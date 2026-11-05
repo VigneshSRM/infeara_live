@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { legacyRedirects } from "./lib/redirects";
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
@@ -14,6 +15,7 @@ const nextConfig: NextConfig = {
         destination: "https://www.infeara.com/:path*",
         permanent: true,
       },
+      ...legacyRedirects,
     ];
   },
   async headers() {

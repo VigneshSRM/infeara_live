@@ -10,3 +10,7 @@ npm-debug.log*
 
 .opencode/
 .playwright-mcp/
+
+# QA run artifacts (summary lives in notes/lighthouse-summary.md)
+notes/lighthouse/*.json
+notes/server*.log

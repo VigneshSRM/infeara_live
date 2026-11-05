@@ -1,5 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Manrope, Space_Grotesk } from "next/font/google";
+import { Analytics } from "@/components/analytics/Analytics";
+import { JsonLd, organizationSchema, websiteSchema } from "@/components/seo/JsonLd";
+import { ConsentBanner } from "@/components/site/ConsentBanner";
 import { SITE_INDEXABLE, SITE_URL, site } from "@/lib/site";
 import "./globals.css";
 
@@ -61,7 +64,13 @@ export default function RootLayout({
       lang="en-IN"
       className={`${inter.variable} ${manrope.variable} ${spaceGrotesk.variable}`}
     >
-      <body>{children}</body>
+      <body>
+      <JsonLd data={organizationSchema} />
+      <JsonLd data={websiteSchema} />
+      {children}
+      <ConsentBanner />
+      <Analytics />
+    </body>
     </html>
   );
 }
