@@ -89,11 +89,22 @@ them. Swap the internals of those two components, not every page.
    `NEXT_PUBLIC_SUPABASE_ANON_KEY`. If you want to create accounts from the CMS, also set
    `SUPABASE_SERVICE_ROLE_KEY` to the project's **secret** key (`sb_secret_…`, or the legacy
    `service_role` JWT). It is server-only and must never be exposed to the browser.
-2. In the Supabase **SQL Editor**, run
-   `supabase/migrations/20261106090000_cms_schema.sql`, then `supabase/seed.sql`.
-   The migration creates the tables, roles, policies, audit triggers and the public `media`
-   storage bucket. The seed copies the frontend content in and skips any table that already
-   has rows, so it is safe to re-run.
+2. Apply the schema, then the seed. The migration creates the tables, roles, policies, audit
+   triggers and the public `media` storage bucket. The seed copies the frontend content in and
+   skips any table that already has rows, so it is safe to re-run.
+
+   The dashboard SQL editor splits a pasted script into statements and can cut a
+   `create policy … for update …` statement in half (`syntax error at or near "for"`). If that
+   happens, use the single-statement wrappers instead - each file is one `do $$ … $$` block
+   holding the real script as base64, so nothing can split it:
+
+   ```bash
+   node scripts/make-apply-blobs.mjs
+   ```
+
+   Then paste `supabase/apply/01-schema.sql` into a **new** SQL editor tab and run it, followed
+   by `supabase/apply/02-seed.sql`. Both should report "Success. No rows returned."
+
    Alternatively, with a personal access token (`sbp_…`, not an API key):
 
    ```bash
