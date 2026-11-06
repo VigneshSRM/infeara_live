@@ -6,20 +6,23 @@ import { CookiePreferences } from "@/components/site/CookiePreferences";
 import { Figure } from "@/components/site/Figure";
 import { Schematic } from "@/components/site/Schematic";
 import { SectionHeading } from "@/components/site/SectionHeading";
-import { legalBySlug, legalDocuments } from "@/lib/content/legal";
+import { getLegalDocument, listLegalDocuments } from "@/lib/content";
 import { pageMetadata } from "@/lib/metadata";
+
+export const revalidate = 300;
 
 export const dynamicParams = false;
 
 export async function generateStaticParams() {
-  return legalDocuments.map((document) => ({ slug: document.slug }));
+  const documents = await listLegalDocuments();
+  return documents.map((document) => ({ slug: document.slug }));
 }
 
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props) {
   const { slug } = await params;
-  const document = legalBySlug(slug);
+  const document = await getLegalDocument(slug);
 
   if (!document) return {};
 
@@ -39,11 +42,12 @@ function slugify(value: string) {
 
 export default async function LegalPage({ params }: Props) {
   const { slug } = await params;
-  const document = legalBySlug(slug);
+  const document = await getLegalDocument(slug);
 
   if (!document) notFound();
 
-  const others = legalDocuments.filter((item) => item.slug !== document.slug);
+  const all = await listLegalDocuments();
+  const others = all.filter((item) => item.slug !== document.slug);
 
   return (
     <PageFrame>

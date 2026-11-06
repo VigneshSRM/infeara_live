@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getPublicClient } from "@/lib/supabase/public";
 
 export const runtime = "nodejs";
 
@@ -19,6 +20,38 @@ function clean(value: unknown, max: number) {
   return typeof value === "string" ? value.trim().slice(0, max) : "";
 }
 
+/**
+ * Best-effort in-process rate limit. Serverless instances do not share memory,
+ * so this slows a single abusive client rather than guaranteeing a global cap.
+ * The real defence is the honeypot plus the narrow insert-only RLS policy.
+ */
+const WINDOW_MS = 10 * 60 * 1000;
+const MAX_PER_WINDOW = 5;
+const hits = new Map<string, { count: number; reset: number }>();
+
+function rateLimited(key: string) {
+  const now = Date.now();
+  const entry = hits.get(key);
+
+  if (!entry || entry.reset < now) {
+    hits.set(key, { count: 1, reset: now + WINDOW_MS });
+    if (hits.size > 5000) {
+      for (const [candidate, value] of hits) {
+        if (value.reset < now) hits.delete(candidate);
+      }
+    }
+    return false;
+  }
+
+  entry.count += 1;
+  return entry.count > MAX_PER_WINDOW;
+}
+
+function clientKey(request: Request) {
+  const forwarded = request.headers.get("x-forwarded-for");
+  return forwarded?.split(",")[0]?.trim() || request.headers.get("x-real-ip") || "unknown";
+}
+
 export async function POST(request: Request) {
   let payload: Payload;
 
@@ -34,6 +67,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true });
   }
 
+  if (rateLimited(clientKey(request))) {
+    return NextResponse.json({ error: "rate_limited" }, { status: 429 });
+  }
+
   const name = clean(payload.name, 120);
   const email = clean(payload.email, 200);
   const organisation = clean(payload.organisation, 160);
@@ -45,42 +82,37 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "invalid_fields" }, { status: 422 });
   }
 
-  const webhook = process.env.CONTACT_WEBHOOK_URL;
+  const supabase = getPublicClient();
 
-  if (!webhook) {
-    // Transport is configured with the backend slice. Until then the form
-    // fails honestly and directs the visitor to email instead.
-    console.warn("CONTACT_WEBHOOK_URL is not configured; contact form delivery is unavailable.");
+  if (!supabase) {
+    console.warn("Supabase is not configured; contact form delivery is unavailable.");
     return NextResponse.json({ error: "form_unconfigured" }, { status: 503 });
   }
 
-  try {
-    const response = await fetch(webhook, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        ...(process.env.CONTACT_WEBHOOK_SECRET
-          ? { Authorization: `Bearer ${process.env.CONTACT_WEBHOOK_SECRET}` }
-          : {}),
-      },
-      body: JSON.stringify({
-        source: "infeara.com/contact",
-        receivedAt: new Date().toISOString(),
-        name,
-        email,
-        organisation,
-        phone,
-        interest,
-        message,
-      }),
-    });
-
-    if (!response.ok) {
-      return NextResponse.json({ error: "delivery_failed" }, { status: 502 });
+  const referer = request.headers.get("referer");
+  let sourcePage: string | null = null;
+  if (referer) {
+    try {
+      sourcePage = new URL(referer).pathname;
+    } catch {
+      sourcePage = null;
     }
+  }
 
-    return NextResponse.json({ ok: true }, { status: 202 });
-  } catch {
+  const { error } = await supabase.from("leads").insert({
+    name,
+    email,
+    company: organisation || null,
+    phone: phone || null,
+    topic: interest || null,
+    message,
+    source_page: sourcePage,
+  } as never);
+
+  if (error) {
+    console.error("[contact] lead insert failed:", error.message);
     return NextResponse.json({ error: "delivery_failed" }, { status: 502 });
   }
+
+  return NextResponse.json({ ok: true }, { status: 202 });
 }

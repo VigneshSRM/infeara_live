@@ -12,7 +12,9 @@ import type { Insight } from "@/lib/content/types";
 import { pageMetadata } from "@/lib/metadata";
 import { SITE_URL } from "@/lib/site";
 
-export const dynamicParams = false;
+export const revalidate = 300;
+
+export const dynamicParams = true;
 
 export async function generateStaticParams() {
   const insights = await listInsights();

@@ -12,9 +12,10 @@ import { OperationsDiagram } from "@/components/site/OperationsDiagram";
 import { Schematic } from "@/components/site/Schematic";
 import { SectionHeading } from "@/components/site/SectionHeading";
 import { ServiceCard } from "@/components/site/ServiceCard";
-import { faqGroups } from "@/lib/content/faqs";
-import { getInsight, listIndustries, listInsights, listServices } from "@/lib/content";
+import { getInsight, listFaqGroups, listIndustries, listInsights, listServices } from "@/lib/content";
 import { pageMetadata } from "@/lib/metadata";
+
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   ...pageMetadata({
@@ -147,21 +148,23 @@ const ecosystems = [
 ];
 
 export default async function HomePage() {
-  const [services, industries, insights, managedIt] = await Promise.all([
+  const [services, industries, insights, managedIt, groups] = await Promise.all([
     listServices(),
     listIndustries(),
     listInsights(),
     getInsight("what-managed-it-actually-covers"),
+    listFaqGroups(),
   ]);
 
+  const pick = (group: number, item: number) => groups[group]?.items[item];
   const selectedFaqs = [
-    faqGroups[0].items[0],
-    faqGroups[0].items[3],
-    faqGroups[1].items[0],
-    faqGroups[1].items[1],
-    faqGroups[2].items[0],
-    faqGroups[3].items[0],
-  ];
+    pick(0, 0),
+    pick(0, 3),
+    pick(1, 0),
+    pick(1, 1),
+    pick(2, 0),
+    pick(3, 0),
+  ].filter((faq): faq is { question: string; answer: string } => Boolean(faq));
 
   return (
     <>

@@ -10,6 +10,8 @@ import { SectionHeading } from "@/components/site/SectionHeading";
 import { getIndustry, listIndustries, servicesForIndustry } from "@/lib/content";
 import { pageMetadata } from "@/lib/metadata";
 
+export const revalidate = 300;
+
 export const dynamicParams = false;
 
 export async function generateStaticParams() {

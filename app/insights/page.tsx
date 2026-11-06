@@ -9,6 +9,8 @@ import { Schematic } from "@/components/site/Schematic";
 import { listInsights } from "@/lib/content";
 import { pageMetadata } from "@/lib/metadata";
 
+export const revalidate = 300;
+
 export const metadata = pageMetadata({
   title: "Insights",
   description:

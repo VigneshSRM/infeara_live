@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 
 const GA_ID = process.env.NEXT_PUBLIC_GA4_ID;
 
 export function Analytics() {
+  const pathname = usePathname();
   const [granted, setGranted] = useState(false);
 
   useEffect(() => {
@@ -16,6 +18,7 @@ export function Analytics() {
 
   useEffect(() => {
     if (!granted || !GA_ID) return;
+    if (pathname.startsWith("/admin")) return;
     if (document.getElementById("ga4-script")) return;
 
     const script = document.createElement("script");

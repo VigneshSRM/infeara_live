@@ -7,8 +7,10 @@ import { FaqList, faqSchema } from "@/components/site/FaqList";
 import { Figure } from "@/components/site/Figure";
 import { Schematic } from "@/components/site/Schematic";
 import { SectionHeading } from "@/components/site/SectionHeading";
-import { faqGroups } from "@/lib/content/faqs";
+import { listFaqGroups } from "@/lib/content";
 import { pageMetadata } from "@/lib/metadata";
+
+export const revalidate = 300;
 
 export const metadata = pageMetadata({
   title: "FAQ",
@@ -17,7 +19,8 @@ export const metadata = pageMetadata({
   path: "/faq",
 });
 
-export default function FaqPage() {
+export default async function FaqPage() {
+  const faqGroups = await listFaqGroups();
   const all = faqGroups.flatMap((group) => group.items);
 
   return (

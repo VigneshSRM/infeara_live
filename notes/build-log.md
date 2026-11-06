@@ -115,3 +115,68 @@ Supabase and `/admin` are untouched.
 3. Swap `lib/content/index.ts` for database queries; add preview and revalidation.
 4. `/admin`: auth, entity editors, media library, lead inbox, scheduled publishing, audit log.
 5. Roughly 40-check smoke test in place of formal UAT.
+
+## 2026-11-06 — Slice 3: CMS and Supabase
+
+**Repository state:** `D:\Automation\Infeara Website`. `npm run typecheck` and `npm run build`
+pass. Supabase project reachable (email auth on, signups open, autoconfirm off).
+
+### Delivered
+
+- **Schema.** `supabase/migrations/20261106090000_cms_schema.sql`: profiles with a `staff_role`
+  enum (`super_admin`, `editor`, `seo_manager`, `pending`), content tables (`services`,
+  `industries`, `insights`, `legal_documents`, `faq_groups`), `leads`, `media`, `audit_log`.
+  Nested lists stay in JSONB/arrays, so one row is one entity and the templates did not change.
+- **Roles and RLS.** Staff read; editors and super admins write; SEO managers are limited to
+  SEO columns by `enforce_seo_manager_columns`. Public reads see published rows whose publish
+  time has arrived. Leads accept anonymous inserts and nothing else. The `media` bucket is
+  public-read, staff-write.
+- **Signup safety.** A trigger creates every new auth user as `pending`. Public signup can stay
+  enabled without granting access, because `is_staff()` ignores pending.
+- **Audit.** Insert/update/delete on content and leads is written by a security-definer trigger
+  with actor, row id and a from/to diff. The CMS renders it at `/admin/audit` with table
+  filters and paging.
+- **Seed parity.** `scripts/generate-seed.mjs` writes `supabase/seed.sql` from the TypeScript
+  content (9 services, 8 sectors, 3 insights, 3 legal, 5 FAQ groups). Each block is skipped when
+  the table already has rows.
+- **Content layer.** `lib/content/queries.ts` reads published rows with a cookieless anon client
+  so marketing pages remain static. Failure falls back to the checked-in seed; a successful
+  empty result does not. All 36 public routes compile from the database path.
+- **Admin.** `/admin/login`, a dashboard with a missing-schema setup notice, and full list and
+  edit screens for services, sectors, insights, legal documents and FAQ groups. Leads inbox with
+  status and notes; media library with upload, alt-text editing and delete; users with role
+  changes; audit viewer.
+- **Forms.** `EntityForm` wraps `useActionState`; `Repeater` edits JSON-backed lists; IST is the
+  admin timezone for scheduled publishing. Slugs are immutable on edit.
+- **Contact form.** `/api/contact` now inserts into `leads` (publishable key, honeypot, 5 per 10
+  minutes per instance) and records the referring path. The webhook variables are gone.
+
+### Verified
+
+- `npm run build`: public routes still static with 5-minute revalidation; admin routes dynamic;
+  proxy registered.
+- `/admin` and `/admin/services` redirect to `/admin/login` when signed out, preserving `next`.
+  `/admin/login` and `/admin/accept-invite` return 200.
+- `/api/contact` returns `502 delivery_failed` until the migration is applied, with
+  `Could not find the table 'public.leads'` in the server log — the expected pre-migration state.
+- Public pages render the seed fallback while the schema is absent (console logs
+  `[content] Supabase read failed, using seed:`).
+
+### Open
+
+- **Migration and seed not applied.** They must be run once in the Supabase SQL editor, then the
+  first auth user promoted to `super_admin`.
+- **No service-role key**, so invitations from `/admin/users` are disabled. Accounts are created
+  in the Supabase dashboard and given a role in the CMS.
+- **No SMTP provider**, so invitation and reset email cannot be relied on. The password screen
+  for invited users exists at `/admin/accept-invite` but is untested without a real invite.
+- Public signup is still enabled; every new profile is `pending`. Disable it once staff accounts
+  exist if preferred.
+- Licensed photography and apex DNS remain open from slice 2.
+
+### Next slice
+
+1. Apply the migration and seed; create and promote the first super admin.
+2. Exercise CRUD in the browser against the real project: create, publish, schedule, unpublish,
+   delete, media upload, lead triage, role change.
+3. Add SMTP and the service-role key, then test the invitation path end to end.

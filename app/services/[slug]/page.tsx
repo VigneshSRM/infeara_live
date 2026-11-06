@@ -13,6 +13,8 @@ import type { Service } from "@/lib/content/types";
 import { pageMetadata } from "@/lib/metadata";
 import { SITE_URL } from "@/lib/site";
 
+export const revalidate = 300;
+
 export const dynamicParams = false;
 
 export async function generateStaticParams() {

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const STORAGE_KEY = "infeara-consent";
@@ -9,6 +10,7 @@ const EVENT = "infeara-consent-change";
 type Decision = "granted" | "essential" | null;
 
 export function ConsentBanner() {
+  const pathname = usePathname();
   const [decision, setDecision] = useState<Decision>(null);
   const [ready, setReady] = useState(false);
 
@@ -24,6 +26,8 @@ export function ConsentBanner() {
     window.dispatchEvent(new Event(EVENT));
   }
 
+  // The CMS is staff-only and loads no analytics, so consent does not apply.
+  if (pathname.startsWith("/admin")) return null;
   if (!ready || decision) return null;
 
   return (

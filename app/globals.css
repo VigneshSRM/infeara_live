@@ -378,3 +378,101 @@
     animation: none !important;
   }
 }
+
+/* ── Admin (CMS) ──────────────────────────────────────────────────────────── */
+
+@layer components {
+  .admin-label {
+    display: block;
+    font-family: var(--font-heading);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgb(32 40 50 / 0.72);
+    margin-bottom: 0.4rem;
+  }
+
+  .admin-input,
+  .admin-textarea,
+  .admin-select {
+    width: 100%;
+    border-radius: 0.5rem;
+    border: 1px solid rgb(16 29 43 / 0.16);
+    background: #ffffff;
+    padding: 0.6rem 0.75rem;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--color-charcoal);
+    outline: none;
+    transition: border-color 160ms ease, box-shadow 160ms ease;
+  }
+
+  .admin-input:focus,
+  .admin-textarea:focus,
+  .admin-select:focus {
+    border-color: var(--color-blue);
+    box-shadow: 0 0 0 3px rgb(34 97 146 / 0.14);
+  }
+
+  .admin-textarea {
+    min-height: 6rem;
+    resize: vertical;
+  }
+
+  .admin-card {
+    border-radius: var(--radius-card);
+    border: 1px solid rgb(16 29 43 / 0.1);
+    background: #ffffff;
+  }
+
+  .admin-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    padding: 0.55rem 1.1rem;
+    font-family: var(--font-heading);
+    font-size: 0.82rem;
+    font-weight: 600;
+    line-height: 1.2;
+    cursor: pointer;
+    transition: background-color 160ms ease, border-color 160ms ease, opacity 160ms ease;
+  }
+
+  .admin-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  .admin-btn-primary {
+    background: var(--color-navy);
+    color: var(--color-ivory);
+  }
+
+  .admin-btn-primary:hover:not(:disabled) {
+    background: var(--color-blue);
+  }
+
+  .admin-btn-ghost {
+    border-color: rgb(16 29 43 / 0.18);
+    color: var(--color-navy);
+    background: transparent;
+  }
+
+  .admin-btn-ghost:hover:not(:disabled) {
+    background: rgb(16 29 43 / 0.04);
+  }
+
+  .admin-btn-danger {
+    border-color: rgb(158 69 30 / 0.35);
+    color: #9e451e;
+    background: transparent;
+  }
+
+  .admin-btn-danger:hover:not(:disabled) {
+    background: rgb(158 69 30 / 0.07);
+  }
+}
