@@ -8,7 +8,6 @@ import { Footer } from "@/components/site/Footer";
 import { Header } from "@/components/site/Header";
 import { IndustryCard } from "@/components/site/IndustryCard";
 import { InsightCard } from "@/components/site/InsightCard";
-import { OperationsDiagram } from "@/components/site/OperationsDiagram";
 import { Schematic } from "@/components/site/Schematic";
 import { SectionHeading } from "@/components/site/SectionHeading";
 import { ServiceCard } from "@/components/site/ServiceCard";
@@ -30,10 +29,33 @@ export const metadata: Metadata = {
 };
 
 const capabilities = [
-  { label: "Operations", value: "24/7 monitoring options" },
+  { label: "Availability", value: "24/7 monitoring options" },
   { label: "Accountability", value: "SLA-based support" },
   { label: "Method", value: "Security-first delivery" },
   { label: "Base", value: "Chennai, India" },
+];
+
+const estate = [
+  {
+    label: "Operations",
+    body: "Monitoring, patching, backup checks and incident response under an agreed service level.",
+    href: "/services/managed-it",
+  },
+  {
+    label: "Security",
+    body: "Assessment, hardening and a response path that has been rehearsed, not assumed.",
+    href: "/services/cybersecurity",
+  },
+  {
+    label: "Infrastructure",
+    body: "Servers, storage, directory and network, documented so the next engineer can pick them up.",
+    href: "/services/it-infrastructure",
+  },
+  {
+    label: "Change",
+    body: "Projects and automation with a rollback position for every change and a record of each.",
+    href: "/services/turnkey-projects",
+  },
 ];
 
 const pillars = [
@@ -170,78 +192,116 @@ export default async function HomePage() {
     <>
       <JsonLd data={faqSchema(selectedFaqs)} />
 
-      <Header variant="overlay" />
+      <Header />
 
       <main id="main">
         {/* 1 — Hero */}
-        <section className="hero-surface min-h-[100svh]">
-          <div className="hero-grid" aria-hidden="true" />
-          <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-[58%] items-center opacity-[0.62] lg:flex">
-            <OperationsDiagram />
-          </div>
-          <div className="hero-vignette" aria-hidden="true" />
-          <div className="hero-scan" aria-hidden="true" />
+        <section className="hero-editorial">
+          <div className="hero-columns" aria-hidden="true" />
 
-          <div className="shell relative z-10 flex min-h-[100svh] flex-col justify-center pb-16 pt-28 sm:pb-20 sm:pt-36 lg:pt-40">
-            <div className="max-w-[54rem]">
-              <div className="reveal flex items-center gap-3" style={{ animationDelay: "0.15s" }}>
-                <span className="h-1.5 w-1.5 rounded-full bg-coral" aria-hidden="true" />
-                <span className="font-heading text-[11px] uppercase tracking-[0.24em] text-ivory/70">
-                  Managed IT · Cybersecurity · Cloud
-                </span>
+          <div className="shell relative z-10 flex min-h-[calc(100svh-4.75rem)] flex-col justify-center py-14 sm:py-18 lg:py-24">
+            <div className="grid items-end gap-12 lg:grid-cols-[1.12fr_0.88fr] lg:gap-16">
+              <div>
+                <div className="reveal flex items-center gap-3" style={{ animationDelay: "0.1s" }}>
+                  <span className="h-px w-8 bg-coral" aria-hidden="true" />
+                  <span className="font-heading text-[11px] uppercase tracking-[0.24em] text-charcoal/60">
+                    The way to lead · Chennai, India
+                  </span>
+                </div>
+
+                <h1
+                  aria-label="Engineering the infrastructure behind business growth."
+                  className="lift mt-6 max-w-[20ch] font-display text-[clamp(2.5rem,5.4vw,4.55rem)] font-medium leading-[0.97] tracking-[-0.035em] text-navy"
+                >
+                  Engineering the infrastructure behind{" "}
+                  <span className="relative inline-block text-blue">
+                    business growth.
+                    <span
+                      className="grow-x absolute -bottom-1.5 left-0 h-[3px] w-full bg-coral"
+                      style={{ animationDelay: "0.85s" }}
+                      aria-hidden="true"
+                    />
+                  </span>
+                </h1>
+
+                <p
+                  className="reveal mt-8 max-w-[33rem] text-[1rem] leading-relaxed text-charcoal/75 sm:text-[1.0625rem]"
+                  style={{ animationDelay: "0.45s" }}
+                >
+                  From managed IT operations and cybersecurity to cloud infrastructure and enterprise
+                  technology, Infeara Technologies helps businesses build, secure and operate technology
+                  with confidence.
+                </p>
+
+                <div
+                  className="reveal mt-9 flex flex-wrap items-center gap-3 sm:gap-4"
+                  style={{ animationDelay: "0.65s" }}
+                >
+                  <Link href="/services" className="btn-solid text-sm">
+                    Explore our services
+                    <span aria-hidden="true">→</span>
+                  </Link>
+                  <Link href="/contact" className="btn-outline text-sm">
+                    Talk to our experts
+                  </Link>
+                </div>
               </div>
 
-              <h1
-                aria-label="Engineering the infrastructure behind business growth."
-                className="lift mt-7 font-display text-[clamp(2.35rem,4.6vw,4.15rem)] font-medium leading-[0.99] tracking-[-0.032em] text-ivory"
-              >
-                Engineering the
-                <br />
-                infrastructure behind
-                <br />
-                <span className="relative inline-block">
-                  business growth.
-                  <span
-                    className="grow-x absolute -bottom-2 left-0 h-[3px] w-full bg-coral"
-                    style={{ animationDelay: "0.9s" }}
-                    aria-hidden="true"
-                  />
-                </span>
-              </h1>
+              <div className="reveal lg:pb-1" style={{ animationDelay: "0.55s" }}>
+                <div className="rounded-[var(--radius-card)] bg-navy p-6 shadow-lift sm:p-7">
+                  <div className="flex items-center justify-between gap-4">
+                    <p className="font-heading text-[9px] uppercase tracking-[0.24em] text-ivory/50">
+                      Inside the estate
+                    </p>
+                    <span className="h-1.5 w-1.5 rounded-full bg-coral" aria-hidden="true" />
+                  </div>
 
-              <p
-                className="reveal mt-6 max-w-[36rem] text-[1rem] leading-relaxed text-ivory/70 sm:mt-8 sm:text-[1.0625rem]"
-                style={{ animationDelay: "0.55s" }}
-              >
-                From managed IT operations and cybersecurity to cloud infrastructure and enterprise
-                technology, Infeara Technologies helps businesses build, secure and operate technology with
-                confidence.
-              </p>
+                  <div className="mt-3">
+                    {estate.map((item, index) => (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        className="group flex gap-4 border-t border-ivory/10 py-3.5"
+                      >
+                        <span className="mt-0.5 font-display text-[0.7rem] tracking-[0.06em] text-coral">
+                          {String(index + 1).padStart(2, "0")}
+                        </span>
+                        <span className="flex-1">
+                          <span className="flex items-center justify-between gap-3">
+                            <span className="font-heading text-[0.9rem] text-ivory">{item.label}</span>
+                            <span
+                              aria-hidden="true"
+                              className="text-ivory/30 transition-all duration-200 group-hover:translate-x-0.5 group-hover:text-coral"
+                            >
+                              →
+                            </span>
+                          </span>
+                          <span className="mt-1 block text-[0.78rem] leading-relaxed text-ivory/60">
+                            {item.body}
+                          </span>
+                        </span>
+                      </Link>
+                    ))}
+                  </div>
 
-              <div
-                className="reveal mt-8 flex flex-wrap items-center gap-3 sm:mt-10 sm:gap-4"
-                style={{ animationDelay: "0.75s" }}
-              >
-                <Link href="/services" className="btn-primary">
-                  Explore our services
-                  <span aria-hidden="true">→</span>
-                </Link>
-                <Link href="/contact" className="btn-ghost">
-                  Talk to our experts
-                </Link>
+                  <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-ivory/10 pt-4 font-heading text-[0.66rem] uppercase tracking-[0.16em] text-ivory/45">
+                    <span>Chennai · UTC+05:30</span>
+                    <span className="text-coral/80">SLA-based support</span>
+                  </div>
+                </div>
               </div>
             </div>
 
             <div
-              className="reveal mt-10 grid grid-cols-2 gap-x-6 gap-y-5 border-t border-ivory/10 pt-6 sm:mt-16 sm:gap-x-8 sm:gap-y-6 sm:pt-7 md:grid-cols-4"
-              style={{ animationDelay: "0.95s" }}
+              className="reveal mt-12 grid grid-cols-2 gap-x-6 gap-y-5 border-t border-navy/15 pt-6 sm:mt-16 sm:gap-x-8 md:grid-cols-4"
+              style={{ animationDelay: "0.85s" }}
             >
               {capabilities.map((item) => (
                 <div key={item.label}>
-                  <p className="font-heading text-[10px] uppercase tracking-[0.2em] text-ivory/65">
+                  <p className="font-heading text-[10px] uppercase tracking-[0.2em] text-charcoal/50">
                     {item.label}
                   </p>
-                  <p className="mt-2 text-[0.9rem] text-ivory/80">{item.value}</p>
+                  <p className="mt-2 text-[0.9rem] text-navy/80">{item.value}</p>
                 </div>
               ))}
             </div>

@@ -180,3 +180,42 @@ pass. Supabase project reachable (email auth on, signups open, autoconfirm off).
 1. Exercise CRUD in the browser against the real project: create, publish, schedule, unpublish,
    delete, media upload, lead triage, role change.
 3. Add SMTP and the service-role key, then test the invitation path end to end.
+
+## 2026-11-06 — Slice 4: brand mark, navigation and careers
+
+**Repository state:** typecheck and build pass; all public routes return 200 from `npm start`.
+
+### Delivered
+
+- **Logo.** `components/brand/Logo.tsx` renders the supplied mark, takes a full `className` size
+  override plus `sizes`/`preload`, and requests `quality={90}` (allowlisted in `next.config.ts`,
+  since Next 16 defaults to `[75]`). The admin login split panel, the login form and the admin
+  sidebar no longer typeset the company name; all three show the image. The public header and
+  footer keep the same component.
+- **Header menus.** Services (9 links, two columns) and Industries (8 links) open on hover and on
+  keyboard focus-within, with an "All …" footer link. The mobile drawer lists both groups and
+  scrolls when the list outgrows the viewport.
+- **Homepage hero.** Replaced the dark `OperationsDiagram` hero with an editorial ivory layout:
+  navy headline with a coral rule, an "Inside the estate" navy link card, and a four-item
+  capabilities strip. `<Header />` is solid on the homepage. `hero-columns` and `hero-editorial`
+  were added to `globals.css`; `OperationsDiagram` is no longer imported.
+- **Careers.** `/careers` keeps the culture, teams and hiring content and now leads with
+  "Explore opportunities". `/careers/opportunities` carries only the overview, the role listing
+  and the application form; it is in the sitemap and footer. `lib/content/careers.ts` holds
+  `openRoles` (intentionally empty) and `disciplines`; `ApplicationForm` posts to `/api/contact`
+  as a lead with `interest: "Careers — <role>"`. No vacancy is invented: an empty list renders a
+  "No published vacancies" state and `JobPosting` structured data is omitted.
+
+### Verified
+
+- Typecheck and `npm run build` clean; `/careers/opportunities` prerenders.
+- Desktop and 390 px screenshots of the hero, `/careers` and `/careers/opportunities`.
+- Application form validation blocks an empty submit with four inline errors; the role select
+  defaults to "Speculative application" while `openRoles` is empty.
+
+### Open
+
+- `profiles.updated_by` is still missing on the hosted project; role and name changes in
+  **Users** fail until the one-line `alter table` runs.
+- Real vacancies are needed before the listing shows anything; add them to `openRoles`.
+

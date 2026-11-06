@@ -69,6 +69,7 @@ export const footerColumns = [
       { label: "Case studies", href: "/case-studies" },
       { label: "Technology partners", href: "/partners" },
       { label: "Careers", href: "/careers" },
+      { label: "Open roles", href: "/careers/opportunities" },
     ],
   },
   {

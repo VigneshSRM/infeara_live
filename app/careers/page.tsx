@@ -6,6 +6,7 @@ import { SectionHeading } from "@/components/site/SectionHeading";
 import { Figure } from "@/components/site/Figure";
 import { Schematic } from "@/components/site/Schematic";
 import { pageMetadata } from "@/lib/metadata";
+import { disciplines, openRoles } from "@/lib/content/careers";
 import { company } from "@/lib/content/site";
 
 export const metadata = pageMetadata({
@@ -15,21 +16,6 @@ export const metadata = pageMetadata({
   path: "/careers",
 });
 
-const teams = [
-  {
-    title: "Service operations",
-    body: "Monitoring, triage, endpoint and server administration, and the monthly reporting that keeps an agreement honest. This is where the client relationship is felt day to day.",
-  },
-  {
-    title: "Infrastructure & network",
-    body: "Windows and Linux systems, virtualisation, storage, routing, switching, firewalls and the documentation that makes an estate supportable by someone else.",
-  },
-  {
-    title: "Security & automation",
-    body: "Assessment, hardening, vulnerability management, monitoring and the integrations that remove repetitive work from the operating team.",
-  },
-];
-
 export default function CareersPage() {
   return (
     <PageFrame>
@@ -38,7 +24,7 @@ export default function CareersPage() {
         title="Engineers who like the estate to make sense."
         intro="Infeara is a small, technical company in Chennai. The work is hands-on, documented and judged by whether the environment is more supportable than it was last month."
         crumbs={[{ label: "Careers", href: "/careers" }]}
-        primary={{ label: "Send your CV", href: `mailto:${company.email}?subject=Careers%20enquiry` }}
+        primary={{ label: "Explore opportunities", href: "/careers/opportunities" }}
         secondary={{ label: "About Infeara", href: "/about" }}
       />
 
@@ -79,7 +65,7 @@ export default function CareersPage() {
           />
 
           <div className="mt-12 grid gap-6 md:grid-cols-3">
-            {teams.map((team, index) => (
+            {disciplines.map((team, index) => (
               <div key={team.title} className="flex flex-col rounded-[var(--radius-card)] border border-navy/10 p-7">
                 <span className="font-display text-sm text-blue">{String(index + 1).padStart(2, "0")}</span>
                 <h3 className="mt-5 font-heading text-[1.02rem] font-semibold text-navy">{team.title}</h3>
@@ -88,20 +74,21 @@ export default function CareersPage() {
             ))}
           </div>
 
-          <div className="mt-10 rounded-[var(--radius-card)] border border-coral/40 bg-ivory p-7 md:p-8">
-            <p className="eyebrow text-coral-ink">Vacancies</p>
-            <p className="mt-3 max-w-[50rem] text-[0.95rem] leading-relaxed text-charcoal/80">
-              We do not have a published vacancy at this time. We still read speculative applications from
-              engineers who work the way described above. Send a CV and a short note about the environment
-              you have operated to{" "}
-              <a
-                href={`mailto:${company.email}?subject=Careers%20enquiry`}
-                className="font-medium text-blue underline decoration-blue/30 underline-offset-4"
-              >
-                {company.email}
-              </a>
-              .
-            </p>
+          <div className="mt-10 flex flex-col gap-6 rounded-[var(--radius-card)] border border-coral/40 bg-ivory p-7 md:flex-row md:items-center md:justify-between md:p-8">
+            <div>
+              <p className="eyebrow text-coral-ink">
+                {openRoles.length > 0 ? `${openRoles.length} open role${openRoles.length === 1 ? "" : "s"}` : "Vacancies"}
+              </p>
+              <p className="mt-3 max-w-[46rem] text-[0.95rem] leading-relaxed text-charcoal/80">
+                {openRoles.length > 0
+                  ? "The roles below are live, with the scope, level and location stated for each."
+                  : "We do not have a published vacancy at this time. Speculative applications are still read by the engineering team."}
+              </p>
+            </div>
+            <Link href="/careers/opportunities" className="btn-solid shrink-0 text-sm">
+              {openRoles.length > 0 ? "See open roles" : "Explore opportunities"}
+              <span aria-hidden="true">→</span>
+            </Link>
           </div>
         </div>
       </section>
@@ -177,8 +164,8 @@ export default function CareersPage() {
 
       <CtaBand
         title="Think you would fit?"
-        body="Send a CV and a short note about the environment you have operated. We read both."
-        primary={{ label: "Email your CV", href: `mailto:${company.email}?subject=Careers%20enquiry` }}
+        body="See what is open today, or send a speculative application with a short note about the environment you have operated."
+        primary={{ label: "Explore opportunities", href: "/careers/opportunities" }}
         secondary={{ label: "Read about the company", href: "/about" }}
       />
     </PageFrame>
