@@ -3,7 +3,7 @@ import { PageHeader } from "@/components/admin/PageHeader";
 import { SchemaNotice } from "@/components/admin/SchemaNotice";
 import { isMissingSchema } from "@/lib/admin/errors";
 import { istLabel } from "@/lib/admin/forms";
-import { inviteUser, updateUserRole } from "@/lib/admin/user-actions";
+import { createStaffAccount, inviteUser, updateUserRole } from "@/lib/admin/user-actions";
 import { requireSuperAdmin } from "@/lib/auth/dal";
 import { hasServiceRole } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -35,7 +35,7 @@ type Profile = {
 export default async function UsersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ saved?: string; invited?: string; error?: string }>;
+  searchParams: Promise<{ saved?: string; invited?: string; created?: string; error?: string }>;
 }) {
   const actor = await requireSuperAdmin();
   const flash = await searchParams;
@@ -61,7 +61,7 @@ export default async function UsersPage({
         description="Three working roles, enforced by the database. A public signup always lands in pending."
       />
 
-      <Flash saved={flash.saved ?? (flash.invited ? "created" : undefined)} error={flash.error} />
+      <Flash saved={flash.saved ?? (flash.invited || flash.created ? "created" : undefined)} error={flash.error} />
 
       {error ? (
         <p role="alert" className="mt-4 rounded-md border border-coral-ink/30 bg-coral/10 px-4 py-3 text-[0.85rem] text-coral-ink">
@@ -175,43 +175,100 @@ export default async function UsersPage({
         <div className="admin-card p-5">
           <h2 className="font-display text-lg text-navy">Add a colleague</h2>
           {hasServiceRole ? (
-            <form action={inviteUser} className="mt-4 space-y-3">
-              <div>
-                <label className="admin-label" htmlFor="invite-email">
-                  Email
-                </label>
-                <input id="invite-email" name="email" type="email" required className="admin-input" />
-              </div>
-              <div>
-                <label className="admin-label" htmlFor="invite-name">
-                  Full name
-                </label>
-                <input id="invite-name" name="full_name" className="admin-input" />
-              </div>
-              <div>
-                <label className="admin-label" htmlFor="invite-role">
-                  Role
-                </label>
-                <select id="invite-role" name="role" defaultValue="editor" className="admin-select">
-                  {ROLES.filter((role) => role.value !== "pending").map((role) => (
-                    <option key={role.value} value={role.value}>
-                      {role.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <button type="submit" className="admin-btn admin-btn-primary">
-                Send invitation
-              </button>
-              <p className="text-[0.74rem] leading-relaxed text-charcoal/60">
-                Requires a configured mail provider in Supabase, not the built-in rate-limited sender.
-              </p>
-            </form>
+            <>
+              <form action={createStaffAccount} className="mt-4 space-y-3">
+                <div>
+                  <label className="admin-label" htmlFor="new-email">
+                    Email
+                  </label>
+                  <input id="new-email" name="email" type="email" required className="admin-input" />
+                </div>
+                <div>
+                  <label className="admin-label" htmlFor="new-name">
+                    Full name
+                  </label>
+                  <input id="new-name" name="full_name" className="admin-input" />
+                </div>
+                <div>
+                  <label className="admin-label" htmlFor="new-role">
+                    Role
+                  </label>
+                  <select id="new-role" name="role" defaultValue="editor" className="admin-select">
+                    {ROLES.filter((role) => role.value !== "pending").map((role) => (
+                      <option key={role.value} value={role.value}>
+                        {role.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="admin-label" htmlFor="new-password">
+                    Temporary password
+                  </label>
+                  <input
+                    id="new-password"
+                    name="password"
+                    type="text"
+                    minLength={12}
+                    required
+                    autoComplete="new-password"
+                    className="admin-input font-mono"
+                  />
+                  <p className="mt-1 text-[0.74rem] leading-relaxed text-charcoal/60">
+                    At least 12 characters. Share it with the person over a channel you trust; they can change it
+                    after signing in.
+                  </p>
+                </div>
+                <button type="submit" className="admin-btn admin-btn-primary">
+                  Create account
+                </button>
+              </form>
+
+              <details className="mt-4 border-t border-navy/10 pt-4">
+                <summary className="cursor-pointer font-heading text-[0.8rem] text-charcoal/75">
+                  Send an invitation instead
+                </summary>
+                <form action={inviteUser} className="mt-3 space-y-3">
+                  <div>
+                    <label className="admin-label" htmlFor="invite-email">
+                      Email
+                    </label>
+                    <input id="invite-email" name="email" type="email" required className="admin-input" />
+                  </div>
+                  <div>
+                    <label className="admin-label" htmlFor="invite-name">
+                      Full name
+                    </label>
+                    <input id="invite-name" name="full_name" className="admin-input" />
+                  </div>
+                  <div>
+                    <label className="admin-label" htmlFor="invite-role">
+                      Role
+                    </label>
+                    <select id="invite-role" name="role" defaultValue="editor" className="admin-select">
+                      {ROLES.filter((role) => role.value !== "pending").map((role) => (
+                        <option key={role.value} value={role.value}>
+                          {role.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <button type="submit" className="admin-btn admin-btn-ghost">
+                    Send invitation
+                  </button>
+                  <p className="text-[0.74rem] leading-relaxed text-charcoal/60">
+                    Needs a configured mail provider in Supabase. Without one, use the temporary-password form
+                    above.
+                  </p>
+                </form>
+              </details>
+            </>
           ) : (
             <div className="mt-3 space-y-3 text-[0.82rem] leading-relaxed text-charcoal/75">
               <p>
-                Invitations are disabled because <code className="rounded bg-navy/5 px-1.5 py-0.5">SUPABASE_SERVICE_ROLE_KEY</code>{" "}
-                is not set for this environment.
+                Account creation is disabled because{" "}
+                <code className="rounded bg-navy/5 px-1.5 py-0.5">SUPABASE_SERVICE_ROLE_KEY</code> is not set for
+                this environment.
               </p>
               <ol className="list-decimal space-y-1 pl-5">
                 <li>

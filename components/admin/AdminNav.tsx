@@ -62,14 +62,22 @@ export function AdminNav({ user }: { user: StaffUser }) {
       <div className="mt-auto border-t border-ivory/12 px-5 py-4">
         <p className="truncate font-heading text-[0.82rem] text-ivory">{user.name ?? user.email}</p>
         <p className="mt-0.5 text-[0.7rem] text-ivory/60">{roleLabel[user.role]}</p>
-        <form action={signOut} className="mt-3">
-          <button
-            type="submit"
+        <div className="mt-3 flex items-center gap-4">
+          <Link
+            href="/admin/account"
             className="font-heading text-[0.72rem] uppercase tracking-[0.14em] text-ivory/60 underline underline-offset-4 hover:text-ivory"
           >
-            Sign out
-          </button>
-        </form>
+            Account
+          </Link>
+          <form action={signOut}>
+            <button
+              type="submit"
+              className="font-heading text-[0.72rem] uppercase tracking-[0.14em] text-ivory/60 underline underline-offset-4 hover:text-ivory"
+            >
+              Sign out
+            </button>
+          </form>
+        </div>
       </div>
     </aside>
   );

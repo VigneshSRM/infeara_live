@@ -51,6 +51,59 @@ export async function updateUserRole(formData: FormData) {
 }
 
 /**
+ * Create a confirmed staff account directly. This is the path that works
+ * without an SMTP provider: the super admin sets a temporary password and
+ * hands it over out of band. The auth trigger creates the profile as
+ * `pending`, then this action sets the chosen role.
+ */
+export async function createStaffAccount(formData: FormData) {
+  await requireSuperAdmin();
+  const email = str(formData, "email").toLowerCase();
+  const role = asRole(str(formData, "role")) ?? "editor";
+  const name = str(formData, "full_name");
+  const password = str(formData, "password");
+
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    redirect("/admin/users?error=Enter%20a%20valid%20email%20address.");
+  }
+  if (role === "pending") {
+    redirect("/admin/users?error=Choose%20a%20working%20role.");
+  }
+  if (password.length < 12) {
+    redirect("/admin/users?error=Use%20a%20password%20of%20at%20least%2012%20characters.");
+  }
+  if (!hasServiceRole) {
+    redirect("/admin/users?error=SUPABASE_SERVICE_ROLE_KEY%20is%20not%20set%2C%20so%20accounts%20cannot%20be%20created%20from%20the%20CMS.");
+  }
+
+  const admin = createAdminClient();
+  const created = await admin.auth.admin.createUser({
+    email,
+    password,
+    email_confirm: true,
+    user_metadata: { full_name: name || undefined },
+  });
+
+  if (created.error) {
+    redirect(`/admin/users?error=${encodeURIComponent(created.error.message)}`);
+  }
+
+  const user = created.data.user;
+  if (user) {
+    const { error } = await admin.from("profiles").upsert(
+      { id: user.id, email, full_name: name || null, role },
+      { onConflict: "id" },
+    );
+    if (error) {
+      redirect(`/admin/users?error=${encodeURIComponent(friendlyError(error))}`);
+    }
+  }
+
+  revalidatePath("/admin/users");
+  redirect("/admin/users?created=1");
+}
+
+/**
  * Invite flow. Requires the service-role key *and* working SMTP: Supabase sends
  * the invitation, so without a mail provider the link never arrives.
  */

@@ -84,13 +84,22 @@ them. Swap the internals of those two components, not every page.
 
 ### First setup (one-time)
 
-1. Create a Supabase project, then copy the project URL and **publishable** key into
-   `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+1. Create a Supabase project, then copy the project URL and **publishable** key
+   (`sb_publishable_…`) into `NEXT_PUBLIC_SUPABASE_URL` and
+   `NEXT_PUBLIC_SUPABASE_ANON_KEY`. If you want to create accounts from the CMS, also set
+   `SUPABASE_SERVICE_ROLE_KEY` to the project's **secret** key (`sb_secret_…`, or the legacy
+   `service_role` JWT). It is server-only and must never be exposed to the browser.
 2. In the Supabase **SQL Editor**, run
    `supabase/migrations/20261106090000_cms_schema.sql`, then `supabase/seed.sql`.
    The migration creates the tables, roles, policies, audit triggers and the public `media`
    storage bucket. The seed copies the frontend content in and skips any table that already
    has rows, so it is safe to re-run.
+   Alternatively, with a personal access token (`sbp_…`, not an API key):
+
+   ```bash
+   SUPABASE_ACCESS_TOKEN=sbp_... node scripts/apply-sql.mjs \
+     supabase/migrations/20261106090000_cms_schema.sql supabase/seed.sql
+   ```
 3. Under **Authentication → Users**, create your own account.
 4. Promote it once in the SQL editor:
 
@@ -139,11 +148,18 @@ closed, spam) and keep internal notes. Nothing on that screen is public.
 
 ### Invitations and email
 
-Inviting a user from `/admin/users` requires `SUPABASE_SERVICE_ROLE_KEY` and a configured SMTP
-provider in Supabase. Without them, create the account under **Authentication → Users** and
-assign the role in `/admin/users`. The invited-user password screen lives at
-`/admin/accept-invite`; the link must be opened from the invitation email so the session
-fragment can be read.
+There are two ways to add a colleague, both under `/admin/users`:
+
+- **Create account** sets a temporary password directly and marks the email confirmed, so it
+  works without any mail provider. Share the password over a channel you trust; the person can
+  change it at `/admin/account` after signing in.
+- **Send invitation** emails a Supabase invitation link to `/admin/accept-invite`. It needs a
+  configured SMTP provider (the built-in sender is rate-limited and unreliable) and
+  `SUPABASE_SERVICE_ROLE_KEY`.
+
+Both paths require the service key. Without it, create the account in the Supabase dashboard
+under **Authentication → Users** and assign the role in `/admin/users`. Because there is no
+reliable reset email, `/admin/account` is also the supported way to rotate a password.
 
 ## Redirects
 
