@@ -164,8 +164,9 @@ pass. Supabase project reachable (email auth on, signups open, autoconfirm off).
 
 ### Open
 
-- **Migration and seed not applied.** They must be run once in the Supabase SQL editor, then the
-  first auth user promoted to `super_admin`.
+- **Migration and seed applied** to the hosted project on 6 Nov 2026 (9 services, 8 industries,
+  3 insights, 3 legal, 5 FAQ groups, 41 policies, public `media` bucket). `admin@infeara.com`
+  is the first `super_admin`.
 - **No service-role key**, so invitations from `/admin/users` are disabled. Accounts are created
   in the Supabase dashboard and given a role in the CMS.
 - **No SMTP provider**, so invitation and reset email cannot be relied on. The password screen
@@ -176,7 +177,6 @@ pass. Supabase project reachable (email auth on, signups open, autoconfirm off).
 
 ### Next slice
 
-1. Apply the migration and seed; create and promote the first super admin.
-2. Exercise CRUD in the browser against the real project: create, publish, schedule, unpublish,
+1. Exercise CRUD in the browser against the real project: create, publish, schedule, unpublish,
    delete, media upload, lead triage, role change.
 3. Add SMTP and the service-role key, then test the invitation path end to end.

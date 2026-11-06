@@ -31,7 +31,8 @@ create table if not exists public.profiles (
   full_name text,
   role public.staff_role not null default 'pending',
   created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+  updated_at timestamptz not null default now(),
+  updated_by uuid references public.profiles (id) on delete set null
 );
 
 create index if not exists profiles_role_idx on public.profiles (role);
