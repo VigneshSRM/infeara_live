@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { signIn } from "@/lib/admin/auth-actions";
+import { Logo } from "@/components/brand/Logo";
 import { getStaffUser } from "@/lib/auth/dal";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 
@@ -32,10 +33,8 @@ function LoginShell({ notice, disabled = false }: { notice?: string; disabled?: 
       <div className="relative hidden overflow-hidden bg-navy p-12 text-ivory lg:flex lg:flex-col">
         <div className="hero-grid absolute inset-0 opacity-40" aria-hidden="true" />
         <div className="relative">
-          <p className="font-display text-2xl tracking-[-0.02em]">
-            Infeara <span className="text-coral">CMS</span>
-          </p>
-          <p className="mt-2 font-heading text-[10px] uppercase tracking-[0.24em] text-ivory/70">
+          <Logo variant="light" preload className="h-12 md:h-14" sizes="280px" />
+          <p className="mt-3 font-heading text-[10px] uppercase tracking-[0.24em] text-ivory/70">
             Content operations
           </p>
         </div>
@@ -53,8 +52,8 @@ function LoginShell({ notice, disabled = false }: { notice?: string; disabled?: 
       <div className="flex items-center justify-center px-5 py-12">
         <div className="w-full max-w-[24rem]">
           <p className="font-heading text-[10px] uppercase tracking-[0.22em] text-blue">Sign in</p>
-          <h1 className="mt-3 font-display text-[2rem] font-medium leading-tight tracking-[-0.02em] text-navy">
-            Infeara CMS
+          <h1 className="mt-4">
+            <Logo variant="dark" preload className="h-10 md:h-12" sizes="300px" />
           </h1>
           <p className="mt-2 text-[0.88rem] leading-relaxed text-charcoal/75">
             Staff access only. Accounts are created by a super admin.

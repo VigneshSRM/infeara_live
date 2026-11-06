@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Logo } from "@/components/brand/Logo";
 import { signOut } from "@/lib/admin/auth-actions";
 import type { StaffUser } from "@/lib/auth/dal";
 
@@ -30,10 +31,10 @@ export function AdminNav({ user }: { user: StaffUser }) {
   return (
     <aside className="flex shrink-0 flex-col border-b border-navy/10 bg-navy text-ivory lg:min-h-screen lg:w-60 lg:border-b-0 lg:border-r">
       <div className="px-5 py-5 lg:py-7">
-        <Link href="/admin" className="font-display text-lg tracking-[-0.02em] text-ivory">
-          Infeara <span className="text-coral">CMS</span>
+        <Link href="/admin" aria-label="Infeara CMS overview" className="inline-flex">
+          <Logo variant="light" className="h-7" sizes="200px" />
         </Link>
-        <p className="mt-1 font-heading text-[9px] uppercase tracking-[0.2em] text-ivory/60">
+        <p className="mt-2 font-heading text-[9px] uppercase tracking-[0.2em] text-ivory/60">
           Content operations
         </p>
       </div>
