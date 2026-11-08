@@ -10,9 +10,9 @@ import { pageMetadata } from "@/lib/metadata";
 import { company } from "@/lib/content/site";
 
 export const metadata = pageMetadata({
-  title: "About",
+  title: "IT Services Company in Chennai",
   description:
-    "Infeara Technologies is an IT infrastructure, cybersecurity and managed services company based in Chennai, India.",
+    "Learn about Infeara Technologies, a Chennai-based team providing managed IT, cybersecurity and infrastructure services for organisations across India.",
   path: "/about",
 });
 

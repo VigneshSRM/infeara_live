@@ -9,9 +9,9 @@ import { Schematic } from "@/components/site/Schematic";
 import { pageMetadata } from "@/lib/metadata";
 
 export const metadata = pageMetadata({
-  title: "Why Infeara",
+  title: "Why Choose Infeara for IT Operations",
   description:
-    "An accountable operating model: named ownership, documented change, tested recovery and reporting written for the business.",
+    "See how Infeara makes IT operations accountable through named ownership, documented changes, tested recovery and clear business reporting.",
   path: "/why-infeara",
 });
 

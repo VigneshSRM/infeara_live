@@ -14,9 +14,9 @@ import { pageMetadata } from "@/lib/metadata";
 import { SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = pageMetadata({
-  title: "Open Roles",
+  title: "IT Engineering Opportunities",
   description:
-    "Current engineering and operations vacancies at Infeara Technologies in Chennai, with the scope of each role and a direct application form.",
+    "Review engineering and operations vacancies at Infeara in Chennai. If no role is listed, you can still submit a speculative application for the team to review.",
   path: "/careers/opportunities",
 });
 
@@ -65,7 +65,7 @@ export default function OpportunitiesPage() {
       <PageHero
         image={figureImage(4)}
         eyebrow="Careers · Open roles"
-        title="Work where the estate is the argument."
+        title={openRoles.length > 0 ? "Open IT engineering roles in Chennai." : "No open roles today. Share your interest."}
         intro={
           openRoles.length > 0
             ? "Every role below is a live vacancy with a stated scope. If nothing matches today, the application form still reaches the engineering team."

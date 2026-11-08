@@ -5,7 +5,7 @@ export const company = {
   region: "Tamil Nadu",
   country: "India",
   description:
-    "IT Infrastructure, managed operations, cybersecurity, cloud platforms and enterprise technology services, delivered from Chennai, India.",
+    "Managed IT services, cybersecurity and infrastructure support for organisations across India, delivered from Chennai by Infeara Technologies.",
   // Seed contact details. Replace through the CMS before the site is indexed.
   email: "contact@infeara.com",
   hours: "Monday to Saturday, 09:00–18:00 IST",

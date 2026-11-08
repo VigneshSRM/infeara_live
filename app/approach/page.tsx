@@ -8,9 +8,9 @@ import { Schematic } from "@/components/site/Schematic";
 import { pageMetadata } from "@/lib/metadata";
 
 export const metadata = pageMetadata({
-  title: "Our Approach",
+  title: "Managed IT Delivery Approach",
   description:
-    "How Infeara assesses, stabilises, operates and improves IT environments: written scope, change control, tested recovery and monthly reporting.",
+    "See how Infeara assesses, stabilises, operates and improves IT environments, with written scope, controlled changes, tested recovery and regular reporting.",
   path: "/approach",
 });
 

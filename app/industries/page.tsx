@@ -12,9 +12,9 @@ import { pageMetadata } from "@/lib/metadata";
 export const revalidate = 300;
 
 export const metadata = pageMetadata({
-  title: "Industries",
+  title: "Industries We Support",
   description:
-    "Infeara works with banking, healthcare, manufacturing, retail, education, logistics, professional services and corporate offices across India.",
+    "See how Infeara's managed IT, cybersecurity and infrastructure services support banking, healthcare, manufacturing, retail, education, logistics and business offices.",
   path: "/industries",
 });
 
@@ -26,7 +26,7 @@ export default async function IndustriesPage() {
       <PageHero
         image={figureImage(6)}
         eyebrow="Industries"
-        title="Sector context changes the answer."
+        title="IT services for business-critical industries."
         intro="The same technology decision carries different risk in a hospital, a plant and a trading floor. These pages describe what we look at first in each sector, and which services usually carry the work."
         crumbs={[{ label: "Industries", href: "/industries" }]}
         primary={{ label: "Talk to an expert", href: "/contact" }}

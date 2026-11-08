@@ -16,9 +16,9 @@ import { pageMetadata } from "@/lib/metadata";
 export const revalidate = 300;
 
 export const metadata = pageMetadata({
-  title: "IT & Cybersecurity Services",
+  title: "Managed IT, Cybersecurity & Cloud Services",
   description:
-    "Explore Infeara's core services and focused sub-services: managed IT, facility management, remote support, network engineering, vulnerability assessment, penetration testing, threat modeling and threat analysis.",
+    "Explore Infeara's managed IT, cybersecurity, cloud infrastructure, network engineering, turnkey project and custom software services, including focused security and IT operations sub-services.",
   path: "/services",
 });
 
@@ -52,7 +52,7 @@ export default async function ServicesPage() {
       <PageHero
         image={figureImage(5)}
         eyebrow="Services"
-        title="Core services, with focused sub-services."
+        title="Managed IT, cybersecurity and infrastructure services."
         intro="IT Infrastructure and Cybersecurity are core practices with focused sub-services in operations, network engineering, security assessment and threat analysis. Cloud, turnkey projects, and automation remain standalone core services."
         crumbs={[{ label: "Services", href: "/services" }]}
         primary={{ label: "Talk to an expert", href: "/contact" }}

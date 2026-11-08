@@ -51,12 +51,12 @@ export const metadata: Metadata = {
     siteName: site.name,
     locale: site.locale,
     url: SITE_URL,
-    title: "Infeara Technologies — The Way to Lead",
+    title: "Infeara Technologies — Managed IT and Cybersecurity in India",
     description: site.description,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Infeara Technologies — The Way to Lead",
+    title: "Infeara Technologies — Managed IT and Cybersecurity in India",
     description: site.description,
   },
 };

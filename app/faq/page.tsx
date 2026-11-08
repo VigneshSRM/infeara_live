@@ -14,9 +14,9 @@ import { pageMetadata } from "@/lib/metadata";
 export const revalidate = 300;
 
 export const metadata = pageMetadata({
-  title: "FAQ",
+  title: "Managed IT & Cybersecurity FAQs",
   description:
-    "Answers to common questions about Infeara's managed IT services, security practice, support model, commercials and onboarding.",
+    "Find answers about Infeara's managed IT services, cybersecurity, support model, service scope, pricing and onboarding.",
   path: "/faq",
 });
 
