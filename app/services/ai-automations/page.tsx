@@ -5,7 +5,7 @@ import { pageMetadata } from "@/lib/metadata";
 
 export const revalidate = 300;
 
-const serviceSlug = "automation-custom-software";
+const serviceSlug = "ai-automations";
 
 export async function generateMetadata() {
   const service = await getService(serviceSlug);
@@ -18,7 +18,7 @@ export async function generateMetadata() {
   });
 }
 
-export default async function AutomationSoftwareServicePage() {
+export default async function AIAutomationsServicePage() {
   const service = await getService(serviceSlug);
   if (!service) notFound();
 

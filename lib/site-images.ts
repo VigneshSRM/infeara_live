@@ -6,7 +6,7 @@
  * section is about the same subject as the section.
  *
  * Adding or replacing an image:
- *   1. drop the file in `public/site/` (16:9, at least 1376x768, JPG or WebP),
+ *   1. drop the file in `public/site/` (16:9, 1200x675 or larger, JPG or WebP),
  *   2. add an entry to `siteImages` with descriptive alt text,
  *   3. point the relevant `seed` (figures) or `label` (schematics) at it.
  *
@@ -15,6 +15,8 @@
  */
 
 export type SiteImageKey =
+  | "ai-automations"
+  | "application-development"
   | "banking-office"
   | "campus-lab"
   | "client-meeting"
@@ -51,13 +53,25 @@ export const coreServiceImages = {
     src: "/site/core-turnkey-projects.jpg",
     alt: "Engineers coordinating a structured network installation in an office.",
   },
-  "automation-custom-software": {
-    src: "/site/core-automation-custom-software.jpg",
-    alt: "Software engineer and business stakeholder reviewing a workflow together.",
+  "ai-automations": {
+    src: "/site/core-ai-automations.jpg",
+    alt: "Business operations and automation specialists reviewing an AI-assisted workflow.",
+  },
+  "application-development": {
+    src: "/site/core-application-development.jpg",
+    alt: "Software developers collaborating on a custom web application.",
   },
 } satisfies Record<string, SiteImage>;
 
 export const siteImages: Record<SiteImageKey, SiteImage> = {
+  "ai-automations": {
+    src: "/site/core-ai-automations.jpg",
+    alt: "Business operations and automation specialists reviewing an AI-assisted workflow.",
+  },
+  "application-development": {
+    src: "/site/core-application-development.jpg",
+    alt: "Software developers collaborating on a custom web application.",
+  },
   "operations-centre": {
     src: "/site/noc-monitoring.jpg",
     alt: "Engineers at a curved desk in a dark network operations centre, watching monitoring dashboards on a wall of screens.",
@@ -80,7 +94,7 @@ export const siteImages: Record<SiteImageKey, SiteImage> = {
   },
   "homepage-hero": {
     src: "/site/homepage-hero.jpg",
-    alt: "An infrastructure engineer in a server room, carefully checking a rack in warm, understated light.",
+    alt: "Two IT engineers working together to maintain a business server environment.",
   },
   "cybersecurity-hub": {
     src: "/site/cybersecurity-hub.jpg",
@@ -127,8 +141,8 @@ export const siteImages: Record<SiteImageKey, SiteImage> = {
 /**
  * Figures are addressed by the numeric `seed` each page already passes.
  *
- * Seeds 1-9 are the nine practice pages, 11-18 the eight sector pages, and the
- * rest are the fixed marketing pages.
+ * Service page seeds are defined by each service record, 11-18 are the eight
+ * sector pages, and the remaining values are fixed marketing pages.
  */
 const figureSeeds: Record<number, SiteImageKey> = {
   // practice pages (lib/content/services.ts)
@@ -140,7 +154,8 @@ const figureSeeds: Record<number, SiteImageKey> = {
   6: "network-cabinet", // Network Engineering
   7: "runbook-desk", // IT Facility Management
   8: "client-meeting", // Turnkey Projects
-  9: "operations-centre", // Automation & Custom Software
+  19: "ai-automations", // AI Automations
+  20: "application-development", // Application Development
   10: "homepage-hero", // Homepage hero
   201: "vulnerability-assessment", // Vulnerability Assessment
   202: "penetration-testing", // Penetration Testing
@@ -180,8 +195,8 @@ const figureSeeds: Record<number, SiteImageKey> = {
 };
 
 /**
- * Schematics are addressed by the `label` each page already passes. The nine
- * practice labels are chosen to differ from the figure on the same page, so a
+ * Schematics are addressed by the `label` each page already passes. Practice
+ * labels are chosen to differ from the figure on the same page, so a
  * service page never shows the same photograph twice.
  */
 const schematicLabels: Record<string, SiteImageKey> = {
@@ -195,6 +210,7 @@ const schematicLabels: Record<string, SiteImageKey> = {
   "Asset lifecycle": "banking-office",
   "Project build": "network-cabinet",
   "Automation flow": "runbook-desk",
+  "Application workflow": "client-meeting",
 
   // fixed pages
   "Company structure": "client-meeting",

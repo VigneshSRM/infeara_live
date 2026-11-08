@@ -13,7 +13,17 @@ export const company = {
 
 export const nav = [
   { label: "Home", href: "/" },
-  { label: "About", href: "/about" },
+  {
+    label: "About",
+    href: "/about",
+    children: [
+      { label: "Our Approach", href: "/approach" },
+      { label: "Why Infeara", href: "/why-infeara" },
+      { label: "Case Studies", href: "/case-studies" },
+      { label: "Technology Partners", href: "/partners" },
+      { label: "Careers", href: "/careers" },
+    ],
+  },
   {
     label: "Services",
     href: "/services",
@@ -40,7 +50,8 @@ export const nav = [
       },
       { label: "Cloud & Datacenter", href: "/services/cloud-datacenter" },
       { label: "Turnkey Projects", href: "/services/turnkey-projects" },
-      { label: "Automation & Software", href: "/services/automation-custom-software" },
+      { label: "AI Automations", href: "/services/ai-automations" },
+      { label: "Application Development", href: "/services/application-development" },
     ],
   },
   {
@@ -58,7 +69,6 @@ export const nav = [
     ],
   },
   { label: "Technical resources", href: "/insights" },
-  { label: "Careers", href: "/careers" },
   { label: "Contact", href: "/contact" },
 ] as const;
 
@@ -70,7 +80,8 @@ export const footerColumns = [
       { label: "Cybersecurity", href: "/services/cybersecurity" },
       { label: "Cloud & Datacenter", href: "/services/cloud-datacenter" },
       { label: "Turnkey Projects", href: "/services/turnkey-projects" },
-      { label: "Automation & Custom Software", href: "/services/automation-custom-software" },
+      { label: "AI Automations", href: "/services/ai-automations" },
+      { label: "Application Development", href: "/services/application-development" },
     ],
   },
   {

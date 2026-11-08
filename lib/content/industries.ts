@@ -185,7 +185,7 @@ export const industries: Industry[] = [
       "Wireless design for dense occupancy",
       "Automated identity lifecycle",
     ],
-    services: ["network-engineering", "it-infrastructure", "automation-custom-software"],
+    services: ["network-engineering", "it-infrastructure", "ai-automations", "application-development"],
     seo: {
       title: "IT Services for Enterprise and Corporate Offices",
       description:

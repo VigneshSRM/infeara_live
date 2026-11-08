@@ -107,7 +107,7 @@ export function Header({ variant = "solid" }: Props) {
                       href={item.href}
                       className="mt-1 block rounded-sm border-t border-navy/10 px-3 pt-3 pb-2 font-heading text-[0.72rem] uppercase tracking-[0.12em] text-blue hover:text-navy"
                     >
-                      {item.href === "/services" ? "All services" : "All industries"}
+                      {item.href === "/services" ? "All services" : item.href === "/industries" ? "All industries" : "About Infeara"}
                     </Link>
                   </div>
                 </div>
@@ -202,7 +202,7 @@ export function Header({ variant = "solid" }: Props) {
                                 href={item.href}
                                 className="mt-1 block border-t border-navy/10 px-3 py-2 text-[0.75rem] font-semibold uppercase tracking-[0.12em] text-blue"
                               >
-                                {item.href === "/services" ? "All services" : "All industries"}
+                                {item.href === "/services" ? "All services" : item.href === "/industries" ? "All industries" : "About Infeara"}
                               </Link>
                             </li>
                           </ul>

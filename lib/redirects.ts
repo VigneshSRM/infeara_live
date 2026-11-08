@@ -27,7 +27,8 @@ const network = "/services/network-engineering";
 const outsourcing = "/services/outsourcing-remote-support";
 const facilities = "/services/it-facility-management";
 const turnkey = "/services/turnkey-projects";
-const automation = "/services/automation-custom-software";
+const aiAutomations = "/services/ai-automations";
+const applicationDevelopment = "/services/application-development";
 const managedIt = "/services/managed-it";
 
 const legacy: LegacyRedirect[] = [
@@ -94,14 +95,16 @@ const legacy: LegacyRedirect[] = [
   { source: "/services/infrastructure/cloud-migration", destination: cloud },
   { source: "/services/infrastructure/hybrid-cloud", destination: cloud },
 
-  // ── Automation and custom software (7) ─────────────────────────────────
-  { source: "/services/ai-automation/workflow-automation", destination: automation },
-  { source: "/services/ai-automation/chatbots", destination: automation },
-  { source: "/services/ai-automation/chatbot-development", destination: automation },
-  { source: "/services/ai-automation/predictive-analytics", destination: automation },
-  { source: "/services/ai-automation/n8n", destination: automation },
-  { source: "/services/ai-automation/custom-ai", destination: automation },
-  { source: "/services/ai-automation/app-development", destination: automation },
+  // ── AI automation and application development (legacy URLs) ───────────
+  { source: "/services/automation-custom-software", destination: "/services" },
+  { source: "/services/ai-automation", destination: aiAutomations },
+  { source: "/services/ai-automation/workflow-automation", destination: aiAutomations },
+  { source: "/services/ai-automation/chatbots", destination: aiAutomations },
+  { source: "/services/ai-automation/chatbot-development", destination: aiAutomations },
+  { source: "/services/ai-automation/predictive-analytics", destination: aiAutomations },
+  { source: "/services/ai-automation/n8n", destination: aiAutomations },
+  { source: "/services/ai-automation/custom-ai", destination: aiAutomations },
+  { source: "/services/ai-automation/app-development", destination: applicationDevelopment },
 
   // ── Turnkey and delivery (4) ───────────────────────────────────────────
   { source: "/services/turnkey/offshore-development", destination: turnkey },

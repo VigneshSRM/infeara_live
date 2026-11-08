@@ -18,7 +18,7 @@ export const revalidate = 300;
 export const metadata = pageMetadata({
   title: "Managed IT, Cybersecurity & Cloud Services",
   description:
-    "Explore Infeara's managed IT, cybersecurity, cloud infrastructure, network engineering, turnkey project and custom software services, including focused security and IT operations sub-services.",
+    "Explore Infeara's six core services: managed IT, cybersecurity, cloud and datacenter, turnkey projects, AI automations and application development.",
   path: "/services",
 });
 
@@ -53,7 +53,7 @@ export default async function ServicesPage() {
         image={figureImage(5)}
         eyebrow="Services"
         title="Managed IT, cybersecurity and infrastructure services."
-        intro="IT Infrastructure and Cybersecurity are core practices with focused sub-services in operations, network engineering, security assessment and threat analysis. Cloud, turnkey projects, and automation remain standalone core services."
+        intro="Six core services cover IT operations, cybersecurity, cloud and datacenter, turnkey projects, AI automations and application development. IT Infrastructure and Cybersecurity also link to focused specialist services below."
         crumbs={[{ label: "Services", href: "/services" }]}
         primary={{ label: "Talk to an expert", href: "/contact" }}
         secondary={{ label: "See our approach", href: "/approach" }}
@@ -63,8 +63,8 @@ export default async function ServicesPage() {
         <div className="shell">
           <SectionHeading
             eyebrow="Core services"
-            title="Start with the area that needs attention."
-            intro="Five core practices cover day-to-day operations, security, cloud platforms, delivery projects and automation. IT Infrastructure and Cybersecurity each link to focused sub-services below."
+            title="Six core services. One clear starting point."
+            intro="Choose managed IT, Cybersecurity, Cloud & Datacenter, Turnkey Projects, AI Automations or Application Development. IT Infrastructure and Cybersecurity link to focused services below."
           />
 
           <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
