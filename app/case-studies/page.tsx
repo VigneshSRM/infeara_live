@@ -9,9 +9,9 @@ import { Schematic } from "@/components/site/Schematic";
 import { pageMetadata } from "@/lib/metadata";
 
 export const metadata = pageMetadata({
-  title: "Case Studies",
+  title: "Representative IT Projects",
   description:
-    "How Infeara approaches representative engagements, and the evidence policy that governs named case studies and published outcomes.",
+    "Review representative IT engagement patterns from Infeara and learn how client approval and supporting evidence guide any published outcomes.",
   path: "/case-studies",
 });
 
@@ -66,7 +66,7 @@ export default function CaseStudiesPage() {
       <PageHero
         image={figureImage(6)}
         eyebrow="Case studies"
-        title="Evidence before storytelling."
+        title="Representative IT projects, documented honestly."
         intro="We publish outcomes only when a client has approved them and the evidence exists. Until then, this page describes the shape of representative engagements without attributing them to named clients or attaching figures we cannot substantiate."
         crumbs={[{ label: "Case studies", href: "/case-studies" }]}
         primary={{ label: "Discuss a similar situation", href: "/contact" }}

@@ -7,7 +7,7 @@ import { Figure } from "@/components/site/Figure";
 import { Footer } from "@/components/site/Footer";
 import { Header } from "@/components/site/Header";
 import { IndustryCard } from "@/components/site/IndustryCard";
-import { figureImage } from "@/lib/site-images";
+import { coreServiceImages } from "@/lib/site-images";
 import { InsightCard } from "@/components/site/InsightCard";
 import { JourneyStory } from "@/components/site/JourneyStory";
 import { SectionHeading } from "@/components/site/SectionHeading";
@@ -148,17 +148,17 @@ export default async function HomePage() {
                 </div>
 
                 <h1
-                  aria-label="Reliable IT. Clear accountability."
+                  aria-label="Managed IT. Clear accountability."
                   className="mt-6 max-w-[16ch] font-display text-[clamp(2.7rem,5.4vw,4.65rem)] font-bold leading-[0.98] tracking-[-0.04em] text-ivory"
                 >
-                  Reliable IT.<br />
+                  Managed IT.<br />
                   <span className="text-coral">Clear accountability.</span>
                 </h1>
 
                 <p
                   className="mt-8 max-w-[33rem] text-[1rem] leading-relaxed text-ivory/75 sm:text-[1.0625rem]"
                 >
-                  Managed IT, cybersecurity and infrastructure services for organisations across India.
+                  Managed IT, cybersecurity and infrastructure support for organisations across India, with clear service scope, named ownership and recovery planning.
                 </p>
 
                 <div
@@ -213,8 +213,8 @@ export default async function HomePage() {
             <div className="flex flex-wrap items-end justify-between gap-6">
               <SectionHeading
                 eyebrow="Core services"
-                title="Technology services that keep work moving."
-                intro="Choose a core service or explore focused infrastructure and cybersecurity expertise."
+                title="Managed IT, cybersecurity and infrastructure services."
+                intro="Choose managed operations, security assessment, cloud infrastructure, project delivery or automation. Explore focused sub-services for IT operations and cybersecurity."
               />
               <Link href="/services" className="btn-outline text-sm">
                 View all services
@@ -226,18 +226,18 @@ export default async function HomePage() {
                 <div
                   key={service.slug}
                   className={
-                    index === 0
-                      ? "sm:col-span-2 lg:col-span-7"
-                      : index === 1
-                        ? "lg:col-span-5"
-                        : "lg:col-span-4"
+                    index === 3
+                      ? "lg:col-start-2 lg:col-span-2"
+                      : index === 4
+                        ? "lg:col-start-4 lg:col-span-2"
+                        : "lg:col-span-2"
                   }
                 >
                   <ServiceCard
                     service={service}
                     index={index}
-                    image={figureImage(service.figure.seed)}
-                    imageShape={index === 1 ? "portrait" : index === 0 ? "landscape" : "wide"}
+                    image={coreServiceImages[service.slug as keyof typeof coreServiceImages]}
+                    imageShape="wide"
                   />
                 </div>
               ))}

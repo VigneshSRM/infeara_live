@@ -11,9 +11,9 @@ import { disciplines, openRoles } from "@/lib/content/careers";
 import { company } from "@/lib/content/site";
 
 export const metadata = pageMetadata({
-  title: "Careers",
+  title: "IT Engineering Careers",
   description:
-    "Engineering roles at Infeara Technologies in Chennai: service operations, infrastructure and network engineering, security and automation.",
+    "Explore engineering careers at Infeara Technologies in Chennai across IT operations, infrastructure, network engineering, cybersecurity and automation.",
   path: "/careers",
 });
 
@@ -23,7 +23,7 @@ export default function CareersPage() {
       <PageHero
         image={figureImage(8)}
         eyebrow="Careers"
-        title="Engineers who like the estate to make sense."
+        title="IT engineering careers in Chennai."
         intro="Infeara is a small, technical company in Chennai. The work is hands-on, documented and judged by whether the environment is more supportable than it was last month."
         crumbs={[{ label: "Careers", href: "/careers" }]}
         primary={{ label: "Explore opportunities", href: "/careers/opportunities" }}

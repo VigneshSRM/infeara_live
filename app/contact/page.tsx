@@ -10,9 +10,9 @@ import { company } from "@/lib/content/site";
 import { pageMetadata } from "@/lib/metadata";
 
 export const metadata = pageMetadata({
-  title: "Contact",
+  title: "Contact Infeara IT Services",
   description:
-    "Talk to Infeara Technologies about managed IT, cybersecurity, infrastructure, cloud or a specific project. Based in Chennai, serving clients across India.",
+    "Contact Infeara to discuss managed IT, cybersecurity, infrastructure, cloud or a specific project. Based in Chennai, we work with organisations across India.",
   path: "/contact",
 });
 
@@ -37,7 +37,7 @@ export default function ContactPage() {
       <PageHero
         image={figureImage(3)}
         eyebrow="Contact"
-        title="Start with the estate."
+        title="Talk with us about your IT environment."
         intro="Tell us what you run, what is failing and what needs to change. A short conversation is enough to establish whether we are the right partner and what the next step should be."
         crumbs={[{ label: "Contact", href: "/contact" }]}
         primary={{ label: "Email Infeara", href: `mailto:${company.email}` }}

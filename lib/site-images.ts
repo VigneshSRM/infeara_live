@@ -34,6 +34,29 @@ export type SiteImageKey =
 
 export type SiteImage = { src: string; alt: string };
 
+export const coreServiceImages = {
+  "it-infrastructure": {
+    src: "/site/core-it-infrastructure.jpg",
+    alt: "Infrastructure engineer inspecting organized server racks in a modern data center.",
+  },
+  cybersecurity: {
+    src: "/site/core-cybersecurity.jpg",
+    alt: "Security operations analyst reviewing monitoring dashboards at a workstation.",
+  },
+  "cloud-datacenter": {
+    src: "/site/core-cloud-datacenter.jpg",
+    alt: "Technician checking a server cabinet in a clean, modern data center.",
+  },
+  "turnkey-projects": {
+    src: "/site/core-turnkey-projects.jpg",
+    alt: "Engineers coordinating a structured network installation in an office.",
+  },
+  "automation-custom-software": {
+    src: "/site/core-automation-custom-software.jpg",
+    alt: "Software engineer and business stakeholder reviewing a workflow together.",
+  },
+} satisfies Record<string, SiteImage>;
+
 export const siteImages: Record<SiteImageKey, SiteImage> = {
   "operations-centre": {
     src: "/site/noc-monitoring.jpg",

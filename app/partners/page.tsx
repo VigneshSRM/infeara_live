@@ -9,9 +9,9 @@ import { Schematic } from "@/components/site/Schematic";
 import { pageMetadata } from "@/lib/metadata";
 
 export const metadata = pageMetadata({
-  title: "Technology Partners",
+  title: "Technology Platforms We Support",
   description:
-    "The technology ecosystems Infeara works with across server, cloud, network, storage, security and monitoring platforms.",
+    "Explore the server, cloud, network, storage, security and monitoring platforms Infeara engineers work with. This is a capability list, not a partner-status claim.",
   path: "/partners",
 });
 
@@ -48,7 +48,7 @@ export default function PartnersPage() {
       <PageHero
         image={figureImage(4)}
         eyebrow="Technology partners"
-        title="Technology chosen for the estate, not the logo."
+        title="Technology platforms selected for your environment."
         intro="We work across the major server, cloud, network and security ecosystems. The platform is selected against the workload, the support position and the client's existing investment — not against a reseller incentive."
         crumbs={[{ label: "Technology partners", href: "/partners" }]}
         primary={{ label: "Talk to an expert", href: "/contact" }}

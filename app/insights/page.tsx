@@ -12,9 +12,9 @@ import { pageMetadata } from "@/lib/metadata";
 export const revalidate = 300;
 
 export const metadata = pageMetadata({
-  title: "Technical Resources",
+  title: "Business IT Guides & Resources",
   description:
-    "Practical IT guides on managed services, cybersecurity, cloud migration and infrastructure operations from the Infeara engineering team.",
+    "Read practical guides from Infeara's engineering team on managed IT, cybersecurity, cloud migration and reliable infrastructure operations.",
   path: "/insights",
 });
 

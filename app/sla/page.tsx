@@ -10,9 +10,9 @@ import { pageMetadata } from "@/lib/metadata";
 import { company } from "@/lib/content/site";
 
 export const metadata = pageMetadata({
-  title: "SLA & Support Model",
+  title: "IT Support Model & Service Levels",
   description:
-    "How Infeara defines support hours, severity, escalation, reporting and client responsibilities, with response targets set in the service schedule.",
+    "Learn how Infeara defines support hours, incident severity, escalation, reporting and client responsibilities. Specific response targets are agreed in each service schedule.",
   path: "/sla",
 });
 
