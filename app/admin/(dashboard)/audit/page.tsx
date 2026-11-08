@@ -86,7 +86,7 @@ export default async function AuditPage({
         <Link
           href="/admin/audit"
           aria-current={!table ? "page" : undefined}
-          className={`rounded-full border px-3 py-1 font-heading text-[0.74rem] ${
+          className={`rounded-sm border px-3 py-1 font-heading text-[0.74rem] ${
             !table ? "border-navy bg-navy text-ivory" : "border-navy/15 text-charcoal/75 hover:border-navy/35"
           }`}
         >
@@ -97,7 +97,7 @@ export default async function AuditPage({
             key={name}
             href={`/admin/audit?table=${name}`}
             aria-current={table === name ? "page" : undefined}
-            className={`rounded-full border px-3 py-1 font-heading text-[0.74rem] ${
+            className={`rounded-sm border px-3 py-1 font-heading text-[0.74rem] ${
               table === name
                 ? "border-navy bg-navy text-ivory"
                 : "border-navy/15 text-charcoal/75 hover:border-navy/35"
@@ -127,7 +127,7 @@ export default async function AuditPage({
                   <td className="px-4 py-3 text-charcoal">{entry.actor_email ?? "System"}</td>
                   <td className="px-4 py-3">
                     <span
-                      className={`rounded-full px-2 py-0.5 font-heading text-[0.66rem] uppercase tracking-[0.1em] ${
+                      className={`rounded-sm px-2 py-0.5 font-heading text-[0.66rem] uppercase tracking-[0.1em] ${
                         entry.action === "delete"
                           ? "bg-coral-ink/10 text-coral-ink"
                           : entry.action === "insert"

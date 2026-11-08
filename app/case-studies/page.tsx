@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { PageFrame } from "@/components/site/PageFrame";
 import { PageHero } from "@/components/site/PageHero";
+import { figureImage } from "@/lib/site-images";
 import { CtaBand } from "@/components/site/CtaBand";
 import { SectionHeading } from "@/components/site/SectionHeading";
 import { Figure } from "@/components/site/Figure";
@@ -63,6 +64,7 @@ export default function CaseStudiesPage() {
   return (
     <PageFrame>
       <PageHero
+        image={figureImage(6)}
         eyebrow="Case studies"
         title="Evidence before storytelling."
         intro="We publish outcomes only when a client has approved them and the evidence exists. Until then, this page describes the shape of representative engagements without attributing them to named clients or attaching figures we cannot substantiate."
@@ -107,7 +109,7 @@ export default function CaseStudiesPage() {
                 <ul className="mt-4 space-y-2.5">
                   {item.work.map((step) => (
                     <li key={step} className="flex items-start gap-3 text-[0.9rem] leading-relaxed text-charcoal/75">
-                      <span aria-hidden="true" className="mt-[0.45rem] h-1.5 w-1.5 shrink-0 rounded-full bg-coral" />
+                      <span aria-hidden="true" className="mt-[0.45rem] h-1.5 w-1.5 shrink-0 rounded-full bg-blue/60" />
                       {step}
                     </li>
                   ))}
@@ -123,7 +125,7 @@ export default function CaseStudiesPage() {
                     <Link
                       key={slug}
                       href={`/services/${slug}`}
-                      className="rounded-full border border-navy/15 px-4 py-1.5 font-heading text-[0.76rem] text-navy transition-colors hover:border-blue/50 hover:text-blue"
+                      className="rounded-sm border border-navy/15 px-4 py-1.5 font-heading text-[0.76rem] text-navy transition-colors hover:border-blue/50 hover:text-blue"
                     >
                       {slug.replace(/-/g, " ")}
                     </Link>

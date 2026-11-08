@@ -43,13 +43,13 @@ export default async function InsightsListPage({
   return (
     <>
       <PageHeader
-        eyebrow="Editorial"
-        title="Insights"
-        description="Articles published to the insights index. New slugs work without a deploy."
+        eyebrow="Content library"
+        title="Technical resources"
+        description="Guides published to the technical resource library. New URLs work without a deploy."
         actions={
           editable ? (
             <Link href="/admin/insights/new" className="admin-btn admin-btn-primary">
-              New article
+              New guide
             </Link>
           ) : null
         }
@@ -68,7 +68,7 @@ export default async function InsightsListPage({
           <table className="w-full text-left text-[0.86rem]">
             <thead className="border-b border-navy/10 bg-ivory/50">
               <tr className="font-heading text-[0.68rem] uppercase tracking-[0.14em] text-charcoal/60">
-                <th className="px-4 py-3 font-medium">Article</th>
+                <th className="px-4 py-3 font-medium">Guide</th>
                 <th className="px-4 py-3 font-medium">Category</th>
                 <th className="px-4 py-3 font-medium">Status</th>
                 <th className="px-4 py-3 font-medium">Published</th>
@@ -102,7 +102,7 @@ export default async function InsightsListPage({
           </table>
         ) : (
           <p className="px-4 py-10 text-center text-[0.86rem] text-charcoal/70">
-            No articles yet. Create one, or run the seed to import the three published pieces.
+            No guides yet. Create one, or run the seed to import the initial resources.
           </p>
         )}
       </div>

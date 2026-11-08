@@ -1,5 +1,6 @@
 import { PageFrame } from "@/components/site/PageFrame";
 import { PageHero } from "@/components/site/PageHero";
+import { figureImage } from "@/lib/site-images";
 import { CtaBand } from "@/components/site/CtaBand";
 import { SectionHeading } from "@/components/site/SectionHeading";
 import { IndustryCard } from "@/components/site/IndustryCard";
@@ -23,6 +24,7 @@ export default async function IndustriesPage() {
   return (
     <PageFrame>
       <PageHero
+        image={figureImage(6)}
         eyebrow="Industries"
         title="Sector context changes the answer."
         intro="The same technology decision carries different risk in a hospital, a plant and a trading floor. These pages describe what we look at first in each sector, and which services usually carry the work."
@@ -41,7 +43,7 @@ export default async function IndustriesPage() {
 
           <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {industries.map((industry) => (
-              <IndustryCard key={industry.slug} industry={industry} />
+              <IndustryCard key={industry.slug} industry={industry} withImage />
             ))}
           </div>
         </div>
@@ -51,6 +53,7 @@ export default async function IndustriesPage() {
         <div className="shell grid items-center gap-12 lg:grid-cols-[1.05fr_1fr] lg:gap-20">
           <Figure
             seed={31}
+            layout="portrait"
             label="Sector pressure"
             caption="Sector requirements compared: availability, confidentiality, evidence and change tolerance differ by environment."
           />
@@ -94,6 +97,7 @@ export default async function IndustriesPage() {
 
           <Schematic
             variant="grid"
+            layout="wide"
             label="Sector matrix"
             caption="A sector matrix: availability, confidentiality, evidence and change tolerance mapped to the services that address them."
           />

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { PageFrame } from "@/components/site/PageFrame";
 import { PageHero } from "@/components/site/PageHero";
+import { figureImage } from "@/lib/site-images";
 import { CtaBand } from "@/components/site/CtaBand";
 import { SectionHeading } from "@/components/site/SectionHeading";
 import { Figure } from "@/components/site/Figure";
@@ -45,6 +46,7 @@ export default function PartnersPage() {
   return (
     <PageFrame>
       <PageHero
+        image={figureImage(4)}
         eyebrow="Technology partners"
         title="Technology chosen for the estate, not the logo."
         intro="We work across the major server, cloud, network and security ecosystems. The platform is selected against the workload, the support position and the client's existing investment — not against a reseller incentive."

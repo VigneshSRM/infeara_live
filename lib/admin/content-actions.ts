@@ -188,7 +188,7 @@ export async function saveInsight(_state: ActionState, formData: FormData): Prom
   const id = optional(formData, "id");
   const seoOnly = isSeo(user.role);
 
-  if (!id && seoOnly) return { error: "Your role cannot create articles." };
+  if (!id && seoOnly) return { error: "Your role cannot create guides." };
 
   const seo = {
     seo_title: str(formData, "seo_title"),
@@ -216,7 +216,7 @@ export async function saveInsight(_state: ActionState, formData: FormData): Prom
   const payload = {
     title: str(formData, "title"),
     excerpt: str(formData, "excerpt"),
-    category: str(formData, "category") || "Insight",
+    category: str(formData, "category") || "IT operations",
     reading_minutes: num(formData, "reading_minutes", 5),
     body,
     ...seo,

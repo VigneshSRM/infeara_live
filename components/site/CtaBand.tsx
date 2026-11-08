@@ -8,10 +8,10 @@ type Props = {
 };
 
 export function CtaBand({
-  title = "Let's scope what you are running.",
-  body = "A short conversation is enough to establish whether we are the right fit. We will ask what you operate today, what is failing, and what you need to change.",
-  primary = { label: "Request a consultation", href: "/contact" },
-  secondary = { label: "Explore managed IT", href: "/services/managed-it" },
+  title = "Ready to improve your IT?",
+  body = "Tell us what you run, what is at risk and what needs to change. We will confirm whether we are the right fit.",
+  primary = { label: "Talk to Infeara", href: "/contact" },
+  secondary = { label: "Our services", href: "/services" },
 }: Props) {
   return (
     <section className="bg-blue">
@@ -29,14 +29,14 @@ export function CtaBand({
         <div className="flex flex-col gap-3 sm:flex-row md:justify-end">
           <Link
             href={primary.href}
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-coral px-6 py-3 font-heading text-sm font-semibold text-navy transition-transform hover:-translate-y-0.5"
+            className="btn-primary text-sm"
           >
             {primary.label}
             <span aria-hidden="true">→</span>
           </Link>
           <Link
             href={secondary.href}
-            className="inline-flex items-center justify-center rounded-full border border-ivory/30 px-6 py-3 font-heading text-sm text-ivory transition-colors hover:bg-ivory/10"
+            className="btn-ghost text-sm"
           >
             {secondary.label}
           </Link>

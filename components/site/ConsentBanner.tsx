@@ -56,14 +56,14 @@ export function ConsentBanner() {
           <button
             type="button"
             onClick={() => choose("essential")}
-            className="rounded-full border border-ivory/30 px-5 py-2.5 font-heading text-[0.82rem] text-ivory transition-colors hover:bg-ivory/10"
+            className="rounded-sm border border-ivory/30 px-5 py-2.5 font-heading text-[0.76rem] uppercase tracking-[0.06em] text-ivory transition-colors hover:bg-ivory/10"
           >
             Essential only
           </button>
           <button
             type="button"
             onClick={() => choose("granted")}
-            className="rounded-full bg-coral px-5 py-2.5 font-heading text-[0.82rem] font-semibold text-navy transition-colors hover:bg-[color-mix(in_oklab,var(--color-coral)_88%,white)]"
+            className="rounded-sm bg-coral px-5 py-2.5 font-heading text-[0.76rem] font-semibold uppercase tracking-[0.06em] text-navy transition-colors hover:bg-[color-mix(in_oklab,var(--color-coral)_88%,white)]"
           >
             Allow analytics
           </button>

@@ -5,6 +5,7 @@ import { CtaBand } from "@/components/site/CtaBand";
 import { Figure } from "@/components/site/Figure";
 import { PageFrame } from "@/components/site/PageFrame";
 import { PageHero } from "@/components/site/PageHero";
+import { figureImage } from "@/lib/site-images";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { SectionHeading } from "@/components/site/SectionHeading";
 import { openRoles, disciplines } from "@/lib/content/careers";
@@ -62,6 +63,7 @@ export default function OpportunitiesPage() {
       {openRoles.length > 0 ? <JsonLd data={jobPostingSchema} /> : null}
 
       <PageHero
+        image={figureImage(4)}
         eyebrow="Careers · Open roles"
         title="Work where the estate is the argument."
         intro={
@@ -126,7 +128,7 @@ export default function OpportunitiesPage() {
                   key={item}
                   className="flex items-start gap-3 border-t border-navy/10 pt-3 text-[0.88rem] leading-relaxed text-charcoal/75"
                 >
-                  <span aria-hidden="true" className="mt-[0.45rem] h-1.5 w-1.5 shrink-0 rounded-full bg-coral" />
+                  <span aria-hidden="true" className="mt-[0.45rem] h-1.5 w-1.5 shrink-0 rounded-full bg-blue/60" />
                   {item}
                 </li>
               ))}
@@ -165,7 +167,7 @@ export default function OpportunitiesPage() {
                         <h3 className="font-heading text-[1.12rem] font-semibold text-navy">
                           {role.title}
                         </h3>
-                        <span className="rounded-full border border-blue/30 px-2.5 py-1 font-heading text-[10px] uppercase tracking-[0.14em] text-blue">
+                        <span className="rounded-sm border border-blue/30 px-2.5 py-1 font-heading text-[10px] uppercase tracking-[0.14em] text-blue">
                           {role.team}
                         </span>
                       </div>

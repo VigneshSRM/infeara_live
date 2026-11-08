@@ -15,7 +15,7 @@ the content swap. The database migration must be applied once (see [Content mana
 | :--- | :--- |
 | Framework | Next.js 16.4.5 (App Router, Turbopack), React 19.3.1, TypeScript |
 | Styling | Tailwind CSS v4, design tokens in `app/globals.css` |
-| Fonts | Inter (body), Manrope (UI headings), Space Grotesk (display) via `next/font` |
+| Fonts | Inter (body), Manrope (UI headings), Space Grotesk (display), self-hosted variable faces in `app/fonts` via `next/font/local` |
 | Data | Supabase — Auth, Postgres with RLS, Storage |
 | Hosting | Vercel |
 
@@ -28,7 +28,8 @@ npm run dev                  # http://localhost:3000
 npm run build && npm run start
 ```
 
-`next/font` fetches Google Fonts at build time, so the first build needs network access.
+The three variable faces are checked into `app/fonts`, so a build needs no network access. To
+refresh them from the `@fontsource-variable` packages, run `node scripts/sync-fonts.mjs`.
 
 ## Environment
 
@@ -65,6 +66,7 @@ lib/redirects.ts           legacy URL map (see below)
 supabase/migrations/       schema, roles, RLS, audit triggers, storage policies
 supabase/seed.sql          generated content parity seed
 scripts/generate-seed.mjs  regenerates the seed from lib/content
+scripts/sync-fonts.mjs     refreshes app/fonts from @fontsource-variable
 notes/                     build log, live-site audit, QA evidence
 ```
 
@@ -75,10 +77,19 @@ is not resurrected.
 
 ### Images
 
-`Figure` and `Schematic` render deterministic SVG illustrations with `role="img"` and
-descriptive labels. They are deliberate stand-ins: every published page needs at least two
-relevant images, and these carry descriptive alt text until licensed photography replaces
-them. Swap the internals of those two components, not every page.
+`Figure` and `Schematic` render photography from `public/site/` through
+`next/image`, in the 1200x760 frame the original placeholder drawings used, so no page layout
+changed. Which photograph a placeholder gets is decided in one place, `lib/site-images.ts`:
+
+- a `Figure` is picked by the numeric `seed` its page already passes (1-9 are the practice
+  pages, 11-18 the sector pages, the rest are the fixed pages);
+- a `Schematic` is picked by its `label`, with the eight sector "Service map" frames resolved
+  from the caption, which names the sector.
+
+Every page therefore shows two different photographs, and each one carries descriptive alt text
+taken from the library entry while the caption stays in the `figcaption`. To change a picture,
+drop the file in `public/site/`, add it to `siteImages`, and repoint the seed or label — no page
+needs editing. Licensed photography can replace any entry the same way.
 
 ## Content management
 

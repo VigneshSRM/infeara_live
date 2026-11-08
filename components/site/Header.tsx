@@ -12,12 +12,12 @@ export function Header({ variant = "solid" }: Props) {
       className={
         overlay
           ? "absolute inset-x-0 top-0 z-30"
-          : "sticky top-0 z-30 border-b border-navy/10 bg-ivory/92 backdrop-blur"
+          : "sticky top-0 z-30 border-b border-navy/20 bg-ivory"
       }
     >
       <div className="shell flex items-center justify-between py-5">
         <Link href="/" aria-label="Infeara Technologies home" className="shrink-0">
-          <Logo variant={overlay ? "light" : "dark"} />
+          <Logo variant={overlay ? "light" : "dark"} preload cropped sizes="176px" />
         </Link>
 
         <nav aria-label="Primary" className="hidden items-center gap-7 xl:flex">
@@ -38,11 +38,9 @@ export function Header({ variant = "solid" }: Props) {
             const wide = children.length > 8;
 
             return (
-              <div key={item.href} className="group relative">
-                <Link
-                  href={item.href}
-                  aria-haspopup="true"
-                  className={`${linkClass} inline-flex items-center gap-1.5`}
+              <details key={item.href} className="group relative">
+                <summary
+                  className={`${linkClass} inline-flex cursor-pointer list-none items-center gap-1.5`}
                 >
                   {item.label}
                   <svg
@@ -50,38 +48,70 @@ export function Header({ variant = "solid" }: Props) {
                     height="9"
                     viewBox="0 0 10 10"
                     aria-hidden="true"
-                    className="mt-px transition-transform duration-150 group-hover:rotate-180 group-focus-within:rotate-180"
+                    className="mt-px"
                   >
                     <path d="M2 4l3 3 3-3" fill="none" stroke="currentColor" strokeWidth="1.3" />
                   </svg>
-                </Link>
+                </summary>
 
-                <div className="invisible absolute left-1/2 top-full z-40 -translate-x-1/2 pt-4 opacity-0 transition duration-150 group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100">
-                  <div className="rounded-2xl border border-navy/10 bg-ivory p-2 shadow-lift">
+                <div className="absolute left-1/2 top-full z-40 hidden -translate-x-1/2 pt-4 group-open:block">
+                  <div className="rounded-sm border border-navy/15 bg-ivory p-2">
                     <p className="px-3 pb-1.5 pt-2 font-heading text-[9px] uppercase tracking-[0.2em] text-muted">
                       {item.label}
                     </p>
                     <ul className={`grid gap-x-1 ${wide ? "w-[30rem] grid-cols-2" : "w-[18rem] grid-cols-1"}`}>
-                      {children.map((child) => (
-                        <li key={child.href}>
-                          <Link
-                            href={child.href}
-                            className="block rounded-lg px-3 py-2 font-heading text-[0.8rem] leading-snug text-charcoal/80 transition-colors hover:bg-navy/5 hover:text-navy"
-                          >
-                            {child.label}
-                          </Link>
-                        </li>
-                      ))}
+                      {children.map((child) => {
+                        const subservices = "children" in child && child.children ? child.children : null;
+                        return (
+                          <li key={child.href}>
+                            {subservices ? (
+                              <details>
+                                <summary className="flex cursor-pointer list-none items-center justify-between rounded-sm px-3 py-2 font-heading text-[0.8rem] font-semibold leading-snug text-navy hover:bg-navy/5">
+                                  {child.label}
+                                  <span aria-hidden="true" className="text-[0.7rem] text-charcoal/50">+</span>
+                                </summary>
+                                <ul className="mb-2 ml-4 space-y-0.5 border-l border-navy/10 pl-2">
+                                  <li>
+                                    <Link
+                                      href={child.href}
+                                      className="block rounded-sm px-2 py-1.5 font-heading text-[0.75rem] font-medium leading-snug text-blue hover:bg-navy/5"
+                                    >
+                                      {child.label} overview
+                                    </Link>
+                                  </li>
+                                  {subservices.map((subservice) => (
+                                    <li key={subservice.href}>
+                                      <Link
+                                        href={subservice.href}
+                                        className="block rounded-sm px-2 py-1.5 font-heading text-[0.75rem] leading-snug text-charcoal/70 hover:bg-navy/5 hover:text-navy"
+                                      >
+                                        {subservice.label}
+                                      </Link>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </details>
+                            ) : (
+                              <Link
+                                href={child.href}
+                                className="block rounded-sm px-3 py-2 font-heading text-[0.8rem] font-semibold leading-snug text-navy transition-colors hover:bg-navy/5"
+                              >
+                                {child.label}
+                              </Link>
+                            )}
+                          </li>
+                        );
+                      })}
                     </ul>
                     <Link
                       href={item.href}
-                      className="mt-1 block rounded-lg border-t border-navy/10 px-3 pt-3 pb-2 font-heading text-[0.72rem] uppercase tracking-[0.12em] text-blue hover:text-navy"
+                      className="mt-1 block rounded-sm border-t border-navy/10 px-3 pt-3 pb-2 font-heading text-[0.72rem] uppercase tracking-[0.12em] text-blue hover:text-navy"
                     >
-                      {wide ? "All services" : "All industries"}
+                      {item.href === "/services" ? "All services" : "All industries"}
                     </Link>
                   </div>
                 </div>
-              </div>
+              </details>
             );
           })}
         </nav>
@@ -100,7 +130,7 @@ export function Header({ variant = "solid" }: Props) {
 
           <details className="group relative xl:hidden">
             <summary
-              className={`flex h-10 w-10 cursor-pointer list-none items-center justify-center rounded-full border ${
+              className={`flex h-10 w-10 cursor-pointer list-none items-center justify-center rounded-sm border ${
                 overlay
                   ? "border-ivory/25 text-ivory"
                   : "border-navy/15 text-navy"
@@ -112,32 +142,82 @@ export function Header({ variant = "solid" }: Props) {
               </svg>
             </summary>
 
-            <div className="absolute right-0 top-12 w-72 max-h-[calc(100vh-5rem)] overflow-y-auto rounded-2xl border border-navy/10 bg-ivory p-5 shadow-lift">
+            <div className="absolute right-0 top-12 w-72 max-h-[calc(100vh-5rem)] overflow-y-auto rounded-sm border border-navy/15 bg-ivory p-5">
               <ul className="space-y-1">
-                {nav.map((item) => (
-                  <li key={item.href}>
-                    <Link
-                      href={item.href}
-                      className="block rounded-lg px-3 py-2 font-heading text-sm text-navy hover:bg-navy/5"
-                    >
-                      {item.label}
-                    </Link>
-                    {"children" in item && item.children ? (
-                      <ul className="mb-2 ml-3 space-y-0.5 border-l border-navy/10 pl-3">
-                        {item.children.map((child) => (
-                          <li key={child.href}>
-                            <Link
-                              href={child.href}
-                              className="block rounded-lg px-3 py-1.5 text-[0.8rem] text-charcoal/75 hover:bg-navy/5 hover:text-navy"
-                            >
-                              {child.label}
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                    ) : null}
-                  </li>
-                ))}
+                {nav.map((item) => {
+                  const children = "children" in item && item.children ? item.children : null;
+                  return (
+                    <li key={item.href}>
+                      {children ? (
+                        <details>
+                          <summary className="flex cursor-pointer list-none items-center justify-between rounded-sm px-3 py-2 font-heading text-sm text-navy hover:bg-navy/5">
+                            {item.label}
+                            <span aria-hidden="true" className="text-xs text-charcoal/50">+</span>
+                          </summary>
+                          <ul className="mb-2 ml-3 space-y-0.5 border-l border-navy/10 pl-3">
+                            {children.map((child) => {
+                              const subservices = "children" in child && child.children ? child.children : null;
+                              return (
+                                <li key={child.href}>
+                                  {subservices ? (
+                                    <details>
+                                      <summary className="flex cursor-pointer list-none items-center justify-between rounded-sm px-3 py-1.5 text-[0.8rem] font-medium text-navy hover:bg-navy/5">
+                                        {child.label}
+                                        <span aria-hidden="true" className="text-xs text-charcoal/50">+</span>
+                                      </summary>
+                                      <ul className="mb-2 ml-4 space-y-0.5 border-l border-navy/10 pl-2">
+                                        <li>
+                                          <Link
+                                            href={child.href}
+                                            className="block rounded-sm px-2 py-1.5 text-[0.76rem] font-medium text-blue hover:bg-navy/5"
+                                          >
+                                            {child.label} overview
+                                          </Link>
+                                        </li>
+                                        {subservices.map((subservice) => (
+                                          <li key={subservice.href}>
+                                            <Link
+                                              href={subservice.href}
+                                              className="block rounded-sm px-2 py-1.5 text-[0.76rem] text-charcoal/70 hover:bg-navy/5 hover:text-navy"
+                                            >
+                                              {subservice.label}
+                                            </Link>
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    </details>
+                                  ) : (
+                                    <Link
+                                      href={child.href}
+                                      className="block rounded-sm px-3 py-1.5 text-[0.8rem] font-medium text-navy hover:bg-navy/5"
+                                    >
+                                      {child.label}
+                                    </Link>
+                                  )}
+                                </li>
+                              );
+                            })}
+                            <li>
+                              <Link
+                                href={item.href}
+                                className="mt-1 block border-t border-navy/10 px-3 py-2 text-[0.75rem] font-semibold uppercase tracking-[0.12em] text-blue"
+                              >
+                                {item.href === "/services" ? "All services" : "All industries"}
+                              </Link>
+                            </li>
+                          </ul>
+                        </details>
+                      ) : (
+                        <Link
+                          href={item.href}
+                          className="block rounded-sm px-3 py-2 font-heading text-sm text-navy hover:bg-navy/5"
+                        >
+                          {item.label}
+                        </Link>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
               <Link href={primaryCta.href} className="btn-primary mt-4 w-full justify-center text-sm">
                 {primaryCta.label}

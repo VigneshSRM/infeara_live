@@ -3,13 +3,20 @@
 import Link from "next/link";
 import { useState } from "react";
 import { services } from "@/lib/content/services";
+import { cybersecuritySubservices } from "@/lib/content/cybersecurity-subservices";
+import { coreServiceSlugs, infrastructureSubserviceSlugs } from "@/lib/content/service-taxonomy";
 
 type Status = "idle" | "submitting" | "success" | "error";
 
 const inputClass =
-  "mt-2 w-full rounded-xl border border-navy/15 bg-white px-4 py-3 text-[0.92rem] text-charcoal placeholder:text-charcoal/35 focus:border-blue focus:outline-none";
+  "mt-2 w-full border-0 border-b border-navy/20 bg-transparent px-0 py-3 text-[0.92rem] text-charcoal placeholder:text-charcoal/35 focus:border-blue focus:outline-none";
 
 const labelClass = "font-heading text-[10px] uppercase tracking-[0.18em] text-charcoal/75";
+const servicesBySlug = new Map(services.map((service) => [service.slug, service]));
+const serviceForSlug = (slug: string) => servicesBySlug.get(slug);
+const standaloneCoreServiceSlugs = coreServiceSlugs.filter(
+  (slug) => slug !== "it-infrastructure" && slug !== "cybersecurity",
+);
 
 export function ContactForm() {
   const [status, setStatus] = useState<Status>("idle");
@@ -157,11 +164,41 @@ export function ContactForm() {
         </label>
         <select id="interest" name="interest" className={inputClass} defaultValue="">
           <option value="">General enquiry</option>
-          {services.map((service) => (
-            <option key={service.slug} value={service.name}>
-              {service.name}
-            </option>
-          ))}
+          <optgroup label="IT Infrastructure core service">
+            {serviceForSlug("it-infrastructure") ? (
+              <option value={serviceForSlug("it-infrastructure")!.name}>IT Infrastructure</option>
+            ) : null}
+          </optgroup>
+          <optgroup label="IT Infrastructure sub-services">
+            {infrastructureSubserviceSlugs.map((slug) => {
+              const service = serviceForSlug(slug);
+              return service ? (
+                <option key={slug} value={service.name}>
+                  {service.name}
+                </option>
+              ) : null;
+            })}
+          </optgroup>
+          <optgroup label="Cybersecurity core service">
+            {serviceForSlug("cybersecurity") ? (
+              <option value={serviceForSlug("cybersecurity")!.name}>Cybersecurity</option>
+            ) : null}
+          </optgroup>
+          <optgroup label="Cybersecurity sub-services">
+            {cybersecuritySubservices.map((service) => (
+              <option key={service.slug} value={service.name}>{service.name}</option>
+            ))}
+          </optgroup>
+          <optgroup label="Other core services">
+            {standaloneCoreServiceSlugs.map((slug) => {
+              const service = serviceForSlug(slug);
+              return service ? (
+                <option key={slug} value={service.name}>
+                  {service.name}
+                </option>
+              ) : null;
+            })}
+          </optgroup>
           <option value="Careers">Careers</option>
         </select>
       </div>

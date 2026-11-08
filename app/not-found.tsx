@@ -9,7 +9,7 @@ export const metadata = {
 
 const links = [
   { label: "Services", href: "/services", description: "Managed IT, security, infrastructure, cloud and more." },
-  { label: "Insights", href: "/insights", description: "Practical notes on operating business IT." },
+  { label: "Technical resources", href: "/insights", description: "Practical guides for operating business IT." },
   { label: "Contact", href: "/contact", description: "Tell us what you are running and what needs to change." },
 ];
 
@@ -19,12 +19,10 @@ export default function NotFound() {
       <Header />
       <main id="main">
         <section className="hero-surface">
-          <div className="hero-grid" aria-hidden="true" />
-          <div className="hero-vignette" aria-hidden="true" />
 
           <div className="shell relative z-10 flex min-h-[70svh] flex-col justify-center py-24">
             <p className="eyebrow text-coral/90">404</p>
-            <h1 className="lift mt-4 max-w-[20ch] font-display text-[clamp(2.2rem,4.4vw,3.8rem)] font-medium leading-[1.02] tracking-[-0.03em] text-ivory">
+            <h1 className="mt-4 max-w-[20ch] font-display text-[clamp(2.2rem,4.4vw,3.8rem)] font-medium leading-[1.02] tracking-[-0.03em] text-ivory">
               That page is not on the map.
             </h1>
             <p className="mt-6 max-w-[38rem] text-[1rem] leading-relaxed text-ivory/68">
@@ -43,7 +41,7 @@ export default function NotFound() {
                   <p className="mt-2 text-[0.82rem] leading-relaxed text-ivory/70">{item.description}</p>
                   <span
                     aria-hidden="true"
-                    className="mt-4 inline-block text-coral transition-transform duration-300 group-hover:translate-x-1"
+                    className="mt-4 inline-block text-coral transition-colors duration-100 group-hover:text-coral"
                   >
                     →
                   </span>

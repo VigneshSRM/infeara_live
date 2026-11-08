@@ -26,12 +26,12 @@ export function StatusBadge({ status, scheduled }: { status: Status; scheduled?:
   return (
     <span className="inline-flex items-center gap-1">
       <span
-        className={`inline-flex rounded-full px-2.5 py-0.5 font-heading text-[0.66rem] uppercase tracking-[0.1em] ${styles[status]}`}
+        className={`inline-flex rounded-sm px-2.5 py-0.5 font-heading text-[0.66rem] uppercase tracking-[0.1em] ${styles[status]}`}
       >
         {labels[status]}
       </span>
       {scheduled ? (
-        <span className="inline-flex rounded-full bg-navy/10 px-2.5 py-0.5 font-heading text-[0.66rem] uppercase tracking-[0.1em] text-navy/75">
+        <span className="inline-flex rounded-sm bg-navy/10 px-2.5 py-0.5 font-heading text-[0.66rem] uppercase tracking-[0.1em] text-navy/75">
           Scheduled
         </span>
       ) : null}

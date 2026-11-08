@@ -1,26 +1,36 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Manrope, Space_Grotesk } from "next/font/google";
+import localFont from "next/font/local";
 import { Analytics } from "@/components/analytics/Analytics";
 import { JsonLd, organizationSchema, websiteSchema } from "@/components/seo/JsonLd";
 import { ConsentBanner } from "@/components/site/ConsentBanner";
 import { SITE_INDEXABLE, SITE_URL, site } from "@/lib/site";
 import "./globals.css";
 
-const inter = Inter({
-  subsets: ["latin"],
+// Self-hosted from app/fonts (see scripts/sync-fonts.mjs). Same latin variable
+// faces and ranges that next/font/google used to fetch, without a build-time
+// request to fonts.googleapis.com.
+
+const inter = localFont({
+  src: "./fonts/inter-latin-wght-normal.woff2",
   variable: "--font-inter",
+  weight: "100 900",
+  style: "normal",
   display: "swap",
 });
 
-const manrope = Manrope({
-  subsets: ["latin"],
+const manrope = localFont({
+  src: "./fonts/manrope-latin-wght-normal.woff2",
   variable: "--font-manrope",
+  weight: "200 800",
+  style: "normal",
   display: "swap",
 });
 
-const spaceGrotesk = Space_Grotesk({
-  subsets: ["latin"],
+const spaceGrotesk = localFont({
+  src: "./fonts/space-grotesk-latin-wght-normal.woff2",
   variable: "--font-space-grotesk",
+  weight: "300 700",
+  style: "normal",
   display: "swap",
 });
 
@@ -52,7 +62,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#101D2B",
+  themeColor: "#14283A",
   colorScheme: "light",
 };
 

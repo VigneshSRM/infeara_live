@@ -40,7 +40,9 @@ export function Footer() {
                     <li key={link.href}>
                       <Link
                         href={link.href}
-                        className="text-[0.84rem] text-ivory/65 transition-colors hover:text-ivory"
+                        className={`text-[0.84rem] text-ivory/65 transition-colors hover:text-ivory ${
+                          "subservice" in link && link.subservice ? "pl-3 text-[0.78rem] text-ivory/55" : ""
+                        }`}
                       >
                         {link.label}
                       </Link>
