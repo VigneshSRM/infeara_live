@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { PageFrame } from "@/components/site/PageFrame";
 import { PageHero } from "@/components/site/PageHero";
+import { figureImage } from "@/lib/site-images";
 import { CtaBand } from "@/components/site/CtaBand";
 import { SectionHeading } from "@/components/site/SectionHeading";
 import { Figure } from "@/components/site/Figure";
@@ -34,6 +35,7 @@ export default function AboutPage() {
   return (
     <PageFrame>
       <PageHero
+        image={figureImage(4)}
         eyebrow="About"
         title="Built in Chennai. Accountable wherever you operate."
         intro="Infeara Technologies is an IT infrastructure, cybersecurity and managed services company. We operate technology for organisations that cannot afford to discover a failure after it has already happened."
@@ -96,6 +98,7 @@ export default function AboutPage() {
         <div className="shell grid items-center gap-12 lg:grid-cols-[1fr_1.05fr] lg:gap-20">
           <Figure
             seed={61}
+            layout="wide"
             label="Operating discipline"
             caption="The three disciplines connected: project work entering an operating service with monitoring, backup and documentation already in place."
           />
@@ -115,7 +118,7 @@ export default function AboutPage() {
                 "Monthly reporting against the agreement",
               ].map((item) => (
                 <li key={item} className="flex items-start gap-3 py-4 text-[0.92rem] leading-relaxed text-charcoal/75">
-                  <span aria-hidden="true" className="mt-[0.45rem] h-1.5 w-1.5 shrink-0 rounded-full bg-coral" />
+                  <span aria-hidden="true" className="mt-[0.45rem] h-1.5 w-1.5 shrink-0 rounded-full bg-blue/60" />
                   {item}
                 </li>
               ))}
@@ -179,6 +182,7 @@ export default function AboutPage() {
         <div className="shell grid items-center gap-12 lg:grid-cols-[1.05fr_1fr] lg:gap-20">
           <Schematic
             variant="timeline"
+            layout="portrait"
             label="Company structure"
             caption="How the company is structured around the client: one accountable owner, with operations, projects and engineering behind them."
           />

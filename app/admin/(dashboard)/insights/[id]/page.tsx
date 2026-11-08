@@ -33,7 +33,7 @@ const blank: InsightRow = {
   slug: "",
   title: "",
   excerpt: "",
-  category: "Insight",
+  category: "IT operations",
   reading_minutes: 5,
   published_at: null,
   body: [],
@@ -75,13 +75,13 @@ export default async function InsightEditorPage({
   return (
     <>
       <PageHeader
-        eyebrow="Insights"
-        title={isNew ? "New article" : row.title}
-        description={isNew ? "Write an article. The slug becomes /insights/slug." : `Editing /insights/${row.slug}`}
+        eyebrow="Technical resources"
+        title={isNew ? "New guide" : row.title}
+        description={isNew ? "Create a practical guide. Its URL will be /insights/slug." : `Editing /insights/${row.slug}`}
         actions={
           <>
             <Link href="/admin/insights" className="admin-btn admin-btn-ghost">
-              All articles
+              All guides
             </Link>
             {!isNew && row.status === "published" ? (
               <Link
@@ -104,13 +104,13 @@ export default async function InsightEditorPage({
       ) : null}
 
       <div className="mt-6">
-        <EntityForm action={saveInsight} submitLabel={isNew ? "Create article" : "Save changes"}>
+        <EntityForm action={saveInsight} submitLabel={isNew ? "Create guide" : "Save changes"}>
           <input type="hidden" name="id" value={isNew ? "" : row.id} />
           {!isNew ? <input type="hidden" name="slug" value={row.slug} /> : null}
 
           {editable ? (
             <>
-              <Panel title="Article" columns={2}>
+              <Panel title="Guide details" columns={2}>
                 <TextField name="title" label="Title" defaultValue={row.title} required className="sm:col-span-2" />
                 {isNew ? (
                   <TextField name="slug" label="Slug" defaultValue={row.slug} hint="Locked after creation." />
@@ -173,7 +173,7 @@ export default async function InsightEditorPage({
             <input type="hidden" name="id" value={row.id} />
             <input type="hidden" name="slug" value={row.slug} />
             <ConfirmButton message={`Delete “${row.title}”? This cannot be undone.`}>
-              Delete article
+              Delete guide
             </ConfirmButton>
           </form>
         ) : null}

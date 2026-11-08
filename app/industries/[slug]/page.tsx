@@ -52,14 +52,12 @@ export default async function IndustryPage({ params }: Props) {
 
       <PageFrame>
         <section className="hero-surface border-b border-ivory/10">
-          <div className="hero-grid" aria-hidden="true" />
-          <div className="hero-vignette" aria-hidden="true" />
 
           <div className="shell relative z-10 py-16 md:py-24">
             <Breadcrumbs items={crumbs} />
 
             <p className="eyebrow mt-8 text-coral/90">{industry.tagline}</p>
-            <h1 className="lift mt-4 max-w-[24ch] font-display text-[clamp(2.1rem,4.2vw,3.5rem)] font-medium leading-[1.02] tracking-[-0.03em] text-ivory">
+            <h1 className="mt-4 max-w-[24ch] font-display text-[clamp(2.1rem,4.2vw,3.5rem)] font-medium leading-[1.02] tracking-[-0.03em] text-ivory">
               {industry.name}
             </h1>
             <p className="mt-6 max-w-[44rem] text-[1.02rem] leading-relaxed text-ivory/68">
@@ -108,7 +106,7 @@ export default async function IndustryPage({ params }: Props) {
               <ul className="mt-9 space-y-5">
                 {industry.capabilities.map((capability) => (
                   <li key={capability} className="flex items-start gap-3 border-t border-navy/10 pt-5">
-                    <span aria-hidden="true" className="mt-[0.45rem] h-1.5 w-1.5 shrink-0 rounded-full bg-coral" />
+                    <span aria-hidden="true" className="mt-[0.45rem] h-1.5 w-1.5 shrink-0 rounded-full bg-blue/60" />
                     <p className="text-[0.94rem] leading-relaxed text-charcoal/75">{capability}</p>
                   </li>
                 ))}
@@ -159,7 +157,7 @@ export default async function IndustryPage({ params }: Props) {
                 <Link
                   key={service.slug}
                   href={`/services/${service.slug}`}
-                  className="group flex flex-col rounded-[var(--radius-card)] border border-navy/10 bg-white p-7 transition-all duration-300 hover:-translate-y-1 hover:border-blue/40 hover:shadow-lift"
+                  className="group flex flex-col rounded-[var(--radius-card)] border border-navy/10 bg-white p-7 transition-colors duration-150 hover:border-blue/40"
                 >
                   <p className="eyebrow text-blue">{service.shortName}</p>
                   <h3 className="mt-4 font-heading text-[1.02rem] font-semibold leading-snug text-navy">
@@ -168,7 +166,7 @@ export default async function IndustryPage({ params }: Props) {
                   <p className="mt-3 flex-1 text-[0.88rem] leading-relaxed text-charcoal/70">{service.summary}</p>
                   <span
                     aria-hidden="true"
-                    className="mt-6 text-blue transition-transform duration-300 group-hover:translate-x-1"
+                    className="mt-6 text-blue transition-colors duration-100 group-hover:text-coral"
                   >
                     →
                   </span>

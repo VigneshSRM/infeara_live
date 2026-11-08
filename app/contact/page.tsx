@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { PageFrame } from "@/components/site/PageFrame";
 import { PageHero } from "@/components/site/PageHero";
+import { figureImage } from "@/lib/site-images";
 import { ContactForm } from "@/components/site/ContactForm";
 import { Figure } from "@/components/site/Figure";
 import { Schematic } from "@/components/site/Schematic";
@@ -34,6 +35,7 @@ export default function ContactPage() {
   return (
     <PageFrame>
       <PageHero
+        image={figureImage(3)}
         eyebrow="Contact"
         title="Start with the estate."
         intro="Tell us what you run, what is failing and what needs to change. A short conversation is enough to establish whether we are the right partner and what the next step should be."
@@ -82,13 +84,13 @@ export default function ContactPage() {
               </dl>
             </div>
 
-            <div className="rounded-[var(--radius-card)] border border-navy/10 bg-navy p-7 text-ivory">
-              <p className="eyebrow text-coral/90">Existing client?</p>
-              <p className="mt-4 text-[0.9rem] leading-relaxed text-ivory/70">
+            <div className="border-t border-navy/15 pt-5">
+              <p className="eyebrow text-blue">Existing client?</p>
+              <p className="mt-3 text-[0.9rem] leading-relaxed text-charcoal/75">
                 Use the agreed support channel rather than this form. Priority 1 incidents should be raised
                 through the escalation path in your service schedule.
               </p>
-              <Link href="/sla" className="mt-5 inline-flex items-center gap-2 font-heading text-[0.82rem] text-ivory underline decoration-ivory/30 underline-offset-4">
+              <Link href="/sla" className="mt-4 inline-flex items-center gap-2 font-heading text-[0.82rem] text-blue underline decoration-blue/30 underline-offset-4">
                 Support model <span aria-hidden="true">→</span>
               </Link>
             </div>
@@ -111,6 +113,7 @@ export default function ContactPage() {
         <div className="shell grid items-center gap-12 lg:grid-cols-[1.05fr_1fr] lg:gap-20">
           <Figure
             seed={141}
+            layout="caption-side"
             label="First conversation"
             caption="A first conversation mapped: estate described, constraints identified, fit assessed and a written next step agreed."
           />
@@ -148,6 +151,7 @@ export default function ContactPage() {
         <div className="shell grid items-center gap-12 lg:grid-cols-[1fr_1.05fr] lg:gap-20">
           <Schematic
             variant="mesh"
+            layout="square"
             label="Enquiry routing"
             caption="Enquiry routing: the message reaches a person who identifies the right engineer, rather than entering an automated sales sequence."
           />
@@ -163,7 +167,7 @@ export default function ContactPage() {
                 "What you need: support cover, a project, a second opinion or a deadline.",
               ].map((item) => (
                 <li key={item} className="flex items-start gap-3 border-t border-navy/10 pt-3 text-[0.92rem] leading-relaxed text-charcoal/75">
-                  <span aria-hidden="true" className="mt-[0.45rem] h-1.5 w-1.5 shrink-0 rounded-full bg-coral" />
+                  <span aria-hidden="true" className="mt-[0.45rem] h-1.5 w-1.5 shrink-0 rounded-full bg-blue/60" />
                   {item}
                 </li>
               ))}

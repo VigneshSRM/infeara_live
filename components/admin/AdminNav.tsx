@@ -11,7 +11,7 @@ const items = [
   { href: "/admin/leads", label: "Leads" },
   { href: "/admin/services", label: "Services" },
   { href: "/admin/industries", label: "Industries" },
-  { href: "/admin/insights", label: "Insights" },
+  { href: "/admin/insights", label: "Resources" },
   { href: "/admin/legal", label: "Legal" },
   { href: "/admin/faqs", label: "FAQs" },
   { href: "/admin/media", label: "Media" },

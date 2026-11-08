@@ -127,7 +127,7 @@ where email = 'you@infeara.com';`}
         <Stat label="New leads" value={counts.newLeads} href="/admin/leads" accent />
         <Stat label="Drafts" value={counts.drafts} href="/admin/services" />
         <Stat label="Published practices" value={counts.services} href="/admin/services" />
-        <Stat label="Published insights" value={counts.insights} href="/admin/insights" />
+        <Stat label="Published guides" value={counts.insights} href="/admin/insights" />
       </div>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-[1.4fr_1fr]">

@@ -7,7 +7,7 @@ import { openRoles } from "@/lib/content/careers";
 type Status = "idle" | "submitting" | "success" | "error";
 
 const inputClass =
-  "mt-2 w-full rounded-xl border border-navy/15 bg-white px-4 py-3 text-[0.92rem] text-charcoal placeholder:text-charcoal/35 focus:border-blue focus:outline-none";
+  "mt-2 w-full border-0 border-b border-navy/20 bg-transparent px-0 py-3 text-[0.92rem] text-charcoal placeholder:text-charcoal/35 focus:border-blue focus:outline-none";
 
 const labelClass = "font-heading text-[10px] uppercase tracking-[0.18em] text-charcoal/75";
 

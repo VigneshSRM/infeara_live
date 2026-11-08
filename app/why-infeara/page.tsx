@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { PageFrame } from "@/components/site/PageFrame";
 import { PageHero } from "@/components/site/PageHero";
+import { figureImage } from "@/lib/site-images";
 import { CtaBand } from "@/components/site/CtaBand";
 import { SectionHeading } from "@/components/site/SectionHeading";
 import { Figure } from "@/components/site/Figure";
@@ -45,6 +46,7 @@ export default function WhyInfearaPage() {
   return (
     <PageFrame>
       <PageHero
+        image={figureImage(4)}
         eyebrow="Why Infeara"
         title="The difference is what gets recorded."
         intro="Most providers can install, monitor and fix. The distinction is whether the environment remains understandable, recoverable and accountable after the work is done. That is the standard we hold ourselves to."
@@ -176,7 +178,7 @@ export default function WhyInfearaPage() {
                 "No testimonials without written permission",
               ].map((item) => (
                 <li key={item} className="flex items-start gap-3 py-4 text-[0.9rem] leading-relaxed text-charcoal/75">
-                  <span aria-hidden="true" className="mt-[0.45rem] h-1.5 w-1.5 shrink-0 rounded-full bg-coral" />
+                  <span aria-hidden="true" className="mt-[0.45rem] h-1.5 w-1.5 shrink-0 rounded-full bg-blue/60" />
                   {item}
                 </li>
               ))}

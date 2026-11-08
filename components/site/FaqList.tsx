@@ -11,7 +11,7 @@ export function FaqList({ items, idPrefix = "faq" }: { items: Faq[]; idPrefix?: 
             </h3>
             <span
               aria-hidden="true"
-              className="mt-0.5 shrink-0 font-display text-lg leading-none text-blue transition-transform duration-300 group-open:rotate-45"
+              className="mt-0.5 shrink-0 font-display text-lg leading-none text-blue "
             >
               +
             </span>

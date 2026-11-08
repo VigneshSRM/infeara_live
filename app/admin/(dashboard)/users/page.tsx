@@ -88,7 +88,7 @@ export default async function UsersPage({
                   <p className="font-heading text-navy">{row.full_name ?? row.email}</p>
                   {row.full_name ? <p className="text-[0.76rem] text-charcoal/60">{row.email}</p> : null}
                   {row.id === actor.id ? (
-                    <span className="mt-1 inline-block rounded-full bg-blue/10 px-2 py-0.5 font-heading text-[0.62rem] uppercase tracking-[0.1em] text-blue">
+                    <span className="mt-1 inline-block rounded-sm bg-blue/10 px-2 py-0.5 font-heading text-[0.62rem] uppercase tracking-[0.1em] text-blue">
                       You
                     </span>
                   ) : null}

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { PageFrame } from "@/components/site/PageFrame";
 import { PageHero } from "@/components/site/PageHero";
+import { figureImage } from "@/lib/site-images";
 import { CtaBand } from "@/components/site/CtaBand";
 import { FaqList, faqSchema } from "@/components/site/FaqList";
 import { Figure } from "@/components/site/Figure";
@@ -29,6 +30,7 @@ export default async function FaqPage() {
 
       <PageFrame>
         <PageHero
+        image={figureImage(1)}
           eyebrow="FAQ"
           title="Questions worth asking before you sign."
           intro="These are the questions we are asked most often. Where the answer depends on your estate or your contract, we say so rather than inventing a standard."

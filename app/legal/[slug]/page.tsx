@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PageFrame } from "@/components/site/PageFrame";
 import { PageHero } from "@/components/site/PageHero";
+import { figureImage } from "@/lib/site-images";
 import { CookiePreferences } from "@/components/site/CookiePreferences";
 import { Figure } from "@/components/site/Figure";
 import { Schematic } from "@/components/site/Schematic";
@@ -52,6 +53,7 @@ export default async function LegalPage({ params }: Props) {
   return (
     <PageFrame>
       <PageHero
+        image={figureImage(5)}
         eyebrow="Legal"
         title={document.title}
         intro={document.intro}
@@ -188,7 +190,7 @@ export default async function LegalPage({ params }: Props) {
                 "Enquiries about this document go to a named contact.",
               ].map((item) => (
                 <li key={item} className="flex items-start gap-3 border-t border-navy/10 pt-3 text-[0.9rem] leading-relaxed text-charcoal/75">
-                  <span aria-hidden="true" className="mt-[0.45rem] h-1.5 w-1.5 shrink-0 rounded-full bg-coral" />
+                  <span aria-hidden="true" className="mt-[0.45rem] h-1.5 w-1.5 shrink-0 rounded-full bg-blue/60" />
                   {item}
                 </li>
               ))}

@@ -77,7 +77,7 @@ export default async function LeadsPage({
             key={item.value || "all"}
             href={item.value ? `/admin/leads?status=${item.value}` : "/admin/leads"}
             aria-current={filter === item.value ? "page" : undefined}
-            className={`rounded-full border px-3 py-1 font-heading text-[0.74rem] transition-colors ${
+            className={`rounded-sm border px-3 py-1 font-heading text-[0.74rem] transition-colors ${
               filter === item.value
                 ? "border-navy bg-navy text-ivory"
                 : "border-navy/15 text-charcoal/75 hover:border-navy/35 hover:text-navy"

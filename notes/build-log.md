@@ -49,10 +49,10 @@ Supabase and `/admin` are untouched.
 - **Homepage, 16 sections.** Hero, positioning, practice grid, engagement model, proof-of-work,
   operating principles, industries, insights, FAQ, CTA. No statistics, client names or
   certifications that cannot be evidenced.
-- **Nine practice pages** at `/services/[slug]`: managed IT, cybersecurity, IT infrastructure,
-  outsourcing and remote support, cloud and data centre, network engineering, IT facility
-  management, turnkey projects, automation and custom software. Each has scope, inclusions,
-  exclusions, engagement model, FAQs and its own metadata.
+- **Nine explicit service routes** under `/services/`: five core practices (IT Infrastructure,
+  cybersecurity, cloud and datacenter, turnkey projects, automation) plus four IT Infrastructure
+  sub-services (managed IT, facility management, remote IT support, network engineering). Each
+  route has its own metadata, scope, inclusions, engagement model and FAQs.
 - **Eight sector pages** at `/industries/[slug]`, each framed around operating context rather
   than invented outcomes.
 - **Corporate and editorial pages:** about, approach, why Infeara, case studies (capability

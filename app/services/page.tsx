@@ -6,14 +6,19 @@ import { ServiceCard } from "@/components/site/ServiceCard";
 import { Figure } from "@/components/site/Figure";
 import { Schematic } from "@/components/site/Schematic";
 import { listServices } from "@/lib/content";
+import { figureImage } from "@/lib/site-images";
+import { cybersecuritySubservices } from "@/lib/content/cybersecurity-subservices";
+import { coreServiceSlugs, infrastructureSubserviceSlugs } from "@/lib/content/service-taxonomy";
+import { SubserviceCard } from "@/components/site/SubserviceCard";
+import type { Service } from "@/lib/content/types";
 import { pageMetadata } from "@/lib/metadata";
 
 export const revalidate = 300;
 
 export const metadata = pageMetadata({
-  title: "IT Services",
+  title: "IT & Cybersecurity Services",
   description:
-    "Managed IT, cybersecurity, infrastructure, cloud, network engineering, facility management, turnkey projects and automation — delivered from Chennai.",
+    "Explore Infeara's core services and focused sub-services: managed IT, facility management, remote support, network engineering, vulnerability assessment, penetration testing, threat modeling and threat analysis.",
   path: "/services",
 });
 
@@ -34,13 +39,21 @@ const startSteps = [
 
 export default async function ServicesPage() {
   const services = await listServices();
+  const bySlug = new Map(services.map((service) => [service.slug, service]));
+  const selectServices = (slugs: readonly string[]) =>
+    slugs
+      .map((slug) => bySlug.get(slug))
+      .filter((service): service is Service => Boolean(service));
+  const coreServices = selectServices(coreServiceSlugs);
+  const infrastructureServices = selectServices(infrastructureSubserviceSlugs);
 
   return (
     <PageFrame>
       <PageHero
+        image={figureImage(5)}
         eyebrow="Services"
-        title="Nine practices, one operating standard."
-        intro="Infeara covers the infrastructure a business already runs and the changes it needs to make next. Managed IT is our primary practice; every other service is delivered to the same standard of documentation, monitoring and reporting."
+        title="Core services, with focused sub-services."
+        intro="IT Infrastructure and Cybersecurity are core practices with focused sub-services in operations, network engineering, security assessment and threat analysis. Cloud, turnkey projects, and automation remain standalone core services."
         crumbs={[{ label: "Services", href: "/services" }]}
         primary={{ label: "Talk to an expert", href: "/contact" }}
         secondary={{ label: "See our approach", href: "/approach" }}
@@ -49,14 +62,51 @@ export default async function ServicesPage() {
       <section className="bg-ivory py-20 md:py-28">
         <div className="shell">
           <SectionHeading
-            eyebrow="What we do"
-            title="Find the practice that matches the problem."
-            intro="Most engagements combine two or three of these. The service pages describe what is included, what changes, and how the work is accounted for."
+            eyebrow="Core services"
+            title="Start with the area that needs attention."
+            intro="Five core practices cover day-to-day operations, security, cloud platforms, delivery projects and automation. IT Infrastructure and Cybersecurity each link to focused sub-services below."
           />
 
           <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {services.map((service, index) => (
+            {coreServices.map((service, index) => (
+              <ServiceCard key={service.slug} service={service} index={index} image={figureImage(service.figure.seed)} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="border-y border-navy/10 bg-white py-20 md:py-28">
+        <div className="shell">
+          <SectionHeading
+            eyebrow="IT Infrastructure sub-services"
+            title="Focused teams for the operational layers."
+            intro="Choose managed operations, facility management, remote IT support or network engineering. Dedicated engineers are available within the remote IT service; they are not a separate offering."
+          />
+          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {infrastructureServices.map((service, index) => (
               <ServiceCard key={service.slug} service={service} index={index} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="border-y border-navy/10 bg-ivory py-20 md:py-28">
+        <div className="shell">
+          <SectionHeading
+            eyebrow="Cybersecurity sub-services"
+            title="Assess exposure, validate defenses, understand threats."
+            intro="Choose a scoped assessment or analysis engagement, with authorization, clear outputs and practical next steps agreed in advance."
+          />
+          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {cybersecuritySubservices.map((service, index) => (
+              <SubserviceCard
+                key={service.slug}
+                href={`/services/cybersecurity/${service.slug}`}
+                title={service.name}
+                summary={service.summary}
+                index={index}
+                image={figureImage(service.figure.seed)}
+              />
             ))}
           </div>
         </div>
@@ -90,6 +140,7 @@ export default async function ServicesPage() {
 
           <Schematic
             variant="timeline"
+            layout="portrait"
             label="Engagement sequence"
             caption="An engagement sequence: assessment, agreement, transition, operation and periodic review, with each stage producing a recorded output."
           />
@@ -100,6 +151,7 @@ export default async function ServicesPage() {
         <div className="shell grid items-center gap-12 lg:grid-cols-[1.05fr_1fr] lg:gap-20">
           <Figure
             seed={21}
+            layout="wide"
             label="Service coverage"
             caption="A service map: managed operations at the centre, with security, infrastructure, cloud, network and project work connected to it."
           />
@@ -117,7 +169,7 @@ export default async function ServicesPage() {
                 "One change record",
               ].map((item) => (
                 <li key={item} className="flex items-start gap-3 border-t border-navy/10 pt-3 text-[0.9rem] text-charcoal/75">
-                  <span aria-hidden="true" className="mt-[0.45rem] h-1.5 w-1.5 shrink-0 rounded-full bg-coral" />
+                  <span aria-hidden="true" className="mt-[0.45rem] h-1.5 w-1.5 shrink-0 rounded-full bg-blue/60" />
                   {item}
                 </li>
               ))}

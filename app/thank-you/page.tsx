@@ -31,7 +31,7 @@ export default function ThankYouPage() {
               Back to the homepage
             </Link>
             <Link href="/insights" className="btn-outline text-sm">
-              Read our insights
+              Browse IT guides
             </Link>
           </div>
         </div>

@@ -31,7 +31,6 @@ function LoginShell({ notice, disabled = false }: { notice?: string; disabled?: 
   return (
     <div className="grid min-h-screen lg:grid-cols-[1fr_1.1fr]">
       <div className="relative hidden overflow-hidden bg-navy p-12 text-ivory lg:flex lg:flex-col">
-        <div className="hero-grid absolute inset-0 opacity-40" aria-hidden="true" />
         <div className="relative">
           <Logo variant="light" preload className="h-12 md:h-14" sizes="280px" />
           <p className="mt-3 font-heading text-[10px] uppercase tracking-[0.24em] text-ivory/70">

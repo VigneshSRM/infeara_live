@@ -83,11 +83,11 @@ export const services: Service[] = [
     order: 2,
     name: "Cybersecurity Services",
     shortName: "Cybersecurity",
-    tagline: "Find the gaps before someone else does.",
+    tagline: "Assess exposure, test defenses and understand threats.",
     summary:
-      "Assessments, hardening, monitoring and incident response for environments that have to be defended, not just configured.",
+      "Four focused services for assessing vulnerabilities, testing defenses, modeling threats and analyzing suspicious activity.",
     intro:
-      "Security work starts with an honest view of what is exposed. We assess the estate, prioritise what can actually be exploited, harden the systems that carry the most risk, and give the business a monitoring and response path for the rest.",
+      "Cybersecurity brings together preventive assessment and practical response. Select a focused service for vulnerability assessment, penetration testing, threat modeling or threat analysis; each engagement is scoped to the environment and produces prioritized actions.",
     deliverables: [
       {
         title: "Security assessment",
@@ -137,7 +137,7 @@ export const services: Service[] = [
     seo: {
       title: "Cybersecurity Services",
       description:
-        "Security assessments, vulnerability management, endpoint and firewall management, monitoring and incident response for business IT environments.",
+        "Cybersecurity services for vulnerability assessment, penetration testing, threat modeling and threat analysis across business IT environments.",
     },
     figure: {
       seed: 2,
@@ -149,13 +149,13 @@ export const services: Service[] = [
   {
     slug: "it-infrastructure",
     order: 3,
-    name: "IT Infrastructure Services",
+    name: "IT Infrastructure",
     shortName: "IT Infrastructure",
-    tagline: "Servers, storage and directory, built to be operated.",
+    tagline: "The core practice for operating and improving business IT.",
     summary:
-      "Deployment, administration and modernisation of the servers, virtualisation, storage and directory services that carry business workloads.",
+      "The core practice for operating and improving business IT, delivered through managed IT, facility management, remote support, network engineering and infrastructure modernisation.",
     intro:
-      "Infrastructure work is judged by how it behaves after handover. We deploy and administer Windows and Linux systems, virtualisation platforms, storage and directory services with the documentation, backup position and monitoring that an operating team needs.",
+      "IT Infrastructure brings together the services that keep a business technology estate running and ready to change. Choose a focused service below for managed operations, facility management, remote support or network engineering; the core team coordinates them to one operating standard.",
     deliverables: [
       {
         title: "Server deployment and administration",
@@ -205,7 +205,7 @@ export const services: Service[] = [
     seo: {
       title: "IT Infrastructure Services",
       description:
-        "Server deployment, Windows and Linux administration, Active Directory, virtualisation, storage management and infrastructure modernisation.",
+        "Managed IT services, facility management, remote support, network engineering and infrastructure modernisation from one core practice.",
     },
     figure: {
       seed: 3,
@@ -217,13 +217,13 @@ export const services: Service[] = [
   {
     slug: "outsourcing-remote-support",
     order: 4,
-    name: "IT Outsourcing & Remote Support",
-    shortName: "Outsourcing",
-    tagline: "Additional capacity, under your direction or ours.",
+    name: "Remote IT Services",
+    shortName: "Remote IT Services",
+    tagline: "Remote support with dedicated capacity when needed.",
     summary:
-      "Dedicated engineers, helpdesk coverage and remote administration, from first-line response to senior engineering.",
+      "Remote administration, tiered helpdesk coverage and dedicated engineers, from first-line response to senior engineering.",
     intro:
-      "Outsourcing is about capacity and continuity. We provide dedicated resources, remote administration and tiered helpdesk cover so that a business can keep operating when its internal team is small, overloaded or between hires.",
+      "Remote IT services provide capacity and continuity when an internal team is small, overloaded or between hires. We combine remote administration, tiered helpdesk cover and dedicated engineer capacity, with responsibilities and decision rights agreed up front.",
     deliverables: [
       {
         title: "Dedicated support resources",
@@ -250,7 +250,7 @@ export const services: Service[] = [
     ],
     faqs: [
       {
-        question: "How does outsourced IT support work?",
+        question: "How does remote IT support work?",
         answer:
           "An external team takes on defined support responsibilities under an agreement. Requests arrive through an agreed channel, are triaged by severity, worked through defined tiers, and closed with a record. Reporting shows volume, response and recurring causes.",
       },
@@ -267,9 +267,9 @@ export const services: Service[] = [
     ],
     related: ["managed-it", "it-facility-management", "network-engineering"],
     seo: {
-      title: "IT Outsourcing & Remote Support",
+      title: "Remote IT Services & Dedicated Support",
       description:
-        "Dedicated IT resources, tiered helpdesk, remote administration and outsourced IT management from Infeara Technologies.",
+        "Remote IT administration, tiered helpdesk and dedicated engineering capacity from Infeara Technologies.",
     },
     figure: {
       seed: 4,

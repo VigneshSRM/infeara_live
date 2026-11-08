@@ -7,6 +7,7 @@ import { Figure } from "@/components/site/Figure";
 import { PageFrame } from "@/components/site/PageFrame";
 import { Schematic } from "@/components/site/Schematic";
 import { SectionHeading } from "@/components/site/SectionHeading";
+import { InsightCard } from "@/components/site/InsightCard";
 import { getInsight, listInsights } from "@/lib/content";
 import type { Insight } from "@/lib/content/types";
 import { pageMetadata } from "@/lib/metadata";
@@ -74,7 +75,7 @@ export default async function InsightPage({ params }: Props) {
   const all = await listInsights();
   const related = all.filter((item) => item.slug !== insight.slug).slice(0, 2);
   const crumbs = [
-    { label: "Insights", href: "/insights" },
+    { label: "Technical resources", href: "/insights" },
     { label: insight.title, href: `/insights/${insight.slug}` },
   ];
 
@@ -85,28 +86,15 @@ export default async function InsightPage({ params }: Props) {
 
       <PageFrame>
         <section className="hero-surface border-b border-ivory/10">
-          <div className="hero-grid" aria-hidden="true" />
-          <div className="hero-vignette" aria-hidden="true" />
 
           <div className="shell relative z-10 py-16 md:py-24">
             <Breadcrumbs items={crumbs} />
 
-            <div className="mt-8 flex flex-wrap items-center gap-x-4 gap-y-2 font-heading text-[10px] uppercase tracking-[0.18em] text-ivory/65">
-              <span className="text-coral/90">{insight.category}</span>
-              <span aria-hidden="true">·</span>
-              <span>{insight.readingMinutes} min read</span>
-              <span aria-hidden="true">·</span>
-              <time dateTime={insight.publishedAt}>
-                {new Date(`${insight.publishedAt}T00:00:00Z`).toLocaleDateString("en-IN", {
-                  day: "numeric",
-                  month: "long",
-                  year: "numeric",
-                  timeZone: "UTC",
-                })}
-              </time>
-            </div>
+            <p className="mt-8 inline-flex rounded-sm border border-ivory/20 bg-ivory/5 px-3 py-1 font-heading text-[10px] font-semibold uppercase tracking-[0.14em] text-coral/90">
+              {insight.category} guide
+            </p>
 
-            <h1 className="lift mt-5 max-w-[26ch] font-display text-[clamp(2rem,4.2vw,3.5rem)] font-medium leading-[1.03] tracking-[-0.03em] text-ivory">
+            <h1 className="mt-5 max-w-[26ch] font-display text-[clamp(2rem,4.2vw,3.5rem)] font-medium leading-[1.03] tracking-[-0.03em] text-ivory">
               {insight.title}
             </h1>
 
@@ -120,8 +108,17 @@ export default async function InsightPage({ params }: Props) {
           <div className="shell grid gap-12 lg:grid-cols-[minmax(0,42rem)_1fr] lg:gap-20">
             <div>
               {insight.body.map((section, index) => (
-                <section key={section.heading} className={index === 0 ? "" : "mt-12"}>
-                  <h2 className="font-display text-[1.55rem] font-medium leading-[1.15] tracking-[-0.02em] text-navy">
+                <section
+                  key={section.heading}
+                  className={`${index === 0 ? "" : "mt-10"} border-t border-navy/10 pt-6`}
+                >
+                  <div className="mb-3 flex items-center gap-3">
+                    <span className="font-heading text-[10px] font-semibold tracking-[0.12em] text-blue">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                    <span className="h-px w-7 bg-coral" aria-hidden="true" />
+                  </div>
+                  <h2 className="font-heading text-[1.2rem] font-semibold leading-[1.3] text-navy">
                     {section.heading}
                   </h2>
                   <div className="mt-4 space-y-4">
@@ -137,7 +134,7 @@ export default async function InsightPage({ params }: Props) {
               <div className="mt-14 rounded-[var(--radius-card)] border border-navy/10 bg-white p-7">
                 <p className="eyebrow text-blue">Related service</p>
                 <p className="mt-3 text-[0.94rem] leading-relaxed text-charcoal/75">
-                  This article sits inside our managed IT and infrastructure practice. If it describes
+                  This guide sits inside our managed IT and infrastructure practice. If it describes
                   something you are dealing with, the service page is the practical next step.
                 </p>
                 <div className="mt-5 flex flex-wrap gap-3">
@@ -154,13 +151,15 @@ export default async function InsightPage({ params }: Props) {
             <aside className="space-y-10">
               <Figure
                 seed={51 + insight.readingMinutes}
-                label="Working note"
-                caption={`Supporting illustration for "${insight.title}": the operational records behind the argument.`}
+                layout="portrait"
+                label="IT operations"
+                caption={`Supporting illustration for "${insight.title}": the infrastructure and people involved in the recommended approach.`}
               />
               <Schematic
                 variant="loop"
+                layout="square"
                 label="Operating loop"
-                caption="The operating loop referenced in the article: detect, triage, change, verify and report."
+                caption="The operating loop for this process: detect, triage, change, verify and report."
               />
             </aside>
           </div>
@@ -169,26 +168,10 @@ export default async function InsightPage({ params }: Props) {
         {related.length > 0 ? (
           <section className="border-t border-navy/10 bg-white py-20 md:py-24">
             <div className="shell">
-              <SectionHeading eyebrow="Continue reading" title="Other notes from the team." />
+              <SectionHeading eyebrow="Related resources" title="More guidance for your team." />
               <div className="mt-10 grid gap-5 md:grid-cols-2">
                 {related.map((item) => (
-                  <Link
-                    key={item.slug}
-                    href={`/insights/${item.slug}`}
-                    className="group rounded-[var(--radius-card)] border border-navy/10 p-7 transition-colors hover:border-blue/40"
-                  >
-                    <p className="eyebrow text-blue">{item.category}</p>
-                    <h3 className="mt-4 font-display text-[1.3rem] font-medium leading-[1.2] tracking-[-0.02em] text-navy">
-                      {item.title}
-                    </h3>
-                    <p className="mt-3 text-[0.9rem] leading-relaxed text-charcoal/70">{item.excerpt}</p>
-                    <span
-                      aria-hidden="true"
-                      className="mt-6 inline-block text-blue transition-transform duration-300 group-hover:translate-x-1"
-                    >
-                      →
-                    </span>
-                  </Link>
+                  <InsightCard key={item.slug} insight={item} />
                 ))}
               </div>
             </div>
@@ -196,10 +179,10 @@ export default async function InsightPage({ params }: Props) {
         ) : null}
 
         <CtaBand
-          title="Put the article into practice."
+          title="Apply this guidance to your environment."
           body="If the situation sounds familiar, a short conversation will establish what is actually happening in your environment."
           primary={{ label: "Talk to an expert", href: "/contact" }}
-          secondary={{ label: "Back to insights", href: "/insights" }}
+          secondary={{ label: "Browse technical resources", href: "/insights" }}
         />
       </PageFrame>
     </>

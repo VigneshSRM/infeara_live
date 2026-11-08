@@ -4,6 +4,9 @@ import { legacyRedirects } from "./lib/redirects";
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
+  // Arena serves the app through an e2b.app preview origin; allow its dev HMR
+  // and font resources instead of having Next.js block them as cross-origin.
+  allowedDevOrigins: ["*.e2b.app"],
   images: {
     formats: ["image/avif", "image/webp"],
     qualities: [75, 90],

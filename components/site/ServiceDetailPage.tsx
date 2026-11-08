@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { Breadcrumbs, breadcrumbSchema } from "@/components/site/Breadcrumbs";
 import { CtaBand } from "@/components/site/CtaBand";
@@ -8,34 +7,9 @@ import { Figure } from "@/components/site/Figure";
 import { PageFrame } from "@/components/site/PageFrame";
 import { Schematic } from "@/components/site/Schematic";
 import { SectionHeading } from "@/components/site/SectionHeading";
-import { getService, listServices, relatedServices } from "@/lib/content";
+import { relatedServices } from "@/lib/content";
 import type { Service } from "@/lib/content/types";
-import { pageMetadata } from "@/lib/metadata";
 import { SITE_URL } from "@/lib/site";
-
-export const revalidate = 300;
-
-export const dynamicParams = false;
-
-export async function generateStaticParams() {
-  const services = await listServices();
-  return services.map((service) => ({ slug: service.slug }));
-}
-
-type Props = { params: Promise<{ slug: string }> };
-
-export async function generateMetadata({ params }: Props) {
-  const { slug } = await params;
-  const service = await getService(slug);
-
-  if (!service) return {};
-
-  return pageMetadata({
-    title: service.seo.title,
-    description: service.seo.description,
-    path: `/services/${service.slug}`,
-  });
-}
 
 const schematicVariants = ["loop", "mesh", "layers", "grid", "timeline"] as const;
 
@@ -56,12 +30,8 @@ function serviceSchema(service: Service) {
   };
 }
 
-export default async function ServicePage({ params }: Props) {
-  const { slug } = await params;
-  const service = await getService(slug);
-
-  if (!service) notFound();
-
+/** Shared visual sections; each service has its own explicit route and metadata. */
+export async function ServiceDetailPage({ service }: { service: Service }) {
   const related = await relatedServices(service);
   const variant = schematicVariants[(service.order - 1) % schematicVariants.length];
   const crumbs = [
@@ -77,41 +47,26 @@ export default async function ServicePage({ params }: Props) {
 
       <PageFrame>
         <section className="hero-surface border-b border-ivory/10">
-          <div className="hero-grid" aria-hidden="true" />
-          <div className="hero-vignette" aria-hidden="true" />
 
           <div className="shell relative z-10 py-16 md:py-24">
             <Breadcrumbs items={crumbs} />
 
-            <div className="mt-8 grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
-              <div>
-                <p className="eyebrow text-coral/90">{service.tagline}</p>
-                <h1 className="lift mt-4 max-w-[20ch] font-display text-[clamp(2.1rem,4.2vw,3.5rem)] font-medium leading-[1.02] tracking-[-0.03em] text-ivory">
-                  {service.name}
-                </h1>
-                <p className="mt-6 max-w-[42rem] text-[1.02rem] leading-relaxed text-ivory/68">
-                  {service.summary}
-                </p>
-                <div className="mt-9 flex flex-wrap gap-3">
-                  <Link href="/contact" className="btn-primary text-sm">
-                    Discuss this service
-                    <span aria-hidden="true">→</span>
-                  </Link>
-                  <Link href="/services" className="btn-ghost text-sm">
-                    All services
-                  </Link>
-                </div>
-              </div>
-
-              <div className="flex flex-wrap gap-2 lg:justify-end">
-                {service.outcomes.map((outcome) => (
-                  <span
-                    key={outcome}
-                    className="rounded-full border border-ivory/20 px-4 py-2 text-[0.76rem] text-ivory/70"
-                  >
-                    {outcome}
-                  </span>
-                ))}
+            <div className="mt-8 max-w-[52rem]">
+              <p className="eyebrow text-coral/90">{service.tagline}</p>
+              <h1 className="mt-4 max-w-[20ch] font-display text-[clamp(2.1rem,4.2vw,3.5rem)] font-medium leading-[1.02] tracking-[-0.03em] text-ivory">
+                {service.name}
+              </h1>
+              <p className="mt-6 max-w-[42rem] text-[1.02rem] leading-relaxed text-ivory/68">
+                {service.summary}
+              </p>
+              <div className="mt-9 flex flex-wrap gap-3">
+                <Link href="/contact" className="btn-primary text-sm">
+                  Discuss this service
+                  <span aria-hidden="true">→</span>
+                </Link>
+                <Link href="/services" className="btn-ghost text-sm">
+                  All services
+                </Link>
               </div>
             </div>
           </div>
@@ -140,15 +95,16 @@ export default async function ServicePage({ params }: Props) {
             <div className="space-y-10 lg:sticky lg:top-28">
               <Figure
                 seed={service.figure.seed}
+                layout="portrait"
                 label={service.figure.label}
                 caption={service.figure.caption}
               />
               <div className="rounded-[var(--radius-card)] border border-navy/10 bg-white p-7">
-                <p className="eyebrow text-blue">What changes</p>
+                <p className="eyebrow text-blue">Service outcomes</p>
                 <ul className="mt-5 space-y-3">
                   {service.outcomes.map((outcome) => (
                     <li key={outcome} className="flex items-start gap-3 text-[0.9rem] leading-relaxed text-charcoal/75">
-                      <span aria-hidden="true" className="mt-[0.45rem] h-1.5 w-1.5 shrink-0 rounded-full bg-coral" />
+                      <span aria-hidden="true" className="mt-[0.45rem] h-1.5 w-1.5 shrink-0 rounded-full bg-blue/60" />
                       {outcome}
                     </li>
                   ))}
@@ -162,6 +118,7 @@ export default async function ServicePage({ params }: Props) {
           <div className="shell grid items-center gap-12 lg:grid-cols-[1fr_1.05fr] lg:gap-20">
             <Schematic
               variant={variant}
+              layout="wide"
               label={service.figure.label}
               caption={`How ${service.shortName.toLowerCase()} is structured at Infeara: defined stages, recorded decisions and a clear handover between them.`}
             />
@@ -221,7 +178,7 @@ export default async function ServicePage({ params }: Props) {
                     <p className="mt-2 text-[0.86rem] leading-relaxed text-charcoal/70">{item.tagline}</p>
                     <span
                       aria-hidden="true"
-                      className="mt-5 inline-block text-blue transition-transform duration-300 group-hover:translate-x-1"
+                      className="mt-5 inline-block text-blue transition-colors duration-100 group-hover:text-coral"
                     >
                       →
                     </span>

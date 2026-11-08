@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { PageFrame } from "@/components/site/PageFrame";
 import { PageHero } from "@/components/site/PageHero";
+import { figureImage } from "@/lib/site-images";
 import { CtaBand } from "@/components/site/CtaBand";
 import { SectionHeading } from "@/components/site/SectionHeading";
 import { Figure } from "@/components/site/Figure";
@@ -20,6 +21,7 @@ export default function CareersPage() {
   return (
     <PageFrame>
       <PageHero
+        image={figureImage(8)}
         eyebrow="Careers"
         title="Engineers who like the estate to make sense."
         intro="Infeara is a small, technical company in Chennai. The work is hands-on, documented and judged by whether the environment is more supportable than it was last month."
@@ -150,7 +152,7 @@ export default function CareersPage() {
                 "Ownership of the outcome",
               ].map((item) => (
                 <li key={item} className="flex items-start gap-3 border-t border-navy/10 pt-3 text-[0.9rem] leading-relaxed text-charcoal/75">
-                  <span aria-hidden="true" className="mt-[0.45rem] h-1.5 w-1.5 shrink-0 rounded-full bg-coral" />
+                  <span aria-hidden="true" className="mt-[0.45rem] h-1.5 w-1.5 shrink-0 rounded-full bg-blue/60" />
                   {item}
                 </li>
               ))}
