@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { CtaBand } from "@/components/site/CtaBand";
@@ -13,9 +14,7 @@ import { JourneyStory } from "@/components/site/JourneyStory";
 import { SectionHeading } from "@/components/site/SectionHeading";
 import { ServiceCard } from "@/components/site/ServiceCard";
 import { getInsight, listFaqGroups, listIndustries, listInsights, listServices } from "@/lib/content";
-import { serviceBySlug as seededServiceBySlug } from "@/lib/content/services";
-import { cybersecuritySubservices } from "@/lib/content/cybersecurity-subservices";
-import { coreServiceSlugs, infrastructureSubserviceSlugs } from "@/lib/content/service-taxonomy";
+import { coreServiceSlugs } from "@/lib/content/service-taxonomy";
 import type { Service } from "@/lib/content/types";
 import { pageMetadata } from "@/lib/metadata";
 
@@ -44,30 +43,22 @@ const phases = [
   {
     step: "01",
     title: "Assess",
-    body: "Record the estate, the dependencies and the exposure. Nothing is changed in this phase.",
-    imageSeed: 4,
-    imageLabel: "Initial assessment",
+    body: "We review your IT systems, dependencies, backups and security exposure. You receive a documented baseline before any changes are proposed.",
   },
   {
     step: "02",
     title: "Stabilise",
-    body: "Address the risks that can actually cause an outage, with a rollback position for every change.",
-    imageSeed: 3,
-    imageLabel: "Stabilisation plan",
+    body: "We prioritise risks to availability and security, then agree each change, its timing and a rollback plan.",
   },
   {
     step: "03",
     title: "Operate",
-    body: "Run the environment to an agreed service level, with a named owner and monthly evidence.",
-    imageSeed: 1,
-    imageLabel: "Managed operations",
+    body: "We manage monitoring, patching, backup checks and incident handling against agreed service levels, with regular reporting.",
   },
   {
     step: "04",
     title: "Improve",
-    body: "Turn incidents and open risk into a rolling change plan with owners and dates.",
-    imageSeed: 7,
-    imageLabel: "Improvement review",
+    body: "We review incidents, service data and open risks, then agree practical improvements with owners and due dates.",
   },
 ];
 
@@ -113,9 +104,6 @@ export default async function HomePage() {
       .map((slug) => servicesBySlug.get(slug))
       .filter((service): service is Service => Boolean(service));
   const coreServices = selectServices(coreServiceSlugs);
-  const infrastructureServices = infrastructureSubserviceSlugs
-    .map((slug) => servicesBySlug.get(slug) ?? seededServiceBySlug(slug))
-    .filter((service): service is Service => Boolean(service));
 
   const pick = (group: number, item: number) => groups[group]?.items[item];
   const selectedFaqs = [
@@ -138,8 +126,8 @@ export default async function HomePage() {
         <section className="hero-surface">
 
           <div className="shell relative z-10 flex min-h-[calc(86svh-4.75rem)] flex-col justify-center py-14 sm:py-18 lg:py-24">
-            <div className="grid items-end gap-12 lg:grid-cols-[1.12fr_0.88fr] lg:gap-16">
-              <div>
+            <div className="grid items-stretch gap-12 lg:grid-cols-[1.12fr_0.88fr] lg:gap-16">
+              <div className="flex flex-col justify-center">
                 <div className="flex items-center gap-3">
                   <span className="h-px w-8 bg-coral" aria-hidden="true" />
                   <span className="font-heading text-[11px] uppercase tracking-[0.24em] text-ivory/65">
@@ -174,16 +162,16 @@ export default async function HomePage() {
                 </div>
               </div>
 
-              <div className="lg:pb-1">
-                <Figure
-                  seed={10}
-                  layout="portrait"
-                  preload
-                  label="IT operations · security · infrastructure"
-                  caption="A clear operating standard for the systems your business depends on."
-                  className="home-hero-figure"
-                />
-              </div>
+              <Image
+                src="/site/homepage-hero.jpg"
+                alt="Two IT engineers working together to maintain a business server environment."
+                width={1200}
+                height={675}
+                preload
+                sizes="(min-width: 1280px) 38vw, (min-width: 1024px) 42vw, 100vw"
+                quality={90}
+                className="block h-full min-h-[18rem] w-full object-cover sm:min-h-[22rem] lg:min-h-[24rem]"
+              />
             </div>
 
             <div
@@ -213,89 +201,26 @@ export default async function HomePage() {
             <div className="flex flex-wrap items-end justify-between gap-6">
               <SectionHeading
                 eyebrow="Core services"
-                title="Managed IT, cybersecurity and infrastructure services."
-                intro="Choose managed operations, security assessment, cloud infrastructure, project delivery or automation. Explore focused sub-services for IT operations and cybersecurity."
+                title="Six core services for business technology."
+                intro="Managed IT, Cybersecurity, Cloud & Datacenter, Turnkey Projects, AI Automations and Application Development."
               />
               <Link href="/services" className="btn-outline text-sm">
                 View all services
               </Link>
             </div>
 
-            <div className="mt-12 grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-12">
+            <div className="mt-12 grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
               {coreServices.map((service, index) => (
-                <div
+                <ServiceCard
                   key={service.slug}
-                  className={
-                    index === 3
-                      ? "lg:col-start-2 lg:col-span-2"
-                      : index === 4
-                        ? "lg:col-start-4 lg:col-span-2"
-                        : "lg:col-span-2"
-                  }
-                >
-                  <ServiceCard
-                    service={service}
-                    index={index}
-                    image={coreServiceImages[service.slug as keyof typeof coreServiceImages]}
-                    imageShape="wide"
-                  />
-                </div>
+                  service={service}
+                  index={index}
+                  image={coreServiceImages[service.slug as keyof typeof coreServiceImages]}
+                  imageShape="wide"
+                />
               ))}
             </div>
 
-          </div>
-        </section>
-
-        {/* Specialist sub-services — distinct, high-contrast section */}
-        <section className="bg-navy py-16 text-ivory md:py-20">
-          <div className="shell grid gap-10 lg:grid-cols-[0.72fr_1.28fr] lg:gap-16">
-            <div>
-              <p className="eyebrow text-coral">Specialist sub-services</p>
-              <h2 className="mt-3 max-w-[17ch] font-display text-[clamp(1.65rem,3vw,2.35rem)] font-medium leading-tight tracking-[-0.025em] text-ivory">
-                Focused expertise when you need it.
-              </h2>
-              <p className="mt-4 max-w-[25rem] text-[0.94rem] leading-relaxed text-ivory/70">
-                Explore individual capabilities within Infrastructure and Cybersecurity.
-              </p>
-            </div>
-            <div className="grid gap-10 sm:grid-cols-2 sm:gap-8">
-              <div>
-                <h3 className="border-b border-ivory/30 pb-3 font-heading text-[0.9rem] font-semibold text-ivory">
-                  IT Infrastructure
-                </h3>
-                <ul className="mt-1">
-                  {infrastructureServices.map((service, index) => (
-                    <li key={service.slug} className="border-b border-ivory/15">
-                      <Link
-                        href={`/services/${service.slug}`}
-                        className="group flex items-center justify-between gap-4 py-3.5 text-[0.96rem] text-ivory/80 hover:text-ivory"
-                      >
-                        <span><span className="mr-3 text-[0.68rem] font-semibold text-coral">{String(index + 1).padStart(2, "0")}</span>{service.name}</span>
-                        <span aria-hidden="true" className="text-coral">→</span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div>
-                <h3 className="border-b border-ivory/30 pb-3 font-heading text-[0.9rem] font-semibold text-ivory">
-                  Cybersecurity
-                </h3>
-                <ul className="mt-1">
-                  {cybersecuritySubservices.map((service, index) => (
-                    <li key={service.slug} className="border-b border-ivory/15">
-                      <Link
-                        href={`/services/cybersecurity/${service.slug}`}
-                        className="group flex items-center justify-between gap-4 py-3.5 text-[0.96rem] text-ivory/80 hover:text-ivory"
-                      >
-                        <span><span className="mr-3 text-[0.68rem] font-semibold text-coral">{String(index + 1).padStart(2, "0")}</span>{service.name}</span>
-                        <span aria-hidden="true" className="text-coral">→</span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
           </div>
         </section>
 

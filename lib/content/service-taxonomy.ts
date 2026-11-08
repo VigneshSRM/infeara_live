@@ -7,7 +7,8 @@ export const coreServiceSlugs = [
   "cybersecurity",
   "cloud-datacenter",
   "turnkey-projects",
-  "automation-custom-software",
+  "ai-automations",
+  "application-development",
 ] as const;
 
 export const infrastructureSubserviceSlugs = [

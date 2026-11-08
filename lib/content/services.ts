@@ -543,71 +543,139 @@ export const services: Service[] = [
     },
   },
   {
-    slug: "automation-custom-software",
+    slug: "ai-automations",
     order: 9,
-    name: "Automation & Custom Software",
-    shortName: "Automation & Software",
-    tagline: "Automate the work that repeats.",
+    name: "AI Automations",
+    shortName: "AI Automations",
+    tagline: "Put repeatable work on a reliable path.",
     summary:
-      "Workflow automation, API integration, enterprise dashboards, monitoring automation and custom management portals.",
+      "AI-assisted workflows and process automation for document handling, reporting, service operations and connected business systems.",
     intro:
-      "Automation is worth doing where a process is repetitive, rule-based and currently consuming skilled time. We build the integration, the workflow and the dashboard that removes that work, and we hand over the source.",
+      "We map the process before automating it, then choose where rules-based automation or AI assistance is useful. Workflows include defined permissions, validation, logs, exception handling and human review where a decision needs it.",
     deliverables: [
       {
-        title: "Workflow and process automation",
-        body: "Repetitive approval, provisioning and reporting steps automated with an auditable execution log.",
+        title: "Process and suitability review",
+        body: "Identify repeated tasks, data sources, decision points and failure cases before selecting an automation approach.",
       },
       {
-        title: "API integration",
-        body: "Connection of systems that were never designed to talk, with error handling and retry behaviour defined rather than assumed.",
+        title: "Workflow automation",
+        body: "Route requests, approvals, notifications and routine updates across the systems your team already uses.",
       },
       {
-        title: "Enterprise dashboards",
-        body: "Operational dashboards that show the state of infrastructure, tickets and assets from one place.",
+        title: "AI-assisted information handling",
+        body: "Support document classification, extraction, summarisation and knowledge lookup with validation and human review built into the workflow.",
       },
       {
-        title: "Monitoring automation",
-        body: "Automated checks, enrichment and routing so that alerts arrive with context instead of raw thresholds.",
+        title: "Integrations and controls",
+        body: "Connect approved services through APIs with scoped access, execution logs, retry behaviour and clear exception paths.",
       },
       {
-        title: "Custom management portals",
-        body: "Internal portals for requests, approvals and asset records, built around the process the business actually uses.",
+        title: "Testing and handover",
+        body: "Test normal and failure cases, document the workflow and hand over operating guidance and ownership.",
       },
     ],
     outcomes: [
-      "Repetitive work removed, not documented",
-      "Integrations with defined failure behaviour",
-      "One view of operational state",
-      "Source code handed over",
+      "Less time spent on repetitive process steps",
+      "Clear records of automated actions and exceptions",
+      "Human review retained for decisions that need it",
+      "Documented workflows with defined ownership",
     ],
     faqs: [
       {
-        question: "What should be automated first?",
+        question: "What is AI automation?",
         answer:
-          "The task that is repeated most often, follows a fixed rule, and currently consumes skilled time. Automating a process nobody has defined simply moves the ambiguity into code.",
+          "It combines workflow rules and, where useful, AI assistance to handle repeatable work such as routing requests or extracting information from documents. Each use case is scoped to the process, data and systems involved.",
       },
       {
-        question: "Do we own the software you build?",
+        question: "How do you keep automated workflows reliable?",
         answer:
-          "Yes. Custom software is delivered with source code, deployment instructions and documentation. There is no dependency on us to keep it running.",
+          "We define permissions, test expected and failure cases, record actions and provide exception paths. Human approval stays in place where a decision should not run without review.",
       },
       {
-        question: "Can you integrate with our existing systems?",
+        question: "Do we need a custom AI model?",
         answer:
-          "Where those systems expose an API or a supported data path, yes. Where they do not, the constraint is stated before the project starts rather than discovered during delivery.",
+          "Not necessarily. We first assess whether an approved existing model or rules-based workflow meets the need and data-handling requirements. Custom model work is considered only when there is a clear case for it.",
       },
     ],
-    related: ["managed-it", "cloud-datacenter", "it-infrastructure"],
+    related: ["application-development", "managed-it", "cloud-datacenter"],
     seo: {
-      title: "Automation & Custom Software",
+      title: "AI Automation Services",
       description:
-        "Workflow automation, API integration, enterprise dashboards, monitoring automation and custom management portals.",
+        "Design controlled AI-assisted workflows and business process automation with integrations, human review and documented handover.",
     },
     figure: {
-      seed: 9,
+      seed: 19,
       label: "Automation flow",
       caption:
-        "A workflow with defined failure behaviour: trigger, validate, act, log, and escalate when a step does not complete.",
+        "An AI-assisted workflow with scoped access, validation, a human review point, recorded actions and an exception path.",
+    },
+  },
+  {
+    slug: "application-development",
+    order: 10,
+    name: "Application Development",
+    shortName: "Application Development",
+    tagline: "Build software around the work your team does.",
+    summary:
+      "Custom web applications, internal portals, dashboards and system integrations, delivered with tested code and a clear handover.",
+    intro:
+      "We develop web applications around the people, processes and systems that need to use them. The work covers requirements, interface design, application logic, data and API integration, testing, release and documentation, with security and maintainability considered throughout.",
+    deliverables: [
+      {
+        title: "Requirements and scope",
+        body: "Agree user roles, core workflows, data needs, integrations and acceptance criteria before implementation begins.",
+      },
+      {
+        title: "Web applications and portals",
+        body: "Build internal tools, customer portals, operational dashboards and workflow applications to suit the agreed use case.",
+      },
+      {
+        title: "APIs and data integration",
+        body: "Connect existing systems through supported APIs and data interfaces, with validation and failure behaviour defined.",
+      },
+      {
+        title: "Testing and release",
+        body: "Test key workflows and edge cases, prepare a controlled release and document the deployment and rollback steps.",
+      },
+      {
+        title: "Source code and handover",
+        body: "Provide the agreed source code, setup instructions and technical documentation so the application can be maintained after delivery.",
+      },
+    ],
+    outcomes: [
+      "An application designed for agreed user workflows",
+      "Integrations with documented boundaries and failure handling",
+      "Tested release and deployment instructions",
+      "Source code and documentation for ongoing ownership",
+    ],
+    faqs: [
+      {
+        question: "What types of applications do you build?",
+        answer:
+          "We build web applications such as internal portals, operational dashboards, request and approval tools, and customer-facing interfaces. Scope is based on the users, process and systems involved.",
+      },
+      {
+        question: "Can a new application connect to our existing systems?",
+        answer:
+          "Yes, when the systems expose a supported API or data interface. We confirm access, security and technical constraints during discovery and document them in the agreed scope.",
+      },
+      {
+        question: "Who owns the application after handover?",
+        answer:
+          "The delivery includes the agreed source code and documentation. Hosting, third-party services, maintenance and support are defined separately so ongoing responsibilities are clear.",
+      },
+    ],
+    related: ["ai-automations", "cybersecurity", "cloud-datacenter"],
+    seo: {
+      title: "Custom Application Development Services",
+      description:
+        "Custom web application development for business portals, dashboards and connected workflows, with tested releases and source-code handover.",
+    },
+    figure: {
+      seed: 20,
+      label: "Application workflow",
+      caption:
+        "A custom application moving from user requirements and interface design through integration, testing, release and handover.",
     },
   },
 ];
