@@ -19,11 +19,13 @@ export async function updateLead(formData: FormData) {
   const id = str(formData, "id");
   if (!id) redirect("/admin/leads?error=Missing%20lead%20id.");
 
+  // The single "notes" box is only on the form until the notes chat is switched on.
+  // When it is absent, leave the column alone: a missing field is not an empty note.
+  const changes: { status: LeadStatus; notes?: string | null } = { status: asStatus(str(formData, "status")) };
+  if (formData.has("notes")) changes.notes = str(formData, "notes") || null;
+
   const supabase = await createClient();
-  const { error } = await supabase
-    .from("leads")
-    .update({ status: asStatus(str(formData, "status")), notes: str(formData, "notes") || null })
-    .eq("id", id);
+  const { error } = await supabase.from("leads").update(changes).eq("id", id);
 
   if (error) redirect(`/admin/leads/${id}?error=${encodeURIComponent(friendlyError(error))}`);
 

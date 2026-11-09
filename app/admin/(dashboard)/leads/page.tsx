@@ -5,6 +5,9 @@ import { SchemaNotice } from "@/components/admin/SchemaNotice";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { isMissingSchema } from "@/lib/admin/errors";
 import { istLabel } from "@/lib/admin/forms";
+import { LEAD_STATUSES } from "@/lib/admin/lead-stats";
+import { loadNoteActivity } from "@/lib/admin/lead-notes";
+import { formatAgo, formatCount } from "@/lib/analytics/format";
 import { requireStaff } from "@/lib/auth/dal";
 import { createClient } from "@/lib/supabase/server";
 
@@ -50,10 +53,28 @@ export default async function LeadsPage({
 
   if (filter) query = query.eq("status", filter);
 
-  const { data, error } = await query;
+  // The list and the number on each filter come back together; a failed count just hides that number.
+  const [{ data, error }, allCount, ...statusCounts] = await Promise.all([
+    query,
+    supabase.from("leads").select("id", { count: "exact", head: true }),
+    ...LEAD_STATUSES.map((status) =>
+      supabase.from("leads").select("id", { count: "exact", head: true }).eq("status", status),
+    ),
+  ]);
   if (isMissingSchema(error)) return <SchemaNotice table="leads" />;
 
   const rows = (data ?? []) as Row[];
+  const counts: Record<string, number | null> = {
+    "": allCount.error ? null : (allCount.count ?? 0),
+    ...Object.fromEntries(LEAD_STATUSES.map((status, index) => [status, statusCounts[index].error ? null : (statusCounts[index].count ?? 0)])),
+  };
+
+  // null when the notes table is not there yet: the list then simply has no Notes column.
+  const activity = await loadNoteActivity(
+    supabase,
+    rows.map((row) => row.id),
+  );
+  const nowMs = Date.now();
 
   return (
     <>
@@ -72,23 +93,33 @@ export default async function LeadsPage({
       ) : null}
 
       <nav aria-label="Filter by status" className="mt-5 flex flex-wrap gap-2">
-        {FILTERS.map((item) => (
-          <Link
-            key={item.value || "all"}
-            href={item.value ? `/admin/leads?status=${item.value}` : "/admin/leads"}
-            aria-current={filter === item.value ? "page" : undefined}
-            className={`rounded-sm border px-3 py-1 font-heading text-[0.74rem] transition-colors ${
-              filter === item.value
-                ? "border-navy bg-navy text-ivory"
-                : "border-navy/15 text-charcoal/75 hover:border-navy/35 hover:text-navy"
-            }`}
-          >
-            {item.label}
-          </Link>
-        ))}
+        {FILTERS.map((item) => {
+          const count = counts[item.value];
+          const selected = filter === item.value;
+          return (
+            <Link
+              key={item.value || "all"}
+              href={item.value ? `/admin/leads?status=${item.value}` : "/admin/leads"}
+              aria-current={selected ? "page" : undefined}
+              className={`rounded-sm border px-3 py-1 font-heading text-[0.74rem] transition-colors ${
+                selected
+                  ? "border-navy bg-navy text-ivory"
+                  : "border-navy/15 text-charcoal/75 hover:border-navy/35 hover:text-navy"
+              }`}
+            >
+              {item.label}
+              {count !== null && count !== undefined ? (
+                <>
+                  {/* A real space, so a screen reader says "All 7" and not "All7". */}{" "}
+                  <span className={`tabular-nums ${selected ? "text-ivory/75" : "text-charcoal/55"}`}>{formatCount(count)}</span>
+                </>
+              ) : null}
+            </Link>
+          );
+        })}
       </nav>
 
-      <div className="admin-card mt-4 overflow-hidden">
+      <div className="admin-card mt-4 overflow-x-auto">
         {rows.length ? (
           <table className="w-full text-left text-[0.86rem]">
             <thead className="border-b border-navy/10 bg-ivory/50">
@@ -96,6 +127,7 @@ export default async function LeadsPage({
                 <th className="px-4 py-3 font-medium">Received</th>
                 <th className="px-4 py-3 font-medium">From</th>
                 <th className="px-4 py-3 font-medium">Topic</th>
+                {activity ? <th className="px-4 py-3 font-medium">Notes</th> : null}
                 <th className="px-4 py-3 font-medium">Status</th>
               </tr>
             </thead>
@@ -119,6 +151,24 @@ export default async function LeadsPage({
                     <span className="block text-[0.78rem] text-charcoal/60">{row.topic ?? "General"}</span>
                     <span className="line-clamp-1">{row.message}</span>
                   </td>
+                  {activity ? (
+                    <td className="whitespace-nowrap px-4 py-3 text-[0.78rem]">
+                      {activity.get(row.id) ? (
+                        <Link href={`/admin/leads/${row.id}#notes`} className="block">
+                          <span className="font-heading text-navy">
+                            {activity.get(row.id)!.count} {activity.get(row.id)!.count === 1 ? "note" : "notes"}
+                          </span>
+                          <span className="block text-[0.72rem] text-charcoal/60">
+                            {activity.get(row.id)!.lastBy} · {formatAgo(Date.parse(activity.get(row.id)!.lastAt), nowMs)}
+                          </span>
+                        </Link>
+                      ) : (
+                        <span className="text-charcoal/40" aria-label="No notes">
+                          —
+                        </span>
+                      )}
+                    </td>
+                  ) : null}
                   <td className="px-4 py-3">
                     <StatusBadge status={row.status} />
                   </td>

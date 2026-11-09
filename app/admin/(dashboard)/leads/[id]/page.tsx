@@ -3,10 +3,13 @@ import { notFound } from "next/navigation";
 import { ConfirmButton } from "@/components/admin/ConfirmButton";
 import { Flash } from "@/components/admin/Flash";
 import { SelectField, TextareaField } from "@/components/admin/Field";
+import { LeadChat } from "@/components/admin/LeadChat";
 import { PageHeader } from "@/components/admin/PageHeader";
 import { SchemaNotice } from "@/components/admin/SchemaNotice";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { deleteLead, updateLead } from "@/lib/admin/lead-actions";
+import { isUuid } from "@/lib/admin/lead-chat";
+import { loadThread } from "@/lib/admin/lead-notes";
 import { isMissingSchema } from "@/lib/admin/errors";
 import { istLabel } from "@/lib/admin/forms";
 import { canEdit, requireStaff } from "@/lib/auth/dal";
@@ -48,14 +51,21 @@ export default async function LeadDetailPage({
   const { id } = await params;
   const flash = await searchParams;
 
+  if (!isUuid(id)) notFound();
+
   const supabase = await createClient();
-  const { data, error } = await supabase.from("leads").select("*").eq("id", id).maybeSingle();
+  const [{ data, error }, thread] = await Promise.all([
+    supabase.from("leads").select("*").eq("id", id).maybeSingle(),
+    loadThread(supabase, id),
+  ]);
 
   if (isMissingSchema(error)) return <SchemaNotice table="leads" />;
   if (!data) notFound();
 
   const lead = data as Lead;
   const editable = canEdit(user);
+  // Until the notes migration is applied the old single box keeps working.
+  const legacyNotes = !thread.ok && thread.reason === "missing_schema";
 
   return (
     <>
@@ -84,42 +94,80 @@ export default async function LeadDetailPage({
       ) : null}
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[1.5fr_1fr]">
-        <section className="admin-card p-5">
-          <div className="flex items-center justify-between gap-3">
-            <h2 className="font-display text-lg text-navy">Enquiry</h2>
-            <StatusBadge status={lead.status} />
-          </div>
+        <div className="min-w-0 space-y-6">
+          <section className="admin-card p-5">
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="font-display text-lg text-navy">Enquiry</h2>
+              <StatusBadge status={lead.status} />
+            </div>
 
-          <dl className="mt-4 grid gap-3 sm:grid-cols-2">
-            <Detail label="Name" value={lead.name} />
-            <Detail label="Email" value={lead.email} href={`mailto:${lead.email}`} />
-            <Detail label="Company" value={lead.company ?? "—"} />
-            <Detail label="Phone" value={lead.phone ?? "—"} href={lead.phone ? `tel:${lead.phone}` : undefined} />
-            <Detail label="Topic" value={lead.topic ?? "General"} />
-            <Detail label="Source page" value={lead.source_page ?? "—"} />
-          </dl>
+            <dl className="mt-4 grid gap-3 sm:grid-cols-2">
+              <Detail label="Name" value={lead.name} />
+              <Detail label="Email" value={lead.email} href={`mailto:${lead.email}`} />
+              <Detail label="Company" value={lead.company ?? "—"} />
+              <Detail label="Phone" value={lead.phone ?? "—"} href={lead.phone ? `tel:${lead.phone}` : undefined} />
+              <Detail label="Topic" value={lead.topic ?? "General"} />
+              <Detail label="Source page" value={lead.source_page ?? "—"} />
+            </dl>
 
-          <div className="mt-5 border-t border-navy/10 pt-4">
-            <p className="admin-label">Message</p>
-            <p className="whitespace-pre-line text-[0.9rem] leading-relaxed text-charcoal">{lead.message}</p>
-          </div>
-        </section>
+            <div className="mt-5 border-t border-navy/10 pt-4">
+              <p className="admin-label">Message</p>
+              <p className="whitespace-pre-line text-[0.9rem] leading-relaxed text-charcoal">{lead.message}</p>
+            </div>
+          </section>
+
+          {thread.ok ? (
+            <LeadChat
+              leadId={lead.id}
+              initialNotes={thread.notes}
+              truncated={thread.truncated}
+              currentUserId={user.id}
+              canDelete={user.role === "super_admin"}
+              nowMs={Date.now()}
+            />
+          ) : (
+            <section className="admin-card p-5" role={legacyNotes ? "status" : "alert"}>
+              <h2 className="font-display text-lg text-navy">Internal notes</h2>
+              {legacyNotes ? (
+                <div className="mt-2 space-y-2 text-[0.84rem] leading-relaxed text-charcoal/80">
+                  <p>
+                    The notes chat needs one more database step. Until it is applied, notes stay in the single box on the
+                    right.
+                  </p>
+                  <p>
+                    A super admin runs{" "}
+                    <code className="rounded bg-navy/5 px-1.5 py-0.5 text-[0.78rem]">
+                      supabase/migrations/20261109210000_lead_notes.sql
+                    </code>{" "}
+                    once in the Supabase SQL editor. Existing notes are kept as the first message.
+                  </p>
+                </div>
+              ) : (
+                <p className="mt-2 text-[0.84rem] leading-relaxed text-charcoal/80">
+                  The notes could not be loaded just now. Reload the page in a moment. Nothing has been lost.
+                </p>
+              )}
+            </section>
+          )}
+        </div>
 
         <section className="space-y-6">
           <form action={updateLead} className="admin-card space-y-4 p-5">
             <h2 className="font-display text-lg text-navy">Triage</h2>
             <input type="hidden" name="id" value={lead.id} />
             <SelectField name="status" label="Status" defaultValue={lead.status} options={STATUS_OPTIONS} />
-            <TextareaField
-              name="notes"
-              label="Internal notes"
-              defaultValue={lead.notes}
-              rows={6}
-              hint="Only staff can read this."
-            />
+            {legacyNotes ? (
+              <TextareaField
+                name="notes"
+                label="Internal notes"
+                defaultValue={lead.notes}
+                rows={6}
+                hint="Only staff can read this."
+              />
+            ) : null}
             <div className="flex flex-wrap items-center gap-3">
               <button type="submit" className="admin-btn admin-btn-primary">
-                Save
+                {legacyNotes ? "Save" : "Save status"}
               </button>
               <span className="text-[0.74rem] text-charcoal/60">Updated {istLabel(lead.updated_at)}</span>
             </div>
