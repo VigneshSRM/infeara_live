@@ -20,6 +20,20 @@ export type SiteImageKey =
   | "banking-office"
   | "campus-lab"
   | "client-meeting"
+  | "cloud-ai-data"
+  | "managed-cloud-support"
+  | "cloud-cost-optimization"
+  | "cloud-disaster-recovery"
+  | "cloud-monitoring-management"
+  | "cloud-application-hosting"
+  | "cloud-devops-automation"
+  | "ai-chatbot-development"
+  | "ai-callers-development"
+  | "llm-development"
+  | "it-infrastructure-ai-automations"
+  | "web-application-development"
+  | "website-development"
+  | "mobile-application-development"
   | "cybersecurity-hub"
   | "penetration-testing"
   | "threat-analysis"
@@ -38,28 +52,28 @@ export type SiteImage = { src: string; alt: string };
 
 export const coreServiceImages = {
   "it-infrastructure": {
-    src: "/site/core-it-infrastructure.jpg",
-    alt: "Infrastructure engineer inspecting organized server racks in a modern data center.",
+    src: "/site/service-it-infrastructure.webp",
+    alt: "Infrastructure engineer's hands patching fiber-optic cables into an organized network rack.",
   },
   cybersecurity: {
-    src: "/site/core-cybersecurity.jpg",
-    alt: "Security operations analyst reviewing monitoring dashboards at a workstation.",
+    src: "/site/service-cybersecurity.webp",
+    alt: "Security analyst reviewing monitoring displays at a workstation.",
   },
   "cloud-datacenter": {
-    src: "/site/core-cloud-datacenter.jpg",
-    alt: "Technician checking a server cabinet in a clean, modern data center.",
+    src: "/site/service-cloud-datacenter.webp",
+    alt: "Symmetrical aisle of server racks in a modern data center.",
   },
   "turnkey-projects": {
-    src: "/site/core-turnkey-projects.jpg",
-    alt: "Engineers coordinating a structured network installation in an office.",
+    src: "/site/service-turnkey-projects.webp",
+    alt: "Engineers planning an office network installation over a printed floor plan.",
   },
   "ai-automations": {
-    src: "/site/core-ai-automations.jpg",
-    alt: "Business operations and automation specialists reviewing an AI-assisted workflow.",
+    src: "/site/service-ai-automations.webp",
+    alt: "Operations specialist mapping a workflow beside a laptop.",
   },
   "application-development": {
-    src: "/site/core-application-development.jpg",
-    alt: "Software developers collaborating on a custom web application.",
+    src: "/site/service-application-development.webp",
+    alt: "Software developers reviewing an application prototype together.",
   },
 } satisfies Record<string, SiteImage>;
 
@@ -71,6 +85,62 @@ export const siteImages: Record<SiteImageKey, SiteImage> = {
   "application-development": {
     src: "/site/core-application-development.jpg",
     alt: "Software developers collaborating on a custom web application.",
+  },
+  "cloud-ai-data": {
+    src: "/site/cloud-ai-data.webp",
+    alt: "Data engineer explaining a data-flow sketch beside a laptop.",
+  },
+  "managed-cloud-support": {
+    src: "/site/cloud-managed-support.webp",
+    alt: "Cloud operations engineer reviewing service-health dashboards in an operations room.",
+  },
+  "cloud-cost-optimization": {
+    src: "/site/cloud-cost-optimization.webp",
+    alt: "Notebook, calculator and laptop with abstract resource charts for cloud cost planning.",
+  },
+  "cloud-disaster-recovery": {
+    src: "/site/cloud-disaster-recovery.webp",
+    alt: "Technician verifying a backup storage appliance in a secondary server room.",
+  },
+  "cloud-monitoring-management": {
+    src: "/site/cloud-monitoring.webp",
+    alt: "Operations engineer reviewing cloud service-health screens at a standing desk.",
+  },
+  "cloud-application-hosting": {
+    src: "/site/cloud-app-hosting.webp",
+    alt: "Platform engineer connecting a network appliance on a clean equipment bench.",
+  },
+  "cloud-devops-automation": {
+    src: "/site/cloud-devops-automation.jpg",
+    alt: "Software engineers reviewing a cloud build and release pipeline together.",
+  },
+  "ai-chatbot-development": {
+    src: "/site/subservice-ai-chatbot.webp",
+    alt: "Product designer testing a chatbot interface on a laptop during AI chatbot development.",
+  },
+  "ai-callers-development": {
+    src: "/site/subservice-ai-voice-callers.webp",
+    alt: "Quality specialist wearing a headset while testing a supervised AI voice-caller workflow.",
+  },
+  "llm-development": {
+    src: "/site/subservice-llm-engineering.webp",
+    alt: "Researcher annotating language-model evaluation charts beside a laptop.",
+  },
+  "it-infrastructure-ai-automations": {
+    src: "/site/subservice-infrastructure-automation.webp",
+    alt: "Infrastructure engineer checking a tablet maintenance checklist beside a server rack.",
+  },
+  "web-application-development": {
+    src: "/site/subservice-web-application.webp",
+    alt: "Product team reviewing web application wireframes and a workflow on a laptop.",
+  },
+  "website-development": {
+    src: "/site/subservice-website.webp",
+    alt: "Designer comparing responsive website layouts on a tablet and laptop.",
+  },
+  "mobile-application-development": {
+    src: "/site/subservice-mobile-app.webp",
+    alt: "Hands testing a mobile application prototype on an unbranded smartphone.",
   },
   "operations-centre": {
     src: "/site/noc-monitoring.jpg",
@@ -156,6 +226,20 @@ const figureSeeds: Record<number, SiteImageKey> = {
   8: "client-meeting", // Turnkey Projects
   19: "ai-automations", // AI Automations
   20: "application-development", // Application Development
+  301: "cloud-ai-data",
+  302: "managed-cloud-support",
+  303: "cloud-cost-optimization",
+  304: "cloud-disaster-recovery",
+  305: "cloud-monitoring-management",
+  306: "cloud-application-hosting",
+  307: "cloud-devops-automation",
+  401: "ai-chatbot-development",
+  402: "ai-callers-development",
+  403: "llm-development",
+  404: "it-infrastructure-ai-automations",
+  405: "web-application-development",
+  406: "website-development",
+  407: "mobile-application-development",
   10: "homepage-hero", // Homepage hero
   201: "vulnerability-assessment", // Vulnerability Assessment
   202: "penetration-testing", // Penetration Testing

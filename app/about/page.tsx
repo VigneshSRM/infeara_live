@@ -72,7 +72,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section className="border-y border-navy/10 bg-white py-20 md:py-28">
+      <section className="border-y border-navy/10 bg-ivory py-20 md:py-28">
         <div className="shell">
           <SectionHeading
             eyebrow="Three disciplines"
@@ -127,7 +127,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section className="border-y border-navy/10 bg-white py-20 md:py-28">
+      <section className="border-y border-navy/10 bg-ivory py-20 md:py-28">
         <div className="shell grid gap-12 lg:grid-cols-[1fr_1fr] lg:gap-20">
           <div>
             <SectionHeading
@@ -141,7 +141,7 @@ export default function AboutPage() {
                 { term: "Base", detail: `${company.city}, ${company.region}, ${company.country}` },
                 { term: "Coverage", detail: "Clients across India" },
                 { term: "Hours", detail: company.hours },
-                { term: "Contact", detail: company.email },
+                { term: "Contact", detail: <Link href="/contact" className="underline decoration-navy/20 underline-offset-4 hover:text-blue">Use our enquiry form</Link> },
               ].map((item) => (
                 <div key={item.term} className="grid grid-cols-[7rem_1fr] gap-4 border-t border-navy/10 pt-4">
                   <dt className="font-heading text-[10px] uppercase tracking-[0.18em] text-charcoal/75">{item.term}</dt>

@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useState } from "react";
 import { services } from "@/lib/content/services";
 import { cybersecuritySubservices } from "@/lib/content/cybersecurity-subservices";
+import { cloudSubservices } from "@/lib/content/cloud-subservices";
+import { aiAutomationSubservices, applicationDevelopmentSubservices } from "@/lib/content/product-subservices";
 import { coreServiceSlugs, infrastructureSubserviceSlugs } from "@/lib/content/service-taxonomy";
 
 type Status = "idle" | "submitting" | "success" | "error";
@@ -70,26 +72,20 @@ export function ContactForm() {
       form.reset();
     } catch {
       setStatus("error");
-      setError(
-        "The form could not be delivered. Please email contact@infeara.com directly and we will respond from there.",
-      );
+      setError("We could not submit your enquiry. Please check your connection and try again.");
     }
   }
 
   if (status === "success") {
     return (
-      <div className="rounded-[var(--radius-card)] border border-blue/25 bg-white p-8">
+      <div className="rounded-[var(--radius-card)] border border-blue/25 bg-ivory p-8">
         <p className="eyebrow text-blue">Received</p>
         <h2 className="mt-4 font-display text-[1.7rem] font-medium tracking-[-0.02em] text-navy">
           Thank you — your request is with us.
         </h2>
         <p className="mt-4 text-[0.94rem] leading-relaxed text-charcoal/75">
           We will reply using the email address you provided, normally within one business day. If the
-          matter is urgent, email{" "}
-          <a href="mailto:contact@infeara.com" className="font-medium text-blue underline underline-offset-4">
-            contact@infeara.com
-          </a>
-          .
+          matter is urgent, submit an update through the contact form with the impact and timing.
         </p>
         <Link href="/" className="btn-outline mt-7 text-sm">
           Back to the homepage
@@ -99,7 +95,7 @@ export function ContactForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} noValidate className="rounded-[var(--radius-card)] border border-navy/10 bg-white p-7 md:p-8">
+    <form onSubmit={onSubmit} noValidate className="rounded-[var(--radius-card)] border border-navy/10 bg-ivory p-7 md:p-8">
       <div className="grid gap-5 sm:grid-cols-2">
         <div>
           <label htmlFor="name" className={labelClass}>
@@ -186,6 +182,21 @@ export function ContactForm() {
           </optgroup>
           <optgroup label="Cybersecurity sub-services">
             {cybersecuritySubservices.map((service) => (
+              <option key={service.slug} value={service.name}>{service.name}</option>
+            ))}
+          </optgroup>
+          <optgroup label="Cloud & Datacenter sub-services">
+            {cloudSubservices.map((service) => (
+              <option key={service.slug} value={service.name}>{service.name}</option>
+            ))}
+          </optgroup>
+          <optgroup label="AI Automation sub-services">
+            {aiAutomationSubservices.map((service) => (
+              <option key={service.slug} value={service.name}>{service.name}</option>
+            ))}
+          </optgroup>
+          <optgroup label="Application Development sub-services">
+            {applicationDevelopmentSubservices.map((service) => (
               <option key={service.slug} value={service.name}>{service.name}</option>
             ))}
           </optgroup>

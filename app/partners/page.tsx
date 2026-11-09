@@ -65,7 +65,7 @@ export default function PartnersPage() {
 
           <div className="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
             {ecosystems.map((group) => (
-              <div key={group.title} className="rounded-[var(--radius-card)] border border-navy/10 bg-white p-7">
+              <div key={group.title} className="rounded-[var(--radius-card)] border border-navy/10 bg-ivory p-7">
                 <h3 className="font-heading text-[1.02rem] font-semibold text-navy">{group.title}</h3>
                 <ul className="mt-4 space-y-2">
                   {group.items.map((item) => (
@@ -81,7 +81,7 @@ export default function PartnersPage() {
         </div>
       </section>
 
-      <section className="border-y border-navy/10 bg-white py-20 md:py-28">
+      <section className="border-y border-navy/10 bg-ivory py-20 md:py-28">
         <div className="shell grid items-center gap-12 lg:grid-cols-[1fr_1.05fr] lg:gap-20">
           <div>
             <SectionHeading

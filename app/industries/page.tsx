@@ -49,7 +49,7 @@ export default async function IndustriesPage() {
         </div>
       </section>
 
-      <section className="border-y border-navy/10 bg-white py-20 md:py-28">
+      <section className="border-y border-navy/10 bg-ivory py-20 md:py-28">
         <div className="shell grid items-center gap-12 lg:grid-cols-[1.05fr_1fr] lg:gap-20">
           <Figure
             seed={31}

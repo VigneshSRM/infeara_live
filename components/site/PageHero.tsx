@@ -28,7 +28,7 @@ export function PageHero({ eyebrow, title, intro, crumbs, primary, secondary, im
           ) : null}
 
           <div className={image ? "order-2 lg:order-1" : ""}>
-            <p className="font-heading text-[10px] uppercase tracking-[0.16em] text-coral/90">{eyebrow}</p>
+            <p className="font-heading text-[10px] uppercase tracking-[0.16em] text-ivory/80">{eyebrow}</p>
             <h1 className="mt-4 max-w-[24ch] font-display text-[clamp(2.1rem,4.2vw,3.6rem)] font-bold leading-[1.04] tracking-[-0.035em] text-ivory">
               {title}
             </h1>

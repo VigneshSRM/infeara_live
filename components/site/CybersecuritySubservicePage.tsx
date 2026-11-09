@@ -38,7 +38,7 @@ export function CybersecuritySubservicePage({ service }: { service: Cybersecurit
           <div className="shell relative z-10 py-16 md:py-24">
             <Breadcrumbs items={crumbs} />
             <div className="mt-8 max-w-[52rem]">
-              <p className="eyebrow text-coral/90">{service.tagline}</p>
+              <p className="eyebrow text-ivory/80">{service.tagline}</p>
               <h1 className="mt-4 max-w-[20ch] font-display text-[clamp(2.1rem,4.2vw,3.5rem)] font-medium leading-[1.02] tracking-[-0.03em] text-ivory">
                 {service.name}
               </h1>
@@ -71,7 +71,7 @@ export function CybersecuritySubservicePage({ service }: { service: Cybersecurit
             </div>
             <div className="space-y-8 lg:sticky lg:top-28">
               <Figure seed={service.figure.seed} layout="square" label={service.figure.label} caption={service.figure.caption} />
-              <div className="rounded-[var(--radius-card)] border border-navy/10 bg-white p-7">
+              <div className="rounded-[var(--radius-card)] border border-navy/10 bg-ivory p-7">
                 <p className="eyebrow text-blue">Expected outcomes</p>
                 <ul className="mt-5 space-y-3">
                   {service.outcomes.map((outcome) => (
@@ -86,7 +86,7 @@ export function CybersecuritySubservicePage({ service }: { service: Cybersecurit
           </div>
         </section>
 
-        <section className="border-y border-navy/10 bg-white py-20 md:py-28">
+        <section className="border-y border-navy/10 bg-ivory py-20 md:py-28">
           <div className="shell grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20">
             <SectionHeading eyebrow="Questions" title="What teams ask before we start." intro="Scope, access, authorization and expected outputs are agreed before an engagement begins." />
             <FaqList items={service.faqs} idPrefix={`${service.slug}-faq`} />

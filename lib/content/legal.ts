@@ -29,7 +29,7 @@ export const legalDocuments: LegalDocument[] = [
         heading: "Who is responsible for your data",
         paragraphs: [
           "Infeara Technologies, Chennai, Tamil Nadu, India, is the data fiduciary for personal data collected through this website. For data processed on behalf of a client under a services agreement, the client is the data fiduciary and Infeara acts as a data processor.",
-          "Data protection enquiries can be sent to contact@infeara.com. If a Data Protection Officer is appointed, their details will be published on this page.",
+          "Data protection enquiries can be submitted through the website contact form. If a Data Protection Officer is appointed, their details will be published on this page.",
         ],
       },
       {
@@ -83,13 +83,13 @@ export const legalDocuments: LegalDocument[] = [
         heading: "Your rights",
         paragraphs: [
           "Subject to applicable law, you may request access to your personal data, correction or completion of inaccurate data, erasure, withdrawal of consent, and nomination of another person to exercise your rights in the event of death or incapacity. You may also raise a grievance about our handling of your data.",
-          "Send requests to contact@infeara.com with enough information for us to identify you and the data concerned. We may need to verify your identity before acting. We will respond within the period required by law. If you are not satisfied with our response, you may complain to the Data Protection Board of India.",
+          "Submit requests through the website contact form with enough information for us to identify you and the data concerned. We may need to verify your identity before acting. We will respond within the period required by law. If you are not satisfied with our response, you may complain to the Data Protection Board of India.",
         ],
       },
       {
         heading: "Children",
         paragraphs: [
-          "This website is intended for business users and is not directed at children. We do not knowingly collect personal data of children. If you believe a child has provided data, contact us and we will delete it.",
+          "This website is intended for business users and is not directed at children. We do not knowingly collect personal data of children. If you believe a child has provided data, submit a request through the website contact form and we will review it.",
         ],
       },
       {
@@ -220,7 +220,7 @@ export const legalDocuments: LegalDocument[] = [
       {
         heading: "Changes and contact",
         paragraphs: [
-          "We may update this policy when the cookies we use change or the law requires it. The revision date at the top of the page will change. Questions about cookies or personal data can be sent to contact@infeara.com.",
+          "We may update this policy when the cookies we use change or the law requires it. The revision date at the top of the page will change. Questions about cookies or personal data can be submitted through the website contact form.",
         ],
       },
     ],

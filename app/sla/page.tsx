@@ -81,7 +81,7 @@ export default function SlaPage() {
         </div>
       </section>
 
-      <section className="border-y border-navy/10 bg-white py-20 md:py-28">
+      <section className="border-y border-navy/10 bg-ivory py-20 md:py-28">
         <div className="shell">
           <SectionHeading
             eyebrow="Severity"
@@ -160,7 +160,7 @@ export default function SlaPage() {
         </div>
       </section>
 
-      <section className="border-y border-navy/10 bg-white py-20 md:py-28">
+      <section className="border-y border-navy/10 bg-ivory py-20 md:py-28">
         <div className="shell grid items-center gap-12 lg:grid-cols-[1.05fr_1fr] lg:gap-20">
           <Figure
             seed={111}
@@ -237,16 +237,12 @@ export default function SlaPage() {
         </div>
       </section>
 
-      <section className="border-t border-navy/10 bg-white py-16 md:py-20">
+      <section className="border-t border-navy/10 bg-ivory py-16 md:py-20">
         <div className="shell flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="eyebrow text-blue">Raise an issue</p>
             <p className="mt-3 max-w-[38rem] text-[0.95rem] leading-relaxed text-charcoal/75">
-              Existing clients should use the agreed support channel. For a new enquiry, email{" "}
-              <a href={`mailto:${company.email}`} className="font-medium text-blue underline decoration-blue/30 underline-offset-4">
-                {company.email}
-              </a>
-              .
+              Existing clients should use the agreed support channel. For a new enquiry, use the contact form.
             </p>
           </div>
           <Link href="/contact" className="btn-solid shrink-0 text-sm">

@@ -66,16 +66,14 @@ export function ApplicationForm({ defaultRole }: { defaultRole?: string }) {
       setStatus("success");
       form.reset();
     } catch {
-      setError(
-        "The application could not be delivered. Please email careers@infeara.com directly and we will respond from there.",
-      );
+      setError("We could not submit your application. Please check your connection and try again.");
       setStatus("error");
     }
   }
 
   if (status === "success") {
     return (
-      <div className="rounded-[var(--radius-card)] border border-blue/25 bg-white p-8">
+      <div className="rounded-[var(--radius-card)] border border-blue/25 bg-ivory p-8">
         <p className="eyebrow text-blue">Application received</p>
         <h2 className="mt-4 font-display text-[1.7rem] font-medium tracking-[-0.02em] text-navy">
           Thank you — we have your details.
@@ -95,7 +93,7 @@ export function ApplicationForm({ defaultRole }: { defaultRole?: string }) {
     <form
       onSubmit={onSubmit}
       noValidate
-      className="rounded-[var(--radius-card)] border border-navy/10 bg-white p-7 md:p-8"
+      className="rounded-[var(--radius-card)] border border-navy/10 bg-ivory p-7 md:p-8"
     >
       <div className="grid gap-5 sm:grid-cols-2">
         <div>

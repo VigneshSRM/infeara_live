@@ -146,7 +146,7 @@ export default async function LegalPage({ params }: Props) {
               </section>
             ))}
 
-            <div className="mt-14 rounded-[var(--radius-card)] border border-navy/10 bg-white p-7">
+            <div className="mt-14 rounded-[var(--radius-card)] border border-navy/10 bg-ivory p-7">
               <p className="eyebrow text-blue">Document control</p>
               <dl className="mt-5 grid gap-5 sm:grid-cols-3">
                 <div>
@@ -164,18 +164,15 @@ export default async function LegalPage({ params }: Props) {
               </dl>
               <p className="mt-5 border-t border-navy/10 pt-4 text-[0.82rem] leading-relaxed text-charcoal/75">
                 This document is reviewed when our practices, our providers or applicable law change.
-                Questions can be sent to{" "}
-                <a href="mailto:contact@infeara.com" className="underline underline-offset-4">
-                  contact@infeara.com
-                </a>
-                .
+                Questions can be submitted through the{" "}
+                <Link href="/contact" className="underline underline-offset-4">contact form</Link>.
               </p>
             </div>
           </article>
         </div>
       </section>
 
-      <section className="border-t border-navy/10 bg-white py-20 md:py-24">
+      <section className="border-t border-navy/10 bg-ivory py-20 md:py-24">
         <div className="shell grid items-center gap-12 lg:grid-cols-[1fr_1.05fr] lg:gap-20">
           <div>
             <SectionHeading

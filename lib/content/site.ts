@@ -6,8 +6,6 @@ export const company = {
   country: "India",
   description:
     "Managed IT services, cybersecurity and infrastructure support for organisations across India, delivered from Chennai by Infeara Technologies.",
-  // Seed contact details. Replace through the CMS before the site is indexed.
-  email: "contact@infeara.com",
   hours: "Monday to Saturday, 09:00–18:00 IST",
 } as const;
 
@@ -48,10 +46,39 @@ export const nav = [
           { label: "Threat Analysis", href: "/services/cybersecurity/threat-analysis" },
         ],
       },
-      { label: "Cloud & Datacenter", href: "/services/cloud-datacenter" },
+      {
+        label: "Cloud & Datacenter",
+        href: "/services/cloud-datacenter",
+        children: [
+          { label: "Cloud AI & Data Services", href: "/services/cloud-datacenter/cloud-ai-data-services" },
+          { label: "Managed Cloud Support Services (MSP)", href: "/services/cloud-datacenter/managed-cloud-support-msp" },
+          { label: "Cloud Cost Optimization & Consulting", href: "/services/cloud-datacenter/cloud-cost-optimization" },
+          { label: "Cloud Disaster Recovery & Business Continuity", href: "/services/cloud-datacenter/cloud-disaster-recovery-business-continuity" },
+          { label: "Cloud Monitoring & Management", href: "/services/cloud-datacenter/cloud-monitoring-management" },
+          { label: "Cloud Application Hosting", href: "/services/cloud-datacenter/cloud-application-hosting" },
+          { label: "Cloud DevOps & Automation", href: "/services/cloud-datacenter/cloud-devops-automation" },
+        ],
+      },
       { label: "Turnkey Projects", href: "/services/turnkey-projects" },
-      { label: "AI Automations", href: "/services/ai-automations" },
-      { label: "Application Development", href: "/services/application-development" },
+      {
+        label: "AI Automations",
+        href: "/services/ai-automations",
+        children: [
+          { label: "AI ChatBot Development", href: "/services/ai-automations/ai-chatbot-development" },
+          { label: "AI Callers Development", href: "/services/ai-automations/ai-callers-development" },
+          { label: "LLM Development", href: "/services/ai-automations/llm-development" },
+          { label: "IT Infrastructure AI Automations", href: "/services/ai-automations/it-infrastructure-ai-automations" },
+        ],
+      },
+      {
+        label: "Application Development",
+        href: "/services/application-development",
+        children: [
+          { label: "Web Application Development", href: "/services/application-development/web-application-development" },
+          { label: "Website Development", href: "/services/application-development/website-development" },
+          { label: "Mobile Application Development", href: "/services/application-development/mobile-application-development" },
+        ],
+      },
     ],
   },
   {

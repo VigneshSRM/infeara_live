@@ -90,7 +90,7 @@ export default async function InsightPage({ params }: Props) {
           <div className="shell relative z-10 py-16 md:py-24">
             <Breadcrumbs items={crumbs} />
 
-            <p className="mt-8 inline-flex rounded-sm border border-ivory/20 bg-ivory/5 px-3 py-1 font-heading text-[10px] font-semibold uppercase tracking-[0.14em] text-coral/90">
+            <p className="mt-8 inline-flex rounded-sm border border-ivory/20 bg-ivory/5 px-3 py-1 font-heading text-[10px] font-semibold uppercase tracking-[0.14em] text-ivory/80">
               {insight.category} guide
             </p>
 
@@ -131,7 +131,7 @@ export default async function InsightPage({ params }: Props) {
                 </section>
               ))}
 
-              <div className="mt-14 rounded-[var(--radius-card)] border border-navy/10 bg-white p-7">
+              <div className="mt-14 rounded-[var(--radius-card)] border border-navy/10 bg-ivory p-7">
                 <p className="eyebrow text-blue">Related service</p>
                 <p className="mt-3 text-[0.94rem] leading-relaxed text-charcoal/75">
                   This guide sits inside our managed IT and infrastructure practice. If it describes
@@ -166,7 +166,7 @@ export default async function InsightPage({ params }: Props) {
         </article>
 
         {related.length > 0 ? (
-          <section className="border-t border-navy/10 bg-white py-20 md:py-24">
+          <section className="border-t border-navy/10 bg-ivory py-20 md:py-24">
             <div className="shell">
               <SectionHeading eyebrow="Related resources" title="More guidance for your team." />
               <div className="mt-10 grid gap-5 md:grid-cols-2">
