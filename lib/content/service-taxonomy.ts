@@ -1,6 +1,6 @@
 /**
- * Public service hierarchy. IT Infrastructure and Cybersecurity are core
- * practices with focused sub-services. The other core practices stand alone.
+ * Public service hierarchy. IT Infrastructure, Cybersecurity, Cloud & Datacenter,
+ * AI Automations and Application Development have focused sub-services.
  */
 export const coreServiceSlugs = [
   "it-infrastructure",
@@ -33,4 +33,17 @@ export const cloudSubserviceSlugs = [
   "cloud-monitoring-management",
   "cloud-application-hosting",
   "cloud-devops-automation",
+] as const;
+
+export const aiAutomationSubserviceSlugs = [
+  "ai-chatbot-development",
+  "ai-callers-development",
+  "llm-development",
+  "it-infrastructure-ai-automations",
+] as const;
+
+export const applicationDevelopmentSubserviceSlugs = [
+  "web-application-development",
+  "website-development",
+  "mobile-application-development",
 ] as const;

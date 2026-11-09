@@ -9,6 +9,7 @@ import { listServices } from "@/lib/content";
 import { figureImage } from "@/lib/site-images";
 import { cybersecuritySubservices } from "@/lib/content/cybersecurity-subservices";
 import { cloudSubservices } from "@/lib/content/cloud-subservices";
+import { aiAutomationSubservices, applicationDevelopmentSubservices } from "@/lib/content/product-subservices";
 import { coreServiceSlugs, infrastructureSubserviceSlugs } from "@/lib/content/service-taxonomy";
 import { SubserviceCard } from "@/components/site/SubserviceCard";
 import type { Service } from "@/lib/content/types";
@@ -55,7 +56,7 @@ export default async function ServicesPage() {
         image={figureImage(5)}
         eyebrow="Services"
         title="Managed IT, cybersecurity and infrastructure services."
-        intro="Six core services cover IT operations, cybersecurity, cloud and datacenter, turnkey projects, AI automations and application development. IT Infrastructure, Cybersecurity and Cloud & Datacenter link to focused specialist services below."
+        intro="Six core services cover IT operations, cybersecurity, cloud and datacenter, turnkey projects, AI automations and application development. IT Infrastructure, Cybersecurity, Cloud & Datacenter, AI Automations and Application Development link to focused specialist services below."
         crumbs={[{ label: "Services", href: "/services" }]}
         primary={{ label: "Talk to an expert", href: "/contact" }}
         secondary={{ label: "See our approach", href: "/approach" }}
@@ -108,6 +109,36 @@ export default async function ServicesPage() {
                 summary={service.summary}
                 index={index}
               />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="border-y border-navy/10 bg-white py-20 md:py-28">
+        <div className="shell">
+          <SectionHeading
+            eyebrow="AI Automation sub-services"
+            title="AI capabilities for conversation, knowledge and operations."
+            intro="Explore chatbot and voice experiences, LLM engineering and AI-assisted infrastructure automation. Each capability is scoped with suitable safety, review and operating controls."
+          />
+          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {aiAutomationSubservices.map((service, index) => (
+              <SubserviceCard key={service.slug} href={`${service.parentHref}/${service.slug}`} title={service.name} summary={service.summary} index={index} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="border-y border-navy/10 bg-ivory py-20 md:py-28">
+        <div className="shell">
+          <SectionHeading
+            eyebrow="Application Development sub-services"
+            title="Digital products for web, content and mobile."
+            intro="Choose custom web applications, a content-led business website or a mobile application, with distinct discovery, engineering and release plans."
+          />
+          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {applicationDevelopmentSubservices.map((service, index) => (
+              <SubserviceCard key={service.slug} href={`${service.parentHref}/${service.slug}`} title={service.name} summary={service.summary} index={index} />
             ))}
           </div>
         </div>

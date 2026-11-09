@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { listIndustries, listInsights, listServices } from "@/lib/content";
 import { cybersecuritySubservices } from "@/lib/content/cybersecurity-subservices";
 import { cloudSubservices } from "@/lib/content/cloud-subservices";
+import { productSubservices } from "@/lib/content/product-subservices";
 import { legalDocuments } from "@/lib/content/legal";
 import { SITE_INDEXABLE, SITE_URL } from "@/lib/site";
 
@@ -59,6 +60,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
+  const productSubserviceRoutes = productSubservices.map((service) => ({
+    url: `${SITE_URL}${service.parentHref}/${service.slug}`,
+    lastModified,
+    changeFrequency: "monthly" as const,
+    priority: 0.7,
+  }));
+
   const industryRoutes = industries.map((industry) => ({
     url: `${SITE_URL}/industries/${industry.slug}`,
     lastModified,
@@ -90,6 +98,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...serviceRoutes,
     ...cybersecurityRoutes,
     ...cloudRoutes,
+    ...productSubserviceRoutes,
     ...industryRoutes,
     ...insightRoutes,
     ...legalRoutes,

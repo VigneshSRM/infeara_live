@@ -27,6 +27,13 @@ export type SiteImageKey =
   | "cloud-monitoring-management"
   | "cloud-application-hosting"
   | "cloud-devops-automation"
+  | "ai-chatbot-development"
+  | "ai-callers-development"
+  | "llm-development"
+  | "it-infrastructure-ai-automations"
+  | "web-application-development"
+  | "website-development"
+  | "mobile-application-development"
   | "cybersecurity-hub"
   | "penetration-testing"
   | "threat-analysis"
@@ -106,6 +113,34 @@ export const siteImages: Record<SiteImageKey, SiteImage> = {
   "cloud-devops-automation": {
     src: "/site/cloud-devops-automation.jpg",
     alt: "Software engineers reviewing a cloud build and release pipeline together.",
+  },
+  "ai-chatbot-development": {
+    src: "/site/ai-chatbot-development.jpg",
+    alt: "Product and AI specialists reviewing a chatbot conversation and intent flow.",
+  },
+  "ai-callers-development": {
+    src: "/site/ai-callers-development.jpg",
+    alt: "A voice AI engineer testing a caller workflow with a teammate.",
+  },
+  "llm-development": {
+    src: "/site/llm-development.jpg",
+    alt: "Machine learning engineers comparing language model evaluation results.",
+  },
+  "it-infrastructure-ai-automations": {
+    src: "/site/it-infrastructure-ai-automations.jpg",
+    alt: "Infrastructure engineers reviewing an AI-assisted operations workflow beside server racks.",
+  },
+  "web-application-development": {
+    src: "/site/web-application-development.jpg",
+    alt: "Web engineers collaborating on application interface and service design.",
+  },
+  "website-development": {
+    src: "/site/website-development.jpg",
+    alt: "A designer and content strategist reviewing a responsive website layout.",
+  },
+  "mobile-application-development": {
+    src: "/site/mobile-application-development.jpg",
+    alt: "A mobile product team testing an application prototype on a smartphone.",
   },
   "operations-centre": {
     src: "/site/noc-monitoring.jpg",
@@ -198,6 +233,13 @@ const figureSeeds: Record<number, SiteImageKey> = {
   305: "cloud-monitoring-management",
   306: "cloud-application-hosting",
   307: "cloud-devops-automation",
+  401: "ai-chatbot-development",
+  402: "ai-callers-development",
+  403: "llm-development",
+  404: "it-infrastructure-ai-automations",
+  405: "web-application-development",
+  406: "website-development",
+  407: "mobile-application-development",
   10: "homepage-hero", // Homepage hero
   201: "vulnerability-assessment", // Vulnerability Assessment
   202: "penetration-testing", // Penetration Testing

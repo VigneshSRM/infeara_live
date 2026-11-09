@@ -549,7 +549,7 @@ export const services: Service[] = [
     shortName: "AI Automations",
     tagline: "Put repeatable work on a reliable path.",
     summary:
-      "AI-assisted workflows and process automation for document handling, reporting, service operations and connected business systems.",
+      "AI chatbot and caller development, LLM engineering and controlled IT infrastructure automations for connected business workflows.",
     intro:
       "We map the process before automating it, then choose where rules-based automation or AI assistance is useful. Workflows include defined permissions, validation, logs, exception handling and human review where a decision needs it.",
     deliverables: [
@@ -601,7 +601,7 @@ export const services: Service[] = [
     seo: {
       title: "AI Automation Services",
       description:
-        "Design controlled AI-assisted workflows and business process automation with integrations, human review and documented handover.",
+        "AI chatbot and caller development, LLM engineering and infrastructure automation with integrations, human review and documented handover.",
     },
     figure: {
       seed: 19,
@@ -617,7 +617,7 @@ export const services: Service[] = [
     shortName: "Application Development",
     tagline: "Build software around the work your team does.",
     summary:
-      "Custom web applications, internal portals, dashboards and system integrations, delivered with tested code and a clear handover.",
+      "Custom web applications, business websites and mobile apps, delivered with tested code, connected systems and a clear handover.",
     intro:
       "We develop web applications around the people, processes and systems that need to use them. The work covers requirements, interface design, application logic, data and API integration, testing, release and documentation, with security and maintainability considered throughout.",
     deliverables: [
@@ -669,7 +669,7 @@ export const services: Service[] = [
     seo: {
       title: "Custom Application Development Services",
       description:
-        "Custom web application development for business portals, dashboards and connected workflows, with tested releases and source-code handover.",
+        "Web application, website and mobile application development for connected business workflows, with tested releases and source-code handover.",
     },
     figure: {
       seed: 20,

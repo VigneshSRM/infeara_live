@@ -62,8 +62,25 @@ export const nav = [
         ],
       },
       { label: "Turnkey Projects", href: "/services/turnkey-projects" },
-      { label: "AI Automations", href: "/services/ai-automations" },
-      { label: "Application Development", href: "/services/application-development" },
+      {
+        label: "AI Automations",
+        href: "/services/ai-automations",
+        children: [
+          { label: "AI ChatBot Development", href: "/services/ai-automations/ai-chatbot-development" },
+          { label: "AI Callers Development", href: "/services/ai-automations/ai-callers-development" },
+          { label: "LLM Development", href: "/services/ai-automations/llm-development" },
+          { label: "IT Infrastructure AI Automations", href: "/services/ai-automations/it-infrastructure-ai-automations" },
+        ],
+      },
+      {
+        label: "Application Development",
+        href: "/services/application-development",
+        children: [
+          { label: "Web Application Development", href: "/services/application-development/web-application-development" },
+          { label: "Website Development", href: "/services/application-development/website-development" },
+          { label: "Mobile Application Development", href: "/services/application-development/mobile-application-development" },
+        ],
+      },
     ],
   },
   {
