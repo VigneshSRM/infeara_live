@@ -184,8 +184,41 @@ There are two ways to add a colleague, both under `/admin/users`:
   `SUPABASE_SERVICE_ROLE_KEY`.
 
 Both paths require the service key. Without it, create the account in the Supabase dashboard
-under **Authentication → Users** and assign the role in `/admin/users`. Because there is no
-reliable reset email, `/admin/account` is also the supported way to rotate a password.
+under **Authentication → Users** and assign the role in `/admin/users`. Staff who know their
+password can change it at `/admin/account`; staff who have forgotten it use the reset page
+below.
+
+### Password reset
+
+`/admin/reset-password` is the one page for a forgotten password. The sign-in page links to it
+("Forgot password?"), and like `/admin/login` it is reachable without a session.
+
+1. The person enters their email address and Supabase emails a link back to the same page. The
+   page gives the same answer whether or not the address has an account.
+2. The link opens a "Choose a new password" form (12 characters minimum, entered twice).
+   Saving signs them in, signs out every other session on the account, and opens `/admin`.
+
+It needs working SMTP, for the same reason as invitations (the built-in sender is rate-limited
+and unreliable). It does not need `SUPABASE_SERVICE_ROLE_KEY`.
+
+**One-time setup** in the Supabase dashboard, under **Authentication → URL Configuration**: add
+`https://<your-domain>/admin/reset-password` to **Redirect URLs**, once for each origin that
+serves the CMS (production, any preview domain you test on, `http://localhost:3000`). An address
+that is not listed is ignored and Supabase sends the link to the **Site URL** instead.
+
+**Which browser opens the link.** Supabase's default "Reset Password" email uses PKCE, so the
+link only works in the browser that requested it. Opened on another device, or after clearing
+cookies, the page says so and offers a new request. To make the link work anywhere, set the
+**Reset Password** template under **Authentication → Emails** to link to:
+
+```text
+{{ .SiteURL }}/admin/reset-password#token_hash={{ .TokenHash }}&type=recovery
+```
+
+`{{ .SiteURL }}` is the Site URL in Supabase, not this app's `SITE_URL` variable, so the link
+always opens that origin. The token sits in the URL fragment, which keeps it out of server logs
+and `Referer` headers, and a mail scanner that only fetches the link does not use it up.
+`?token_hash=…&type=recovery` in the query string works as well.
 
 ### Troubleshooting the Supabase dashboard
 

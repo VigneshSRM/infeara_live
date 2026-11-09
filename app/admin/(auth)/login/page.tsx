@@ -95,6 +95,11 @@ function LoginShell({ notice, disabled = false }: { notice?: string; disabled?: 
                 disabled={disabled}
                 className="admin-input"
               />
+              <p className="mt-2 text-right text-[0.78rem]">
+                <Link href="/admin/reset-password" className="text-charcoal/70 underline underline-offset-4 hover:text-navy">
+                  Forgot password?
+                </Link>
+              </p>
             </div>
             <button type="submit" className="admin-btn admin-btn-primary w-full" disabled={disabled}>
               Sign in
@@ -102,8 +107,8 @@ function LoginShell({ notice, disabled = false }: { notice?: string; disabled?: 
           </form>
 
           <p className="mt-6 text-[0.78rem] leading-relaxed text-charcoal/70">
-            Password resets are handled by a super admin. If you have just been invited, confirm your
-            email first, then sign in.
+            If the reset email does not arrive, ask a super admin. If you have just been invited,
+            confirm your email first, then sign in.
           </p>
           <p className="mt-3 text-[0.78rem] text-charcoal/70">
             <Link href="/" className="underline underline-offset-4 hover:text-navy">

@@ -1,7 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/proxy";
 
-const PUBLIC_ADMIN_PATHS = ["/admin/login", "/admin/accept-invite"];
+// Admin pages a visitor without a session has to be able to open.
+const PUBLIC_ADMIN_PATHS = ["/admin/login", "/admin/accept-invite", "/admin/reset-password"];
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
