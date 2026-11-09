@@ -4,7 +4,6 @@ import { getService } from "@/lib/content";
 import { pageMetadata } from "@/lib/metadata";
 import { cloudSubservices } from "@/lib/content/cloud-subservices";
 import { SubserviceCard } from "@/components/site/SubserviceCard";
-import { figureImage } from "@/lib/site-images";
 import { SectionHeading } from "@/components/site/SectionHeading";
 
 export const revalidate = 300;
@@ -43,7 +42,6 @@ export default async function CloudDatacenterServicePage() {
                 title={subservice.name}
                 summary={subservice.summary}
                 index={index}
-                image={figureImage(subservice.figure.seed)}
               />
             ))}
           </div>

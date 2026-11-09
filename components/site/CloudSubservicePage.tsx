@@ -8,7 +8,6 @@ import { PageFrame } from "@/components/site/PageFrame";
 import { SectionHeading } from "@/components/site/SectionHeading";
 import { SubserviceCard } from "@/components/site/SubserviceCard";
 import { cloudSubservices, type CloudSubservice } from "@/lib/content/cloud-subservices";
-import { figureImage } from "@/lib/site-images";
 import { SITE_URL } from "@/lib/site";
 
 export function CloudSubservicePage({ service }: { service: CloudSubservice }) {
@@ -70,13 +69,12 @@ export function CloudSubservicePage({ service }: { service: CloudSubservice }) {
                 ))}
               </div>
             </div>
-            <div className="space-y-8 lg:sticky lg:top-28">
-              <div className="rounded-[var(--radius-card)] border border-navy/10 bg-white p-6 md:p-8">
-                <p className="eyebrow text-blue">Expected outcomes</p>
-                <ul className="mt-5 space-y-3">{service.outcomes.map((outcome) => <li key={outcome} className="flex items-start gap-3 text-[0.9rem] leading-relaxed text-charcoal/75"><span aria-hidden="true" className="mt-[0.45rem] h-1.5 w-1.5 shrink-0 rounded-full bg-blue/60" />{outcome}</li>)}</ul>
+              <div className="lg:sticky lg:top-28">
+                <div className="rounded-[var(--radius-card)] border border-navy/10 bg-white p-6 md:p-8">
+                  <p className="eyebrow text-blue">Expected outcomes</p>
+                  <ul className="mt-5 space-y-3">{service.outcomes.map((outcome) => <li key={outcome} className="flex items-start gap-3 text-[0.9rem] leading-relaxed text-charcoal/75"><span aria-hidden="true" className="mt-[0.45rem] h-1.5 w-1.5 shrink-0 rounded-full bg-blue/60" />{outcome}</li>)}</ul>
+                </div>
               </div>
-              <Figure seed={service.figure.seed} layout="square" label={service.figure.label} caption={service.figure.caption} />
-            </div>
           </div>
         </section>
 
@@ -101,7 +99,7 @@ export function CloudSubservicePage({ service }: { service: CloudSubservice }) {
           <div className="shell">
             <SectionHeading eyebrow="Related cloud services" title="Connected capabilities, one cloud plan." intro="Explore adjacent areas that can be combined where your environment needs a joined-up approach." />
             <div className="mt-9 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {related.map((item, index) => <SubserviceCard key={item.slug} href={`/services/cloud-datacenter/${item.slug}`} title={item.name} summary={item.summary} index={index} image={figureImage(item.figure.seed)} />)}
+              {related.map((item, index) => <SubserviceCard key={item.slug} href={`/services/cloud-datacenter/${item.slug}`} title={item.name} summary={item.summary} index={index} />)}
             </div>
           </div>
         </section>

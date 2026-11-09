@@ -107,7 +107,6 @@ export default async function ServicesPage() {
                 title={service.name}
                 summary={service.summary}
                 index={index}
-                image={figureImage(service.figure.seed)}
               />
             ))}
           </div>
