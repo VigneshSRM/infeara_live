@@ -89,6 +89,23 @@ test("admin dashboard pages redirect signed-out visitors to login", async () => 
   }
 });
 
+test("admin password reset page opens without a session and stays out of search indexes", async () => {
+  const response = await fetch(`${baseURL}/admin/reset-password`, { redirect: "manual" });
+  assert.equal(response.status, 200, "the reset page must not redirect signed-out visitors to login");
+  const body = await response.text();
+  assert.match(body, /<meta name="robots" content="[^"]*noindex/);
+  assert.match(body, /<meta name="referrer" content="no-referrer"/);
+  assert.match(body, /Reset your password/);
+});
+
+test("only the exact password reset path is public under /admin", async () => {
+  for (const path of ["/admin/reset-password/extra", "/admin/reset-passwordx"]) {
+    const response = await fetch(`${baseURL}${path}`, { redirect: "manual" });
+    assert.ok([307, 308].includes(response.status), `${path} should redirect, got ${response.status}`);
+    assert.match(response.headers.get("location") ?? "", /\/admin\/login/);
+  }
+});
+
 test("retired public login route stays gone and contains no mailbox", async () => {
   const response = await fetch(`${baseURL}/login`);
   const body = (await response.text()).toLowerCase();

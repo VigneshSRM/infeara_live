@@ -44,6 +44,23 @@ test("admin login shows a safe setup state when Supabase is not configured", asy
   await expect(page.getByRole("button", { name: "Sign in" })).toBeDisabled();
 });
 
+test("admin login links to the password reset page, which opens without a session", async ({ page }) => {
+  await page.goto("/admin/login");
+  await page.getByRole("link", { name: "Forgot password?" }).click();
+  await expect(page).toHaveURL(/\/admin\/reset-password$/);
+  await expect(page.getByRole("heading", { name: "Reset your password" })).toBeVisible();
+  await expect(page.getByLabel("Email")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Back to sign in" })).toBeVisible();
+});
+
+test("password reset shows a safe setup state when Supabase is not configured", async ({ page }) => {
+  test.skip(Boolean(process.env.PLAYWRIGHT_BASE_URL), "This check targets the isolated local test server.");
+  await page.goto("/admin/reset-password");
+  await expect(page.getByText("Supabase is not configured for this environment.")).toBeVisible();
+  await expect(page.getByLabel("Email")).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Send reset link" })).toBeDisabled();
+});
+
 async function signIn(page: Page, email: string, password: string) {
   await page.goto("/admin/login");
   await page.getByLabel("Email").fill(email);
