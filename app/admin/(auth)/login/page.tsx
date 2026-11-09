@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { signIn } from "@/lib/admin/auth-actions";
+import { signIn, signOut } from "@/lib/admin/auth-actions";
 import { Logo } from "@/components/brand/Logo";
-import { getStaffUser } from "@/lib/auth/dal";
+import { getStaffAccess, type StaffAccess } from "@/lib/auth/dal";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 
 export const dynamic = "force-dynamic";
@@ -13,6 +13,32 @@ const messages: Record<string, string> = {
   config: "Supabase is not configured for this environment.",
 };
 
+/**
+ * A signed-in account the CMS will not open for. The sign-in itself worked, so
+ * the copy says what is missing rather than repeating the form with nothing
+ * said. Fixed text only: nothing from the database or the URL is echoed.
+ */
+type Blocked = Extract<StaffAccess, { status: "no_role" | "lookup_failed" }>;
+
+const blockedCopy = {
+  no_role: {
+    title: "You are signed in, but this account has no CMS role yet",
+    body: "Your password worked, but only accounts with a staff role can open the CMS. A super admin can assign one under Users. Setting up the first super admin? The README has the steps.",
+  },
+  permission: {
+    title: "You are signed in, but the database blocked the staff lookup",
+    body: "Your password worked. Supabase answered \"permission denied\" when the CMS read its staff list, so table permissions are missing on this project. The README has the one-time step that adds them.",
+  },
+  unavailable: {
+    title: "You are signed in, but the staff lookup did not complete",
+    body: "Your password worked, but the CMS could not read its staff list. Try again in a moment. If it keeps happening, check that the Supabase project is running and the schema migration has been applied (see the README).",
+  },
+} as const;
+
+function blockedReason(access: Blocked): keyof typeof blockedCopy {
+  return access.status === "no_role" ? "no_role" : access.cause;
+}
+
 type Props = { searchParams: Promise<{ error?: string }> };
 
 export default async function AdminLoginPage({ searchParams }: Props) {
@@ -20,14 +46,27 @@ export default async function AdminLoginPage({ searchParams }: Props) {
     return <LoginShell notice={messages.config} disabled />;
   }
 
-  const staff = await getStaffUser();
-  if (staff) redirect("/admin");
+  const access = await getStaffAccess();
+  if (access.status === "staff") redirect("/admin");
 
   const { error } = await searchParams;
-  return <LoginShell notice={error ? (messages[error] ?? messages.invalid) : undefined} />;
+  return (
+    <LoginShell
+      notice={error ? (messages[error] ?? messages.invalid) : undefined}
+      blocked={access.status === "no_role" || access.status === "lookup_failed" ? access : undefined}
+    />
+  );
 }
 
-function LoginShell({ notice, disabled = false }: { notice?: string; disabled?: boolean }) {
+function LoginShell({
+  notice,
+  blocked,
+  disabled = false,
+}: {
+  notice?: string;
+  blocked?: Blocked;
+  disabled?: boolean;
+}) {
   return (
     <div className="grid min-h-screen lg:grid-cols-[1fr_1.1fr]">
       <div className="relative hidden overflow-hidden bg-navy p-12 text-ivory lg:flex lg:flex-col">
@@ -66,6 +105,8 @@ function LoginShell({ notice, disabled = false }: { notice?: string; disabled?: 
               {notice}
             </p>
           ) : null}
+
+          {blocked ? <BlockedNotice access={blocked} /> : null}
 
           <form action={signIn} className="mt-6 space-y-4">
             <div>
@@ -117,6 +158,24 @@ function LoginShell({ notice, disabled = false }: { notice?: string; disabled?: 
           </p>
         </div>
       </div>
+    </div>
+  );
+}
+
+function BlockedNotice({ access }: { access: Blocked }) {
+  const copy = blockedCopy[blockedReason(access)];
+  return (
+    <div className="mt-5 rounded-md border border-coral-ink/30 bg-coral/10 px-4 py-3 text-[0.84rem] text-coral-ink">
+      <div role="alert">
+        <p className="font-medium">{copy.title}</p>
+        <p className="mt-1.5 leading-relaxed">{copy.body}</p>
+      </div>
+      {access.email ? <p className="mt-2 text-[0.8rem] opacity-80">Signed in as {access.email}</p> : null}
+      <form action={signOut} className="mt-3">
+        <button type="submit" className="admin-btn admin-btn-ghost">
+          Sign out
+        </button>
+      </form>
     </div>
   );
 }
