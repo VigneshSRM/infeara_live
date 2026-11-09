@@ -27,7 +27,7 @@ export default async function ApplicationDevelopmentServicePage() {
 
   return (
     <ServiceDetailPage service={service}>
-      <section className="border-y border-navy/10 bg-white py-20 md:py-28">
+      <section className="border-y border-navy/10 bg-ivory py-20 md:py-28">
         <div className="shell">
           <SectionHeading eyebrow="Application Development sub-services" title="Choose the right product surface for your users." intro="Explore web applications, content websites and mobile apps, each scoped to its users, workflows and delivery needs." />
           <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">

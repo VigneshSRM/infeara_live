@@ -53,7 +53,7 @@ export async function ServiceDetailPage({ service, children }: { service: Servic
             <Breadcrumbs items={crumbs} />
 
             <div className="mt-8 max-w-[52rem]">
-              <p className="eyebrow text-coral/90">{service.tagline}</p>
+              <p className="eyebrow text-ivory/80">{service.tagline}</p>
               <h1 className="mt-4 max-w-[20ch] font-display text-[clamp(2.1rem,4.2vw,3.5rem)] font-medium leading-[1.02] tracking-[-0.03em] text-ivory">
                 {service.name}
               </h1>
@@ -100,7 +100,7 @@ export async function ServiceDetailPage({ service, children }: { service: Servic
                 label={service.figure.label}
                 caption={service.figure.caption}
               />
-              <div className="rounded-[var(--radius-card)] border border-navy/10 bg-white p-7">
+              <div className="rounded-[var(--radius-card)] border border-navy/10 bg-ivory p-7">
                 <p className="eyebrow text-blue">Service outcomes</p>
                 <ul className="mt-5 space-y-3">
                   {service.outcomes.map((outcome) => (
@@ -117,7 +117,7 @@ export async function ServiceDetailPage({ service, children }: { service: Servic
 
         {children}
 
-        <section className="border-y border-navy/10 bg-white py-20 md:py-28">
+        <section className="border-y border-navy/10 bg-ivory py-20 md:py-28">
           <div className="shell grid items-center gap-12 lg:grid-cols-[1fr_1.05fr] lg:gap-20">
             <Schematic
               variant={variant}
@@ -161,7 +161,7 @@ export async function ServiceDetailPage({ service, children }: { service: Servic
         </section>
 
         {related.length > 0 ? (
-          <section className="border-t border-navy/10 bg-white py-20 md:py-24">
+          <section className="border-t border-navy/10 bg-ivory py-20 md:py-24">
             <div className="shell">
               <div className="flex flex-wrap items-end justify-between gap-6">
                 <SectionHeading eyebrow="Related" title="Services that usually run alongside this one." />

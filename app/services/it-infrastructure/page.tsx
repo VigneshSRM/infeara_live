@@ -106,7 +106,7 @@ export default async function ItInfrastructureCorePage() {
           </div>
         </section>
 
-        <section className="border-y border-navy/10 bg-white py-20 md:py-28">
+        <section className="border-y border-navy/10 bg-ivory py-20 md:py-28">
           <div className="shell">
             <SectionHeading
               eyebrow="Sub-services"

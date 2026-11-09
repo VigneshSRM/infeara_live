@@ -207,9 +207,19 @@ Flip it only on the client's written instruction, after the content swap. With t
 Lighthouse SEO scores 69 purely because the page is blocked from indexing; with
 `SITE_INDEXABLE=true` the same pages score 100, and the sitemap lists 36 URLs.
 
+## Browser and integration tests
+
+The Playwright MCP server is configured in `.mcp.json` for MCP-compatible clients. Install the local browser binary once with `npx playwright install chromium` before running browser tests.
+
+- `npm run test:e2e` — full Playwright browser suite: public route rendering, navigation, contact validation, cookie choices, admin authentication and role permissions.
+- `npm run test:e2e:list` — list discovered browser tests without launching a browser.
+- `npm run test:http` — HTTP/API smoke tests against a running app (defaults to `http://127.0.0.1:3000`).
+
+The browser suite starts an isolated, non-Supabase Next dev server on port 3100 by default. Set `PLAYWRIGHT_PORT` to change it or `PLAYWRIGHT_BASE_URL` to target a test deployment. Optional staff-role checks require an isolated test deployment identified by `PLAYWRIGHT_BASE_URL`, `PLAYWRIGHT_ADMIN_TEST_HOST` (exact hostname match), and `PLAYWRIGHT_ADMIN_ISOLATED_TEST=true`, plus the relevant credentials: `PLAYWRIGHT_SUPER_ADMIN_EMAIL` / `PLAYWRIGHT_SUPER_ADMIN_PASSWORD`, `PLAYWRIGHT_EDITOR_EMAIL` / `PLAYWRIGHT_EDITOR_PASSWORD`, and `PLAYWRIGHT_SEO_MANAGER_EMAIL` / `PLAYWRIGHT_SEO_MANAGER_PASSWORD`. Known Infeara production hostnames are blocked. The create/edit/delete CMS workflow has an additional `PLAYWRIGHT_ADMIN_ALLOW_MUTATIONS=true` opt-in; point the test deployment at an isolated Supabase project only.
+
 ## Quality checks
 
-- `npm run build` — TypeScript clean; 36 public routes plus the `/admin` routes, `/api/contact`
+- `npm run build` — TypeScript clean; public routes plus the `/admin` routes, `/api/contact`
   and the 410 handlers.
 - Lighthouse 12, desktop preset: performance 97–100, accessibility 100, best practices 100.
   Mobile (throttled): accessibility 100, performance 71–93.

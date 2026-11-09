@@ -52,28 +52,28 @@ export type SiteImage = { src: string; alt: string };
 
 export const coreServiceImages = {
   "it-infrastructure": {
-    src: "/site/core-it-infrastructure.jpg",
-    alt: "Infrastructure engineer inspecting organized server racks in a modern data center.",
+    src: "/site/service-it-infrastructure.webp",
+    alt: "Infrastructure engineer's hands patching fiber-optic cables into an organized network rack.",
   },
   cybersecurity: {
-    src: "/site/core-cybersecurity.jpg",
-    alt: "Security operations analyst reviewing monitoring dashboards at a workstation.",
+    src: "/site/service-cybersecurity.webp",
+    alt: "Security analyst reviewing monitoring displays at a workstation.",
   },
   "cloud-datacenter": {
-    src: "/site/core-cloud-datacenter.jpg",
-    alt: "Technician checking a server cabinet in a clean, modern data center.",
+    src: "/site/service-cloud-datacenter.webp",
+    alt: "Symmetrical aisle of server racks in a modern data center.",
   },
   "turnkey-projects": {
-    src: "/site/core-turnkey-projects.jpg",
-    alt: "Engineers coordinating a structured network installation in an office.",
+    src: "/site/service-turnkey-projects.webp",
+    alt: "Engineers planning an office network installation over a printed floor plan.",
   },
   "ai-automations": {
-    src: "/site/core-ai-automations.jpg",
-    alt: "Business operations and automation specialists reviewing an AI-assisted workflow.",
+    src: "/site/service-ai-automations.webp",
+    alt: "Operations specialist mapping a workflow beside a laptop.",
   },
   "application-development": {
-    src: "/site/core-application-development.jpg",
-    alt: "Software developers collaborating on a custom web application.",
+    src: "/site/service-application-development.webp",
+    alt: "Software developers reviewing an application prototype together.",
   },
 } satisfies Record<string, SiteImage>;
 
@@ -87,60 +87,60 @@ export const siteImages: Record<SiteImageKey, SiteImage> = {
     alt: "Software developers collaborating on a custom web application.",
   },
   "cloud-ai-data": {
-    src: "/site/cloud-ai-data.jpg",
-    alt: "Cloud data specialists reviewing an analytics platform and data flows together.",
+    src: "/site/cloud-ai-data.webp",
+    alt: "Data engineer explaining a data-flow sketch beside a laptop.",
   },
   "managed-cloud-support": {
-    src: "/site/managed-cloud-support.jpg",
-    alt: "Cloud operations engineers monitoring services and documenting support activity.",
+    src: "/site/cloud-managed-support.webp",
+    alt: "Cloud operations engineer reviewing service-health dashboards in an operations room.",
   },
   "cloud-cost-optimization": {
-    src: "/site/cloud-cost-optimization.jpg",
-    alt: "Cloud engineers reviewing resource usage and cost trends on a dashboard.",
+    src: "/site/cloud-cost-optimization.webp",
+    alt: "Notebook, calculator and laptop with abstract resource charts for cloud cost planning.",
   },
   "cloud-disaster-recovery": {
-    src: "/site/cloud-disaster-recovery.jpg",
-    alt: "Engineers validating recovery readiness beside a secondary server environment.",
+    src: "/site/cloud-disaster-recovery.webp",
+    alt: "Technician verifying a backup storage appliance in a secondary server room.",
   },
   "cloud-monitoring-management": {
-    src: "/site/cloud-monitoring-management.jpg",
-    alt: "A cloud infrastructure engineer reviewing service health and monitoring dashboards.",
+    src: "/site/cloud-monitoring.webp",
+    alt: "Operations engineer reviewing cloud service-health screens at a standing desk.",
   },
   "cloud-application-hosting": {
-    src: "/site/cloud-application-hosting.jpg",
-    alt: "An application and platform engineer reviewing a hosted service release.",
+    src: "/site/cloud-app-hosting.webp",
+    alt: "Platform engineer connecting a network appliance on a clean equipment bench.",
   },
   "cloud-devops-automation": {
     src: "/site/cloud-devops-automation.jpg",
     alt: "Software engineers reviewing a cloud build and release pipeline together.",
   },
   "ai-chatbot-development": {
-    src: "/site/ai-chatbot-development.jpg",
-    alt: "Product and AI specialists reviewing a chatbot conversation and intent flow.",
+    src: "/site/subservice-ai-chatbot.webp",
+    alt: "Product designer testing a chatbot interface on a laptop during AI chatbot development.",
   },
   "ai-callers-development": {
-    src: "/site/ai-callers-development.jpg",
-    alt: "A voice AI engineer testing a caller workflow with a teammate.",
+    src: "/site/subservice-ai-voice-callers.webp",
+    alt: "Quality specialist wearing a headset while testing a supervised AI voice-caller workflow.",
   },
   "llm-development": {
-    src: "/site/llm-development.jpg",
-    alt: "Machine learning engineers comparing language model evaluation results.",
+    src: "/site/subservice-llm-engineering.webp",
+    alt: "Researcher annotating language-model evaluation charts beside a laptop.",
   },
   "it-infrastructure-ai-automations": {
-    src: "/site/it-infrastructure-ai-automations.jpg",
-    alt: "Infrastructure engineers reviewing an AI-assisted operations workflow beside server racks.",
+    src: "/site/subservice-infrastructure-automation.webp",
+    alt: "Infrastructure engineer checking a tablet maintenance checklist beside a server rack.",
   },
   "web-application-development": {
-    src: "/site/web-application-development.jpg",
-    alt: "Web engineers collaborating on application interface and service design.",
+    src: "/site/subservice-web-application.webp",
+    alt: "Product team reviewing web application wireframes and a workflow on a laptop.",
   },
   "website-development": {
-    src: "/site/website-development.jpg",
-    alt: "A designer and content strategist reviewing a responsive website layout.",
+    src: "/site/subservice-website.webp",
+    alt: "Designer comparing responsive website layouts on a tablet and laptop.",
   },
   "mobile-application-development": {
-    src: "/site/mobile-application-development.jpg",
-    alt: "A mobile product team testing an application prototype on a smartphone.",
+    src: "/site/subservice-mobile-app.webp",
+    alt: "Hands testing a mobile application prototype on an unbranded smartphone.",
   },
   "operations-centre": {
     src: "/site/noc-monitoring.jpg",

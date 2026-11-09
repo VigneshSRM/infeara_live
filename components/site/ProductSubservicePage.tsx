@@ -46,7 +46,7 @@ export function ProductSubservicePage({ service }: { service: ProductSubservice 
                 <Figure seed={service.figure.seed} layout="wide" label={service.figure.label} caption={service.figure.caption} preload />
               </div>
               <div className="order-2 lg:order-1">
-                <p className="eyebrow text-coral/90">{service.tagline}</p>
+                <p className="eyebrow text-ivory/80">{service.tagline}</p>
                 <h1 className="mt-4 max-w-[20ch] font-display text-[clamp(2.1rem,4.2vw,3.5rem)] font-medium leading-[1.02] tracking-[-0.03em] text-ivory">{service.name}</h1>
                 <p className="mt-6 max-w-[42rem] text-[1.02rem] leading-relaxed text-ivory/75">{service.summary}</p>
                 <div className="mt-8 flex flex-wrap gap-3">
@@ -72,7 +72,7 @@ export function ProductSubservicePage({ service }: { service: ProductSubservice 
               </div>
             </div>
             <div className="lg:sticky lg:top-28">
-              <div className="rounded-[var(--radius-card)] border border-navy/10 bg-white p-6 md:p-8">
+              <div className="rounded-[var(--radius-card)] border border-navy/10 bg-ivory p-6 md:p-8">
                 <p className="eyebrow text-blue">Expected outcomes</p>
                 <ul className="mt-5 space-y-3">{service.outcomes.map((outcome) => <li key={outcome} className="flex items-start gap-3 text-[0.9rem] leading-relaxed text-charcoal/75"><span aria-hidden="true" className="mt-[0.45rem] h-1.5 w-1.5 shrink-0 rounded-full bg-blue/60" />{outcome}</li>)}</ul>
               </div>
@@ -80,10 +80,10 @@ export function ProductSubservicePage({ service }: { service: ProductSubservice 
           </div>
         </section>
 
-        <section className="border-y border-navy/10 bg-white py-16 md:py-24">
+        <section className="border-y border-navy/10 bg-ivory py-16 md:py-24">
           <div className="shell">
             <SectionHeading eyebrow="How it works" title={service.infographic.title} intro="A focused delivery lifecycle with clear checks and ownership at each stage." />
-            <figure className="mt-10 overflow-hidden rounded-[var(--radius-card)] border border-navy/10 bg-[#f7f8f8]">
+            <figure className="mt-10 overflow-hidden rounded-[var(--radius-card)] border border-navy/10 bg-[#EAE6DE]">
               <img src={`/site/infographics/${service.slug}.svg`} alt={`${service.infographic.title}: ${service.infographic.steps.map((step) => `${step.title}, ${step.description}`).join("; ")}`} width="1400" height="780" loading="lazy" className="h-auto w-full" />
               <figcaption className="border-t border-navy/10 px-5 py-3 text-[0.8rem] leading-relaxed text-charcoal/65 md:px-7">A four-stage delivery infographic for {service.name}, from definition through operation or review.</figcaption>
             </figure>
@@ -97,7 +97,7 @@ export function ProductSubservicePage({ service }: { service: ProductSubservice 
           </div>
         </section>
 
-        <section className="bg-white py-16 md:py-24">
+        <section className="bg-ivory py-16 md:py-24">
           <div className="shell">
             <SectionHeading eyebrow={`More ${service.parentName}`} title="Explore the related capabilities." intro="Choose a focused service or combine capabilities around your product and operating needs." />
             <div className="mt-9 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">

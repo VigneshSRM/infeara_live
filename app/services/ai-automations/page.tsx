@@ -27,7 +27,7 @@ export default async function AIAutomationsServicePage() {
 
   return (
     <ServiceDetailPage service={service}>
-      <section className="border-y border-navy/10 bg-white py-20 md:py-28">
+      <section className="border-y border-navy/10 bg-ivory py-20 md:py-28">
         <div className="shell">
           <SectionHeading eyebrow="AI Automation sub-services" title="Focused AI services for conversational and operational workflows." intro="Choose chatbot, voice, language-model or infrastructure automation capabilities with the right controls and human review." />
           <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">

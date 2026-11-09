@@ -24,7 +24,7 @@ export function SectionHeading({
       className={`${align === "center" ? "mx-auto max-w-[42rem] text-center" : "max-w-[42rem]"} ${className}`}
     >
       {eyebrow ? (
-        <p className={`eyebrow ${invert ? "text-coral/90" : "text-blue"}`}>
+        <p className={`eyebrow ${invert ? "text-ivory/80" : "text-blue"}`}>
           {eyebrow}
         </p>
       ) : null}

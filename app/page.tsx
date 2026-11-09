@@ -140,7 +140,7 @@ export default async function HomePage() {
                   className="mt-6 max-w-[16ch] font-display text-[clamp(2.7rem,5.4vw,4.65rem)] font-bold leading-[0.98] tracking-[-0.04em] text-ivory"
                 >
                   Managed IT.<br />
-                  <span className="text-coral">Clear accountability.</span>
+                  <span className="text-ivory">Clear accountability.</span>
                 </h1>
 
                 <p
@@ -163,8 +163,8 @@ export default async function HomePage() {
               </div>
 
               <Image
-                src="/site/homepage-hero.jpg"
-                alt="Two IT engineers working together to maintain a business server environment."
+                src="/site/home-hero.webp"
+                alt="IT engineer inspecting a server cabinet in a modern enterprise data room."
                 width={1200}
                 height={675}
                 preload
@@ -190,7 +190,7 @@ export default async function HomePage() {
         </section>
 
         {/* 2 — Story-driven operating journey */}
-        <section className="border-y border-navy/10 bg-white py-16 md:py-20">
+        <section className="border-y border-navy/10 bg-ivory py-16 md:py-20">
           <JourneyStory steps={phases} />
         </section>
 
@@ -269,7 +269,7 @@ export default async function HomePage() {
         </section>
 
         {/* 5 — Industries */}
-        <section className="border-b border-navy/10 bg-white py-20 md:py-28">
+        <section className="border-b border-navy/10 bg-ivory py-20 md:py-28">
           <div className="shell">
             <div className="flex flex-wrap items-end justify-between gap-6">
               <SectionHeading
@@ -323,7 +323,7 @@ export default async function HomePage() {
         </section>
 
         {/* 7 — Technical resources */}
-        <section className="border-y border-navy/10 bg-white py-20 md:py-28">
+        <section className="border-y border-navy/10 bg-ivory py-20 md:py-28">
           <div className="shell">
             <div className="flex flex-wrap items-end justify-between gap-6">
               <SectionHeading

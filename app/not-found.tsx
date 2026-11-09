@@ -21,7 +21,7 @@ export default function NotFound() {
         <section className="hero-surface">
 
           <div className="shell relative z-10 flex min-h-[70svh] flex-col justify-center py-24">
-            <p className="eyebrow text-coral/90">404</p>
+            <p className="eyebrow text-ivory/80">404</p>
             <h1 className="mt-4 max-w-[20ch] font-display text-[clamp(2.2rem,4.4vw,3.8rem)] font-medium leading-[1.02] tracking-[-0.03em] text-ivory">
               That page is not on the map.
             </h1>

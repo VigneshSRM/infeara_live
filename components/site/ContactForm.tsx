@@ -78,7 +78,7 @@ export function ContactForm() {
 
   if (status === "success") {
     return (
-      <div className="rounded-[var(--radius-card)] border border-blue/25 bg-white p-8">
+      <div className="rounded-[var(--radius-card)] border border-blue/25 bg-ivory p-8">
         <p className="eyebrow text-blue">Received</p>
         <h2 className="mt-4 font-display text-[1.7rem] font-medium tracking-[-0.02em] text-navy">
           Thank you — your request is with us.
@@ -95,7 +95,7 @@ export function ContactForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} noValidate className="rounded-[var(--radius-card)] border border-navy/10 bg-white p-7 md:p-8">
+    <form onSubmit={onSubmit} noValidate className="rounded-[var(--radius-card)] border border-navy/10 bg-ivory p-7 md:p-8">
       <div className="grid gap-5 sm:grid-cols-2">
         <div>
           <label htmlFor="name" className={labelClass}>

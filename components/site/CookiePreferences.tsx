@@ -22,7 +22,7 @@ export function CookiePreferences() {
   if (!ready) return null;
 
   return (
-    <div className="rounded-[var(--radius-card)] border border-navy/15 bg-white p-6">
+    <div className="rounded-[var(--radius-card)] border border-navy/15 bg-ivory p-6">
       <p className="font-heading text-[10px] uppercase tracking-[0.18em] text-charcoal/75">Your current choice</p>
       <p className="mt-2 text-[0.95rem] font-medium text-navy">
         {decision === "granted"

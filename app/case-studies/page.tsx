@@ -75,7 +75,7 @@ export default function CaseStudiesPage() {
 
       <section className="bg-ivory py-14 md:py-16">
         <div className="shell">
-          <div className="rounded-[var(--radius-card)] border border-blue/20 bg-white p-7 md:p-8">
+          <div className="rounded-[var(--radius-card)] border border-blue/20 bg-ivory p-7 md:p-8">
             <p className="eyebrow text-blue">How to read this page</p>
             <p className="mt-4 max-w-[58rem] text-[0.94rem] leading-relaxed text-charcoal/75">
               The engagements below are <strong className="font-semibold text-navy">representative patterns</strong>,
@@ -93,7 +93,7 @@ export default function CaseStudiesPage() {
           {engagements.map((item, index) => (
             <article
               key={item.title}
-              className="grid gap-8 rounded-[var(--radius-card)] border border-navy/10 bg-white p-7 md:p-10 lg:grid-cols-[0.9fr_1.4fr] lg:gap-14"
+              className="grid gap-8 rounded-[var(--radius-card)] border border-navy/10 bg-ivory p-7 md:p-10 lg:grid-cols-[0.9fr_1.4fr] lg:gap-14"
             >
               <div>
                 <p className="font-display text-sm text-blue">{String(index + 1).padStart(2, "0")}</p>
@@ -137,7 +137,7 @@ export default function CaseStudiesPage() {
         </div>
       </section>
 
-      <section className="border-y border-navy/10 bg-white py-20 md:py-28">
+      <section className="border-y border-navy/10 bg-ivory py-20 md:py-28">
         <div className="shell grid items-center gap-12 lg:grid-cols-[1fr_1.05fr] lg:gap-20">
           <Schematic
             variant="loop"

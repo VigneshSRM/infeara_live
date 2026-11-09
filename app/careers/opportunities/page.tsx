@@ -145,7 +145,7 @@ export default function OpportunitiesPage() {
       </section>
 
       {/* Openings */}
-      <section id="openings" className="scroll-mt-28 border-y border-navy/10 bg-white py-20 md:py-24">
+      <section id="openings" className="scroll-mt-28 border-y border-navy/10 bg-ivory py-20 md:py-24">
         <div className="shell">
           <SectionHeading
             eyebrow="Openings"

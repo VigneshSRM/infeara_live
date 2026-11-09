@@ -56,7 +56,7 @@ export default async function IndustryPage({ params }: Props) {
           <div className="shell relative z-10 py-16 md:py-24">
             <Breadcrumbs items={crumbs} />
 
-            <p className="eyebrow mt-8 text-coral/90">{industry.tagline}</p>
+            <p className="eyebrow mt-8 text-ivory/80">{industry.tagline}</p>
             <h1 className="mt-4 max-w-[24ch] font-display text-[clamp(2.1rem,4.2vw,3.5rem)] font-medium leading-[1.02] tracking-[-0.03em] text-ivory">
               {industry.name}
             </h1>
@@ -115,7 +115,7 @@ export default async function IndustryPage({ params }: Props) {
           </div>
         </section>
 
-        <section className="border-y border-navy/10 bg-white py-20 md:py-28">
+        <section className="border-y border-navy/10 bg-ivory py-20 md:py-28">
           <div className="shell grid items-center gap-12 lg:grid-cols-[1.02fr_0.98fr] lg:gap-20">
             <Figure
               seed={industry.figure.seed}
@@ -157,7 +157,7 @@ export default async function IndustryPage({ params }: Props) {
                 <Link
                   key={service.slug}
                   href={`/services/${service.slug}`}
-                  className="group flex flex-col rounded-[var(--radius-card)] border border-navy/10 bg-white p-7 transition-colors duration-150 hover:border-blue/40"
+                  className="group flex flex-col rounded-[var(--radius-card)] border border-navy/10 bg-ivory p-7 transition-colors duration-150 hover:border-blue/40"
                 >
                   <p className="eyebrow text-blue">{service.shortName}</p>
                   <h3 className="mt-4 font-heading text-[1.02rem] font-semibold leading-snug text-navy">

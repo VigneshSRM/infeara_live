@@ -14,45 +14,45 @@
       .connector, .step { opacity: 1; animation: none; transform: none; }
     }
   </style>
-  <rect width="600" height="1040" fill="#FFFFFF"/>
-  <text x="42" y="62" fill="#315F78" font-family="Inter, Arial, sans-serif" font-size="18" font-weight="700" letter-spacing="2.1">A CLEAR, ACCOUNTABLE DELIVERY CYCLE</text>
+  <rect width="600" height="1040" fill="#EAE6DE"/>
+  <text x="42" y="62" fill="#226192" font-family="Inter, Arial, sans-serif" font-size="18" font-weight="700" letter-spacing="2.1">A CLEAR, ACCOUNTABLE DELIVERY CYCLE</text>
 
-  <g class="connector" stroke="#B77B4B" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter">
+  <g class="connector" stroke="#EF8557" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter">
     <path d="M76 183V339M76 418V569M76 653V799"/>
     <path d="m70 329 6 10 6-10m-12 230 6 10 6-10m-12 220 6 10 6-10"/>
   </g>
 
   <g class="step step-1" font-family="Inter, Arial, sans-serif">
-    <circle cx="76" cy="155" r="28" fill="#142B3C" stroke="#B77B4B" stroke-width="2"/>
-    <text x="76" y="161" fill="#F3F6F7" font-size="16" font-weight="700" text-anchor="middle">01</text>
-    <text x="142" y="150" fill="#142B3C" font-size="27" font-weight="700">Assess</text>
-    <text x="142" y="186" fill="#4B5961" font-size="19">Document systems, dependencies</text>
-    <text x="142" y="214" fill="#4B5961" font-size="19">and risk before proposing changes.</text>
+    <circle cx="76" cy="155" r="28" fill="#226192" stroke="#EF8557" stroke-width="2"/>
+    <text x="76" y="161" fill="#EAE6DE" font-size="16" font-weight="700" text-anchor="middle">01</text>
+    <text x="142" y="150" fill="#226192" font-size="27" font-weight="700">Assess</text>
+    <text x="142" y="186" fill="#226192" font-size="19">Document systems, dependencies</text>
+    <text x="142" y="214" fill="#226192" font-size="19">and risk before proposing changes.</text>
   </g>
 
   <g class="step step-2" font-family="Inter, Arial, sans-serif">
-    <circle cx="76" cy="390" r="28" fill="#142B3C" stroke="#B77B4B" stroke-width="2"/>
-    <text x="76" y="396" fill="#F3F6F7" font-size="16" font-weight="700" text-anchor="middle">02</text>
-    <text x="142" y="385" fill="#142B3C" font-size="27" font-weight="700">Stabilise</text>
-    <text x="142" y="421" fill="#4B5961" font-size="19">Prioritise exposure and control</text>
-    <text x="142" y="449" fill="#4B5961" font-size="19">each approved change.</text>
+    <circle cx="76" cy="390" r="28" fill="#226192" stroke="#EF8557" stroke-width="2"/>
+    <text x="76" y="396" fill="#EAE6DE" font-size="16" font-weight="700" text-anchor="middle">02</text>
+    <text x="142" y="385" fill="#226192" font-size="27" font-weight="700">Stabilise</text>
+    <text x="142" y="421" fill="#226192" font-size="19">Prioritise exposure and control</text>
+    <text x="142" y="449" fill="#226192" font-size="19">each approved change.</text>
   </g>
 
   <g class="step step-3" font-family="Inter, Arial, sans-serif">
-    <circle cx="76" cy="625" r="28" fill="#142B3C" stroke="#B77B4B" stroke-width="2"/>
-    <text x="76" y="631" fill="#F3F6F7" font-size="16" font-weight="700" text-anchor="middle">03</text>
-    <text x="142" y="620" fill="#142B3C" font-size="27" font-weight="700">Operate</text>
-    <text x="142" y="656" fill="#4B5961" font-size="19">Monitor, patch and support</text>
-    <text x="142" y="684" fill="#4B5961" font-size="19">to agreed service levels.</text>
+    <circle cx="76" cy="625" r="28" fill="#226192" stroke="#EF8557" stroke-width="2"/>
+    <text x="76" y="631" fill="#EAE6DE" font-size="16" font-weight="700" text-anchor="middle">03</text>
+    <text x="142" y="620" fill="#226192" font-size="27" font-weight="700">Operate</text>
+    <text x="142" y="656" fill="#226192" font-size="19">Monitor, patch and support</text>
+    <text x="142" y="684" fill="#226192" font-size="19">to agreed service levels.</text>
   </g>
 
   <g class="step step-4" font-family="Inter, Arial, sans-serif">
-    <circle cx="76" cy="860" r="28" fill="#142B3C" stroke="#B77B4B" stroke-width="2"/>
-    <text x="76" y="866" fill="#F3F6F7" font-size="16" font-weight="700" text-anchor="middle">04</text>
-    <text x="142" y="855" fill="#142B3C" font-size="27" font-weight="700">Improve</text>
-    <text x="142" y="891" fill="#4B5961" font-size="19">Review service evidence and</text>
-    <text x="142" y="919" fill="#4B5961" font-size="19">plan the next improvement.</text>
+    <circle cx="76" cy="860" r="28" fill="#226192" stroke="#EF8557" stroke-width="2"/>
+    <text x="76" y="866" fill="#EAE6DE" font-size="16" font-weight="700" text-anchor="middle">04</text>
+    <text x="142" y="855" fill="#226192" font-size="27" font-weight="700">Improve</text>
+    <text x="142" y="891" fill="#226192" font-size="19">Review service evidence and</text>
+    <text x="142" y="919" fill="#226192" font-size="19">plan the next improvement.</text>
   </g>
 
-  <path d="M42 970H558" stroke="#142B3C" stroke-opacity=".16"/>
+  <path d="M42 970H558" stroke="#226192" stroke-opacity=".16"/>
 </svg>

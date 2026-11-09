@@ -65,7 +65,7 @@ export default function WhyInfearaPage() {
 
           <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {differences.map((item, index) => (
-              <div key={item.title} className="flex flex-col rounded-[var(--radius-card)] border border-navy/10 bg-white p-7">
+              <div key={item.title} className="flex flex-col rounded-[var(--radius-card)] border border-navy/10 bg-ivory p-7">
                 <span className="font-display text-sm text-blue">
                   {String(index + 1).padStart(2, "0")}
                 </span>
@@ -79,7 +79,7 @@ export default function WhyInfearaPage() {
         </div>
       </section>
 
-      <section className="border-y border-navy/10 bg-white py-20 md:py-28">
+      <section className="border-y border-navy/10 bg-ivory py-20 md:py-28">
         <div className="shell grid items-center gap-12 lg:grid-cols-[1.05fr_1fr] lg:gap-20">
           <Figure
             seed={81}
@@ -161,7 +161,7 @@ export default function WhyInfearaPage() {
         </div>
       </section>
 
-      <section className="border-y border-navy/10 bg-white py-20 md:py-28">
+      <section className="border-y border-navy/10 bg-ivory py-20 md:py-28">
         <div className="shell grid items-center gap-12 lg:grid-cols-[1fr_1.05fr] lg:gap-20">
           <div>
             <SectionHeading

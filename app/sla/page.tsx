@@ -81,7 +81,7 @@ export default function SlaPage() {
         </div>
       </section>
 
-      <section className="border-y border-navy/10 bg-white py-20 md:py-28">
+      <section className="border-y border-navy/10 bg-ivory py-20 md:py-28">
         <div className="shell">
           <SectionHeading
             eyebrow="Severity"
@@ -160,7 +160,7 @@ export default function SlaPage() {
         </div>
       </section>
 
-      <section className="border-y border-navy/10 bg-white py-20 md:py-28">
+      <section className="border-y border-navy/10 bg-ivory py-20 md:py-28">
         <div className="shell grid items-center gap-12 lg:grid-cols-[1.05fr_1fr] lg:gap-20">
           <Figure
             seed={111}
@@ -237,7 +237,7 @@ export default function SlaPage() {
         </div>
       </section>
 
-      <section className="border-t border-navy/10 bg-white py-16 md:py-20">
+      <section className="border-t border-navy/10 bg-ivory py-16 md:py-20">
         <div className="shell flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="eyebrow text-blue">Raise an issue</p>

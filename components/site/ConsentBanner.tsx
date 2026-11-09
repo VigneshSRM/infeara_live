@@ -15,9 +15,15 @@ export function ConsentBanner() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    const stored = window.localStorage.getItem(STORAGE_KEY);
-    if (stored === "granted" || stored === "essential") setDecision(stored);
-    setReady(true);
+    function syncDecision() {
+      const stored = window.localStorage.getItem(STORAGE_KEY);
+      setDecision(stored === "granted" || stored === "essential" ? stored : null);
+      setReady(true);
+    }
+
+    syncDecision();
+    window.addEventListener(EVENT, syncDecision);
+    return () => window.removeEventListener(EVENT, syncDecision);
   }, []);
 
   function choose(next: Exclude<Decision, null>) {
@@ -63,7 +69,7 @@ export function ConsentBanner() {
           <button
             type="button"
             onClick={() => choose("granted")}
-            className="rounded-sm bg-coral px-5 py-2.5 font-heading text-[0.76rem] font-semibold uppercase tracking-[0.06em] text-navy transition-colors hover:bg-[color-mix(in_oklab,var(--color-coral)_88%,white)]"
+            className="rounded-sm border border-coral bg-blue px-5 py-2.5 font-heading text-[0.76rem] font-semibold uppercase tracking-[0.06em] text-ivory transition-colors hover:border-ivory"
           >
             Allow analytics
           </button>

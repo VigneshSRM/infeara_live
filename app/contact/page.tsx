@@ -58,7 +58,7 @@ export default function ContactPage() {
           </div>
 
           <aside className="space-y-6">
-            <div className="rounded-[var(--radius-card)] border border-navy/10 bg-white p-7">
+            <div className="rounded-[var(--radius-card)] border border-navy/10 bg-ivory p-7">
               <p className="eyebrow text-blue">Contact by form</p>
               <p className="mt-4 text-[0.9rem] leading-relaxed text-charcoal/75">
                 Send your enquiry through the form and our team will respond to the details you provide.
@@ -92,7 +92,7 @@ export default function ContactPage() {
               </Link>
             </div>
 
-            <div className="rounded-[var(--radius-card)] border border-navy/10 bg-white p-7">
+            <div className="rounded-[var(--radius-card)] border border-navy/10 bg-ivory p-7">
               <p className="eyebrow text-blue">Careers</p>
               <p className="mt-4 text-[0.88rem] leading-relaxed text-charcoal/70">
                 For engineering applications, send a CV and a short note about the environment you have
@@ -106,7 +106,7 @@ export default function ContactPage() {
         </div>
       </section>
 
-      <section className="border-y border-navy/10 bg-white py-20 md:py-28">
+      <section className="border-y border-navy/10 bg-ivory py-20 md:py-28">
         <div className="shell grid items-center gap-12 lg:grid-cols-[1.05fr_1fr] lg:gap-20">
           <Figure
             seed={141}

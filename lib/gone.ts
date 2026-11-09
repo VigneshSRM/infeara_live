@@ -13,7 +13,7 @@ const NOTICE = `<!doctype html>
         display: grid;
         place-items: center;
         background: #eae6de;
-        color: #202832;
+        color: #226192;
         font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
         padding: 2rem;
       }
@@ -22,7 +22,7 @@ const NOTICE = `<!doctype html>
         font-size: 0.7rem;
         letter-spacing: 0.18em;
         text-transform: uppercase;
-        color: #9e451e;
+        color: #226192;
         margin: 0 0 1rem;
       }
       h1 { font-size: clamp(1.6rem, 4vw, 2.2rem); line-height: 1.15; margin: 0 0 1rem; }
