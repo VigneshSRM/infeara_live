@@ -164,11 +164,8 @@ export default async function LegalPage({ params }: Props) {
               </dl>
               <p className="mt-5 border-t border-navy/10 pt-4 text-[0.82rem] leading-relaxed text-charcoal/75">
                 This document is reviewed when our practices, our providers or applicable law change.
-                Questions can be sent to{" "}
-                <a href="mailto:contact@infeara.com" className="underline underline-offset-4">
-                  contact@infeara.com
-                </a>
-                .
+                Questions can be submitted through the{" "}
+                <Link href="/contact" className="underline underline-offset-4">contact form</Link>.
               </p>
             </div>
           </article>

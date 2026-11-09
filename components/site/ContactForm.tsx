@@ -72,9 +72,7 @@ export function ContactForm() {
       form.reset();
     } catch {
       setStatus("error");
-      setError(
-        "The form could not be delivered. Please email contact@infeara.com directly and we will respond from there.",
-      );
+      setError("We could not submit your enquiry. Please check your connection and try again.");
     }
   }
 
@@ -87,11 +85,7 @@ export function ContactForm() {
         </h2>
         <p className="mt-4 text-[0.94rem] leading-relaxed text-charcoal/75">
           We will reply using the email address you provided, normally within one business day. If the
-          matter is urgent, email{" "}
-          <a href="mailto:contact@infeara.com" className="font-medium text-blue underline underline-offset-4">
-            contact@infeara.com
-          </a>
-          .
+          matter is urgent, submit an update through the contact form with the impact and timing.
         </p>
         <Link href="/" className="btn-outline mt-7 text-sm">
           Back to the homepage

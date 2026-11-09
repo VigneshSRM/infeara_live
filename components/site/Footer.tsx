@@ -21,9 +21,9 @@ export function Footer() {
                 {company.city}, {company.region}, {company.country}
               </p>
               <p>
-                <a href={`mailto:${company.email}`} className="underline decoration-ivory/25 underline-offset-4 hover:text-ivory">
-                  {company.email}
-                </a>
+                <Link href="/contact" className="underline decoration-ivory/25 underline-offset-4 hover:text-ivory">
+                  Contact form
+                </Link>
               </p>
               <p>{company.hours}</p>
             </div>
@@ -57,10 +57,8 @@ export function Footer() {
         <div className="mt-14 flex flex-col gap-4 border-t border-ivory/10 pt-7 text-[0.78rem] text-ivory/65 sm:flex-row sm:items-center sm:justify-between">
           <p>© {new Date().getFullYear()} {company.name}. All rights reserved.</p>
           <p>
-            Content managed through the Infeara dashboard. Report an issue:{" "}
-            <a href={`mailto:${company.email}`} className="underline underline-offset-4 hover:text-ivory/70">
-              {company.email}
-            </a>
+            Questions or issues? Use the{" "}
+            <Link href="/contact" className="underline underline-offset-4 hover:text-ivory/70">contact form</Link>.
           </p>
         </div>
       </div>

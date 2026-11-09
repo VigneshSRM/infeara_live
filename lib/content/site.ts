@@ -6,8 +6,6 @@ export const company = {
   country: "India",
   description:
     "Managed IT services, cybersecurity and infrastructure support for organisations across India, delivered from Chennai by Infeara Technologies.",
-  // Seed contact details. Replace through the CMS before the site is indexed.
-  email: "contact@infeara.com",
   hours: "Monday to Saturday, 09:00–18:00 IST",
 } as const;
 

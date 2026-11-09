@@ -227,14 +227,7 @@ export default function OpportunitiesPage() {
                   invented pipeline, no holding pool.
                 </p>
                 <p className="mt-4 text-[0.88rem] leading-relaxed text-charcoal/70">
-                  Prefer email? Write to{" "}
-                  <a
-                    href={`mailto:${company.email}?subject=Careers%20enquiry`}
-                    className="font-medium text-blue underline decoration-blue/30 underline-offset-4"
-                  >
-                    {company.email}
-                  </a>
-                  .
+                  Please use the application form below so your details reach the right hiring team.
                 </p>
               </div>
 

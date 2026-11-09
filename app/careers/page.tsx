@@ -158,7 +158,7 @@ export default function CareersPage() {
               ))}
             </ul>
             <Link href="/contact" className="link-arrow mt-8">
-              Contact the team <span aria-hidden="true">→</span>
+              Use the contact form <span aria-hidden="true">→</span>
             </Link>
           </div>
         </div>

@@ -40,11 +40,11 @@ export default function ContactPage() {
         title="Talk with us about your IT environment."
         intro="Tell us what you run, what is failing and what needs to change. A short conversation is enough to establish whether we are the right partner and what the next step should be."
         crumbs={[{ label: "Contact", href: "/contact" }]}
-        primary={{ label: "Email Infeara", href: `mailto:${company.email}` }}
+        primary={{ label: "Send an enquiry", href: "#enquiry" }}
         secondary={{ label: "Read the SLA model", href: "/sla" }}
       />
 
-      <section className="bg-ivory py-20 md:py-28">
+      <section id="enquiry" className="bg-ivory py-20 md:py-28">
         <div className="shell grid gap-12 lg:grid-cols-[1.25fr_0.75fr] lg:gap-16">
           <div>
             <SectionHeading
@@ -59,13 +59,10 @@ export default function ContactPage() {
 
           <aside className="space-y-6">
             <div className="rounded-[var(--radius-card)] border border-navy/10 bg-white p-7">
-              <p className="eyebrow text-blue">Direct</p>
-              <a
-                href={`mailto:${company.email}`}
-                className="mt-4 block font-heading text-[1rem] font-medium text-navy underline decoration-navy/20 underline-offset-4 hover:text-blue"
-              >
-                {company.email}
-              </a>
+              <p className="eyebrow text-blue">Contact by form</p>
+              <p className="mt-4 text-[0.9rem] leading-relaxed text-charcoal/75">
+                Send your enquiry through the form and our team will respond to the details you provide.
+              </p>
               <dl className="mt-6 space-y-4 border-t border-navy/10 pt-5 text-[0.86rem]">
                 <div>
                   <dt className="font-heading text-[10px] uppercase tracking-[0.18em] text-charcoal/75">Hours</dt>
@@ -137,11 +134,7 @@ export default function ContactPage() {
             </ol>
 
             <p className="mt-7 text-[0.82rem] leading-relaxed text-charcoal/75">
-              We aim to reply within one business day. If the matter is urgent, email{" "}
-              <a href={`mailto:${company.email}`} className="underline underline-offset-4">
-                {company.email}
-              </a>{" "}
-              and say so in the subject line.
+              We aim to reply within one business day. If the matter is urgent, describe its impact and timing in the enquiry form.
             </p>
           </div>
         </div>

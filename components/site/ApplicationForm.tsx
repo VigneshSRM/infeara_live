@@ -66,9 +66,7 @@ export function ApplicationForm({ defaultRole }: { defaultRole?: string }) {
       setStatus("success");
       form.reset();
     } catch {
-      setError(
-        "The application could not be delivered. Please email careers@infeara.com directly and we will respond from there.",
-      );
+      setError("We could not submit your application. Please check your connection and try again.");
       setStatus("error");
     }
   }

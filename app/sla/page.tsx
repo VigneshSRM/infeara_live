@@ -242,11 +242,7 @@ export default function SlaPage() {
           <div>
             <p className="eyebrow text-blue">Raise an issue</p>
             <p className="mt-3 max-w-[38rem] text-[0.95rem] leading-relaxed text-charcoal/75">
-              Existing clients should use the agreed support channel. For a new enquiry, email{" "}
-              <a href={`mailto:${company.email}`} className="font-medium text-blue underline decoration-blue/30 underline-offset-4">
-                {company.email}
-              </a>
-              .
+              Existing clients should use the agreed support channel. For a new enquiry, use the contact form.
             </p>
           </div>
           <Link href="/contact" className="btn-solid shrink-0 text-sm">

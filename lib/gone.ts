@@ -39,8 +39,7 @@ const NOTICE = `<!doctype html>
         Infeara delivers support through its service desk rather than a public login.
       </p>
       <p>
-        To reach the team, use the <a href="/contact">contact form</a> or email
-        <a href="mailto:contact@infeara.com">contact@infeara.com</a>.
+        To reach the team, use the <a href="/contact">contact form</a>.
       </p>
       <p><a href="/">Return to the homepage</a></p>
     </main>

@@ -20,18 +20,14 @@ export default function ThankYouPage() {
           </h1>
           <p className="mt-6 text-[1rem] leading-relaxed text-charcoal/75">
             We will reply using the email address you provided, normally within one business day. If the
-            matter is urgent, email{" "}
-            <a href="mailto:contact@infeara.com" className="font-medium text-blue underline underline-offset-4">
-              contact@infeara.com
-            </a>{" "}
-            and say so in the subject line.
+            matter is urgent, submit an update through the contact form with the impact and timing.
           </p>
           <div className="mt-9 flex flex-wrap gap-3">
             <Link href="/" className="btn-solid text-sm">
               Back to the homepage
             </Link>
-            <Link href="/insights" className="btn-outline text-sm">
-              Browse IT guides
+            <Link href="/contact" className="btn-outline text-sm">
+              Contact form
             </Link>
           </div>
         </div>
