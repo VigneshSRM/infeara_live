@@ -122,6 +122,12 @@ needs editing. Licensed photography can replace any entry the same way.
    SUPABASE_ACCESS_TOKEN=sbp_... node scripts/apply-sql.mjs \
      supabase/migrations/20261106090000_cms_schema.sql supabase/seed.sql
    ```
+
+   Supabase no longer exposes new `public` tables to the API on its own: that is the default for
+   projects created since 30 May 2026 and applies to every project from 30 October 2026. On such
+   a project, also run `supabase/migrations/20261109120000_grant_data_api_access.sql` after the
+   schema. It only adds the grants the policies already describe, so it is safe to run on any
+   project and to repeat. Without it a correct sign-in cannot read its staff profile.
 3. Under **Authentication → Users**, create your own account.
 4. Promote it once in the SQL editor:
 
@@ -131,9 +137,11 @@ needs editing. Licensed photography can replace any entry the same way.
    where email = 'you@infeara.com';
    ```
 
-   If it reports `UPDATE 0`, the account was created before the schema was applied, so the
-   signup trigger never made its profile. Run the backfill under
-   [Troubleshooting the Supabase dashboard](#troubleshooting-the-supabase-dashboard) first.
+   If it reports `UPDATE 0`, the address matched no profile: either it is spelled differently
+   from the account you created, or the account was created before the schema was applied, so
+   the signup trigger never made its profile. Use the statements under
+   [Signed in, but the CMS will not open](#signed-in-but-the-cms-will-not-open), which create the
+   missing profile as well.
 
 5. Sign in at `/admin/login`.
 
@@ -252,6 +260,37 @@ If the picker still fails with **Role** on `postgres`, run `select count(*) from
 the SQL editor. If that fails too, the fault is in the database rather than the dashboard: keep
 the exact error text and look at it before changing anything.
 
+### Signed in, but the CMS will not open
+
+Signing in checks the password. Opening the CMS also needs a staff role on the account's
+`public.profiles` row. If a correct password brings you back to `/admin/login`, the page says
+why above the form and shows which account is signed in, with a **Sign out** button:
+
+| The page says | What it means | What to do |
+| :--- | :--- | :--- |
+| "…this account has no CMS role yet" | The account has no profile row, or its role is `pending`. | Give it a role, below. |
+| "…the database blocked the staff lookup" | Postgres answered `permission denied` when the CMS read `profiles`: the API roles have no table grants on this project. | Run `supabase/migrations/20261109120000_grant_data_api_access.sql` in the SQL editor. |
+| "…the staff lookup did not complete" | Any other failure: project paused, schema not applied, network. | Check the project is running and the schema is applied. The server log has the database's own message under `[auth] staff profile lookup failed`. |
+
+**Giving an account a role.** In the SQL editor, list the accounts and their roles (the role is
+empty where there is no profile row), then promote the one you sign in with. Replace the
+address; an address that matches nobody changes nothing, so run the list again to check.
+
+```sql
+select u.email, p.role
+from auth.users u
+left join public.profiles p on p.id = u.id
+order by u.created_at, u.email;
+
+insert into public.profiles (id, email, role)
+select id, coalesce(email, ''), 'super_admin'
+from auth.users
+where lower(email) = lower('you@infeara.com')
+on conflict (id) do update set role = 'super_admin';
+```
+
+Then reload `/admin/login`. The session is still valid, so the CMS opens without signing in again.
+
 ## Redirects
 
 `lib/redirects.ts` maps all 77 URLs from the previous sitemap:
@@ -283,6 +322,7 @@ The Playwright MCP server is configured in `.mcp.json` for MCP-compatible client
 - `npm run test:e2e` — full Playwright browser suite: public route rendering, navigation, contact validation, cookie choices, admin authentication and role permissions.
 - `npm run test:e2e:list` — list discovered browser tests without launching a browser.
 - `npm run test:http` — HTTP/API smoke tests against a running app (defaults to `http://127.0.0.1:3000`).
+- `npm run test:unit` — unit tests for the rule that decides who the CMS lets in (`lib/auth/access.ts`). No server or Supabase needed.
 
 The browser suite starts an isolated, non-Supabase Next dev server on port 3100 by default. Set `PLAYWRIGHT_PORT` to change it or `PLAYWRIGHT_BASE_URL` to target a test deployment. Optional staff-role checks require an isolated test deployment identified by `PLAYWRIGHT_BASE_URL`, `PLAYWRIGHT_ADMIN_TEST_HOST` (exact hostname match), and `PLAYWRIGHT_ADMIN_ISOLATED_TEST=true`, plus the relevant credentials: `PLAYWRIGHT_SUPER_ADMIN_EMAIL` / `PLAYWRIGHT_SUPER_ADMIN_PASSWORD`, `PLAYWRIGHT_EDITOR_EMAIL` / `PLAYWRIGHT_EDITOR_PASSWORD`, and `PLAYWRIGHT_SEO_MANAGER_EMAIL` / `PLAYWRIGHT_SEO_MANAGER_PASSWORD`. Known Infeara production hostnames are blocked. The create/edit/delete CMS workflow has an additional `PLAYWRIGHT_ADMIN_ALLOW_MUTATIONS=true` opt-in; point the test deployment at an isolated Supabase project only.
 

@@ -9,6 +9,7 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "fonts": "node scripts/sync-fonts.mjs",
+    "test:unit": "node --test tests/staff-access.test.mjs",
     "test:http": "node --test tests/http-smoke.test.mjs",
     "test:e2e": "playwright test",
     "test:e2e:list": "playwright test --list"

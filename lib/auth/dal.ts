@@ -4,50 +4,49 @@ import { cache } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { resolveStaffAccess, type StaffAccess, type StaffRole, type StaffUser } from "./access";
 
-export type StaffRole = "super_admin" | "editor" | "seo_manager";
-
-export type StaffUser = {
-  id: string;
-  email: string;
-  name: string | null;
-  role: StaffRole;
-};
+export type { StaffAccess, StaffRole, StaffUser };
 
 /**
  * The single place that turns a Supabase session into a staff identity.
  *
  * A session alone is not enough: the profile must exist and its role must be
  * one of the three working roles. Public signups land in `pending` and are
- * treated as anonymous here.
+ * not admitted. The outcome says *why* someone is not admitted, so the sign-in
+ * page can tell a signed-in person what is wrong instead of showing the form
+ * again with no explanation.
  */
-export const getStaffUser = cache(async (): Promise<StaffUser | null> => {
-  if (!isSupabaseConfigured) return null;
+export const getStaffAccess = cache(async (): Promise<StaffAccess> => {
+  if (!isSupabaseConfigured) return { status: "anonymous" };
 
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return null;
+  if (!user) return { status: "anonymous" };
 
-  const { data: profile } = await supabase
+  const { data: profile, error } = await supabase
     .from("profiles")
     .select("email, full_name, role")
     .eq("id", user.id)
     .maybeSingle();
 
-  if (!profile) return null;
-  if (profile.role !== "super_admin" && profile.role !== "editor" && profile.role !== "seo_manager") {
-    return null;
+  const access = resolveStaffAccess({ user, profile, error });
+
+  if (access.status === "lookup_failed") {
+    // The page shows fixed copy. The database's own wording stays in the log.
+    console.error("[auth] staff profile lookup failed:", error?.code ?? "no code", error?.message ?? "");
   }
 
-  return {
-    id: user.id,
-    email: profile.email ?? user.email ?? "",
-    name: profile.full_name,
-    role: profile.role,
-  };
+  return access;
 });
+
+/** The admitted staff member, or null for anyone who is not let in. */
+export async function getStaffUser(): Promise<StaffUser | null> {
+  const access = await getStaffAccess();
+  return access.status === "staff" ? access.user : null;
+}
 
 export async function requireStaff(): Promise<StaffUser> {
   const user = await getStaffUser();
