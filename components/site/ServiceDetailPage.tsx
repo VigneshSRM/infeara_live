@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { Breadcrumbs, breadcrumbSchema } from "@/components/site/Breadcrumbs";
 import { CtaBand } from "@/components/site/CtaBand";
@@ -31,7 +32,7 @@ function serviceSchema(service: Service) {
 }
 
 /** Shared visual sections; each service has its own explicit route and metadata. */
-export async function ServiceDetailPage({ service }: { service: Service }) {
+export async function ServiceDetailPage({ service, children }: { service: Service; children?: ReactNode }) {
   const related = await relatedServices(service);
   const variant = schematicVariants[(service.order - 1) % schematicVariants.length];
   const crumbs = [
@@ -113,6 +114,8 @@ export async function ServiceDetailPage({ service }: { service: Service }) {
             </div>
           </div>
         </section>
+
+        {children}
 
         <section className="border-y border-navy/10 bg-white py-20 md:py-28">
           <div className="shell grid items-center gap-12 lg:grid-cols-[1fr_1.05fr] lg:gap-20">

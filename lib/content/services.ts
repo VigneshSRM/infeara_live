@@ -285,9 +285,9 @@ export const services: Service[] = [
     shortName: "Cloud & Datacenter",
     tagline: "Migration planned around a way back.",
     summary:
-      "Cloud migration, hybrid and private cloud, datacenter deployment, virtualisation, storage and disaster recovery.",
+      "Cloud AI and data, managed support, cost optimization, monitoring, application hosting, DevOps automation and tested recovery.",
     intro:
-      "Cloud decisions are infrastructure decisions with a time horizon. We plan migrations with a rollback position, run hybrid and private environments where that is the better answer, and treat recovery as a tested capability rather than a document.",
+      "Cloud decisions are infrastructure decisions with a time horizon. We plan migrations with a rollback position, run hybrid and private environments where that is the better answer, and connect cloud AI and data, managed operations, cost optimization, monitoring, hosting, DevOps and recovery to a clear operating model.",
     deliverables: [
       {
         title: "Cloud migration",
@@ -337,7 +337,7 @@ export const services: Service[] = [
     seo: {
       title: "Cloud & Datacenter Services",
       description:
-        "Cloud migration, hybrid and private cloud, datacenter deployment, virtualisation, storage and tested disaster recovery.",
+        "Cloud AI and data services, managed cloud support, cost optimization, monitoring, application hosting, DevOps automation and tested disaster recovery.",
     },
     figure: {
       seed: 5,

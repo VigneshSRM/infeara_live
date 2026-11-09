@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { services } from "@/lib/content/services";
 import { cybersecuritySubservices } from "@/lib/content/cybersecurity-subservices";
+import { cloudSubservices } from "@/lib/content/cloud-subservices";
 import { coreServiceSlugs, infrastructureSubserviceSlugs } from "@/lib/content/service-taxonomy";
 
 type Status = "idle" | "submitting" | "success" | "error";
@@ -186,6 +187,11 @@ export function ContactForm() {
           </optgroup>
           <optgroup label="Cybersecurity sub-services">
             {cybersecuritySubservices.map((service) => (
+              <option key={service.slug} value={service.name}>{service.name}</option>
+            ))}
+          </optgroup>
+          <optgroup label="Cloud & Datacenter sub-services">
+            {cloudSubservices.map((service) => (
               <option key={service.slug} value={service.name}>{service.name}</option>
             ))}
           </optgroup>

@@ -24,3 +24,13 @@ export const cybersecuritySubserviceSlugs = [
   "threat-modeling",
   "threat-analysis",
 ] as const;
+
+export const cloudSubserviceSlugs = [
+  "cloud-ai-data-services",
+  "managed-cloud-support-msp",
+  "cloud-cost-optimization",
+  "cloud-disaster-recovery-business-continuity",
+  "cloud-monitoring-management",
+  "cloud-application-hosting",
+  "cloud-devops-automation",
+] as const;

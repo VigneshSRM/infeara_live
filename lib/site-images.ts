@@ -20,6 +20,13 @@ export type SiteImageKey =
   | "banking-office"
   | "campus-lab"
   | "client-meeting"
+  | "cloud-ai-data"
+  | "managed-cloud-support"
+  | "cloud-cost-optimization"
+  | "cloud-disaster-recovery"
+  | "cloud-monitoring-management"
+  | "cloud-application-hosting"
+  | "cloud-devops-automation"
   | "cybersecurity-hub"
   | "penetration-testing"
   | "threat-analysis"
@@ -71,6 +78,34 @@ export const siteImages: Record<SiteImageKey, SiteImage> = {
   "application-development": {
     src: "/site/core-application-development.jpg",
     alt: "Software developers collaborating on a custom web application.",
+  },
+  "cloud-ai-data": {
+    src: "/site/cloud-ai-data.jpg",
+    alt: "Cloud data specialists reviewing an analytics platform and data flows together.",
+  },
+  "managed-cloud-support": {
+    src: "/site/managed-cloud-support.jpg",
+    alt: "Cloud operations engineers monitoring services and documenting support activity.",
+  },
+  "cloud-cost-optimization": {
+    src: "/site/cloud-cost-optimization.jpg",
+    alt: "Cloud engineers reviewing resource usage and cost trends on a dashboard.",
+  },
+  "cloud-disaster-recovery": {
+    src: "/site/cloud-disaster-recovery.jpg",
+    alt: "Engineers validating recovery readiness beside a secondary server environment.",
+  },
+  "cloud-monitoring-management": {
+    src: "/site/cloud-monitoring-management.jpg",
+    alt: "A cloud infrastructure engineer reviewing service health and monitoring dashboards.",
+  },
+  "cloud-application-hosting": {
+    src: "/site/cloud-application-hosting.jpg",
+    alt: "An application and platform engineer reviewing a hosted service release.",
+  },
+  "cloud-devops-automation": {
+    src: "/site/cloud-devops-automation.jpg",
+    alt: "Software engineers reviewing a cloud build and release pipeline together.",
   },
   "operations-centre": {
     src: "/site/noc-monitoring.jpg",
@@ -156,6 +191,13 @@ const figureSeeds: Record<number, SiteImageKey> = {
   8: "client-meeting", // Turnkey Projects
   19: "ai-automations", // AI Automations
   20: "application-development", // Application Development
+  301: "cloud-ai-data",
+  302: "managed-cloud-support",
+  303: "cloud-cost-optimization",
+  304: "cloud-disaster-recovery",
+  305: "cloud-monitoring-management",
+  306: "cloud-application-hosting",
+  307: "cloud-devops-automation",
   10: "homepage-hero", // Homepage hero
   201: "vulnerability-assessment", // Vulnerability Assessment
   202: "penetration-testing", // Penetration Testing
