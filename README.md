@@ -131,6 +131,10 @@ needs editing. Licensed photography can replace any entry the same way.
    where email = 'you@infeara.com';
    ```
 
+   If it reports `UPDATE 0`, the account was created before the schema was applied, so the
+   signup trigger never made its profile. Run the backfill under
+   [Troubleshooting the Supabase dashboard](#troubleshooting-the-supabase-dashboard) first.
+
 5. Sign in at `/admin/login`.
 
 Regenerate the seed after editing `lib/content` with `node scripts/generate-seed.mjs`.
@@ -182,6 +186,38 @@ There are two ways to add a colleague, both under `/admin/users`:
 Both paths require the service key. Without it, create the account in the Supabase dashboard
 under **Authentication → Users** and assign the role in `/admin/users`. Because there is no
 reliable reset email, `/admin/account` is also the supported way to rotate a password.
+
+### Troubleshooting the Supabase dashboard
+
+**"Unable to load rows from `auth.users`. Please try again or contact support."**
+This is the Table Editor's foreign-key picker. It opens when you insert a row into
+`public.profiles` or edit its `id`, which references `auth.users`. The picker reads `auth.users`
+as the role chosen in the **Role** selector at the top of the Table Editor, and `anon` and
+`authenticated` cannot read that table, so it fails whenever the selector is on one of them (or
+on an impersonated user).
+
+1. Set **Role** back to `postgres` and reopen the picker.
+2. Or skip the picker. The `on_auth_user_created` trigger creates profiles, so set a role in
+   the SQL editor instead of the row editor. The statements are safe to re-run. The first does
+   nothing unless `profiles` predates the `updated_by` column (without it every update fails
+   with `record "new" has no field "updated_by"`); the second adds a `pending` profile for any
+   account that existed before the schema was applied.
+
+   ```sql
+   alter table public.profiles
+     add column if not exists updated_by uuid references public.profiles (id) on delete set null;
+
+   insert into public.profiles (id, email, full_name, role)
+   select u.id, coalesce(u.email, ''), nullif(u.raw_user_meta_data ->> 'full_name', ''), 'pending'
+   from auth.users u
+   on conflict (id) do nothing;
+
+   update public.profiles set role = 'super_admin' where email = 'you@infeara.com';
+   ```
+
+If the picker still fails with **Role** on `postgres`, run `select count(*) from auth.users;` in
+the SQL editor. If that fails too, the fault is in the database rather than the dashboard: keep
+the exact error text and look at it before changing anything.
 
 ## Redirects
 
