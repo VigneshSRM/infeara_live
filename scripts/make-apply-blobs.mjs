@@ -7,15 +7,21 @@
 // splitter can break, while keeping the original files readable and diffable.
 //
 //   node scripts/make-apply-blobs.mjs
-//   → supabase/apply/01-schema.sql, supabase/apply/02-seed.sql
+//   → supabase/apply/01-schema.sql, 02-seed.sql, 03-lead-notes.sql
 //
-// Run 01 first, then 02, each as a fresh query in the SQL editor.
+// Run 01 first, then 02, each as a fresh query in the SQL editor. 03 adds the lead
+// notes chat and can be run at any time after 01 (it is safe to run again).
+//
+// 01 and 02 are large and stay out of git. 03 is small and IS committed, so it can be
+// copied straight from GitHub; tests/dashboard.test.mjs checks it still matches its
+// migration, so run this script again whenever the migration changes.
 
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 
 const targets = [
   ["supabase/migrations/20261106090000_cms_schema.sql", "supabase/apply/01-schema.sql", "schema, roles, RLS, audit, storage"],
   ["supabase/seed.sql", "supabase/apply/02-seed.sql", "content seed"],
+  ["supabase/migrations/20261109210000_lead_notes.sql", "supabase/apply/03-lead-notes.sql", "lead notes chat"],
 ];
 
 mkdirSync("supabase/apply", { recursive: true });

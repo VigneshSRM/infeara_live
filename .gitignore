@@ -11,9 +11,16 @@ npm-debug.log*
 .opencode/
 .playwright-mcp/
 
+# Playwright output (npm run test:e2e writes traces and screenshots here)
+test-results/
+playwright-report/
+
 # QA run artifacts (summary lives in notes/lighthouse-summary.md)
 notes/lighthouse/*.json
 notes/server*.log
 
-# Generated paste-safe SQL wrappers (node scripts/make-apply-blobs.mjs)
-supabase/apply/
+# Generated paste-safe SQL wrappers (node scripts/make-apply-blobs.mjs). The large schema and
+# seed copies stay out of git; the small notes one is committed so it can be copied from GitHub.
+# npm run test:unit fails if it ever stops matching its migration.
+supabase/apply/*
+!supabase/apply/03-lead-notes.sql

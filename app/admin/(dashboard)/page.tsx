@@ -1,6 +1,11 @@
 import Link from "next/link";
+import { Suspense } from "react";
+import { LeadsSection } from "@/components/admin/overview/LeadsSection";
+import { SkeletonSection } from "@/components/admin/overview/blocks";
+import { VisitorsSection } from "@/components/admin/overview/VisitorsSection";
 import { PageHeader, Card, EmptyState } from "@/components/admin/PageHeader";
 import { StatusBadge } from "@/components/admin/StatusBadge";
+import { parseRange } from "@/lib/analytics/ga4-core";
 import { requireStaff } from "@/lib/auth/dal";
 import { createClient } from "@/lib/supabase/server";
 import { isMissingSchema } from "@/lib/admin/errors";
@@ -18,10 +23,11 @@ const when = (value: string) =>
 export default async function AdminOverview({
   searchParams,
 }: {
-  searchParams: Promise<{ denied?: string; welcome?: string }>;
+  searchParams: Promise<{ denied?: string; welcome?: string; range?: string | string[] }>;
 }) {
   const user = await requireStaff();
-  const { denied, welcome } = await searchParams;
+  const { denied, welcome, range } = await searchParams;
+  const days = parseRange(range);
   const supabase = await createClient();
 
   const [newLeads, leads, services, industries, insights, media, audit] = await Promise.all([
@@ -128,6 +134,19 @@ where email = 'you@infeara.com';`}
         <Stat label="Drafts" value={counts.drafts} href="/admin/services" />
         <Stat label="Published practices" value={counts.services} href="/admin/services" />
         <Stat label="Published guides" value={counts.insights} href="/admin/insights" />
+      </div>
+
+      {/* Each section streams in by itself: a slow reply from Google never holds up the rest of the page. */}
+      <div className="mt-10">
+        <Suspense key={`visitors-${days}`} fallback={<SkeletonSection label="Loading website visitors" />}>
+          <VisitorsSection days={days} supabase={supabase} />
+        </Suspense>
+      </div>
+
+      <div className="mt-10">
+        <Suspense fallback={<SkeletonSection label="Loading leads overview" />}>
+          <LeadsSection supabase={supabase} />
+        </Suspense>
       </div>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-[1.4fr_1fr]">

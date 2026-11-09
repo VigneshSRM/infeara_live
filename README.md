@@ -39,10 +39,13 @@ refresh them from the `@fontsource-variable` packages, run `node scripts/sync-fo
 | `SITE_INDEXABLE` | `"true"` to allow indexing. Anything else emits `noindex, nofollow`, an empty sitemap and `Disallow: /`. |
 | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Public project URL and publishable key. Required for the CMS and for database-backed content. |
 | `SUPABASE_SERVICE_ROLE_KEY` | Server-only. Needed only to invite users from the CMS; never exposed to the browser. |
-| `NEXT_PUBLIC_GA4_ID` | GA4 property, loaded only after analytics consent. |
+| `NEXT_PUBLIC_GA4_ID` | GA4 measurement ID (`G-…`). Loaded in the visitor's browser only after they press **Allow analytics**. It is baked into the build, so changing it needs a new deployment. |
+| `GA4_PROPERTY_ID` | Server-only. The numeric **Property ID** of the same GA4 property (not the `G-…` ID). With the next variable it lets the CMS Overview read visitor numbers back. |
+| `GA4_SERVICE_ACCOUNT_JSON` | Server-only secret. The whole JSON key of a Google service account that is a Viewer on that property. In Vercel mark it **Sensitive**. |
 
 Without the Supabase variables the public site renders the checked-in seed content and the
-CMS shows a setup notice.
+CMS shows a setup notice. Without the two `GA4_…` server variables the CMS Overview shows a
+setup card in place of visitor numbers; nothing else changes.
 
 ## Structure
 
@@ -123,6 +126,14 @@ needs editing. Licensed photography can replace any entry the same way.
      supabase/migrations/20261106090000_cms_schema.sql supabase/seed.sql
    ```
 
+   The internal notes chat on leads has its own file,
+   `supabase/migrations/20261109210000_lead_notes.sql`. Run it in the SQL editor with
+   **Role: postgres**, after the schema. It is safe to run again. If the editor splits it and
+   reports a syntax error, paste `supabase/apply/03-lead-notes.sql` instead: the same SQL as a
+   single statement, committed to the repository (the unit tests fail if the two ever differ;
+   regenerate it with `node scripts/make-apply-blobs.mjs`). Until the file is applied the CMS
+   keeps working: lead pages show the old single notes box and a short notice.
+
    Supabase no longer exposes new `public` tables to the API on its own: that is the default for
    projects created since 30 May 2026 and applies to every project from 30 October 2026. On such
    a project, also run `supabase/migrations/20261109120000_grant_data_api_access.sql` after the
@@ -178,7 +189,69 @@ not read one back.
 `/api/contact` validates the submission, ignores honeypot hits, applies a best-effort
 per-instance rate limit and inserts into `leads` using the anonymous publishable key. Staff
 see the enquiry at `/admin/leads`, where they can set a status (new, contacted, qualified,
-closed, spam) and keep internal notes. Nothing on that screen is public.
+closed, spam) and keep internal notes as a chat (see below). Nothing on that screen is public.
+
+### Overview: visitors and leads
+
+`/admin` shows two live sections under the quick numbers.
+
+**Website visitors** is read from Google Analytics through the Data API: active now, visitors,
+new visitors, sessions, page views, average engagement time and engagement rate (each against
+the previous period), a bar per day, and the top pages, channels, sources, countries, cities
+and devices. The tabs switch between 7, 30 and 90 days (`?range=7|30|90`); days follow
+Asia/Kolkata. Reports are cached for ten minutes (the "active now" figure for one minute, a
+failure for 30 seconds), so a reload is cheap and the numbers can lag a little. Only visitors
+who press **Allow analytics** on the cookie banner are counted. The consent rule is unchanged,
+so these figures are lower than real traffic.
+
+**Leads overview** comes from the database, so it works without Google: enquiries today, in the
+last 7 and 30 days against the period before, how many are still **new** after a day, a bar per
+day, the split by status, and the topics and pages people wrote from.
+
+One-time Google setup (about ten minutes):
+
+1. In Google Cloud (any project), open **APIs & Services › Library** and enable **Google
+   Analytics Data API**.
+2. In **IAM & Admin › Service accounts**, create a service account (it needs no roles), then
+   **Keys › Add key › JSON**. Copy the account's email address.
+3. In Google Analytics, open **Admin › Property access management** and add that email as a
+   **Viewer**.
+4. In **Admin › Property details**, copy the numeric **Property ID**.
+5. In Vercel add `GA4_PROPERTY_ID` (the number) and `GA4_SERVICE_ACCOUNT_JSON` (the whole key
+   file, marked **Sensitive**) for Production, then redeploy.
+
+Until that is done the Overview shows a setup card that lists what is set and what is missing.
+When Google refuses a request the card names the likely cause and the fix. It never prints
+Google's own error text.
+
+| The card says | What to do |
+| :--- | :--- |
+| `GA4_PROPERTY_ID holds the G-… tracking id` | Use the numeric Property ID from **Admin › Property details**. |
+| The Google Analytics Data API is switched off | Enable it in the same Google Cloud project as the service account (step 1). |
+| The service account cannot read this property | Add the account's email as a Viewer (step 3) and check the Property ID. |
+| Google rejected the service account key | Create a new JSON key and update `GA4_SERVICE_ACCOUNT_JSON`. |
+| Google Analytics is limiting requests | The property's allowance is used up. Reports are cached, so it clears by itself. |
+
+Check that tracking works with a private window: open the public site, press **Allow
+analytics**, and look for yourself in Google Analytics under **Reports › Realtime**. The
+measurement ID is read at build time and only in the Vercel environments it is added to
+(Production, in this project), so preview deployments do not track.
+
+### Internal notes on leads
+
+Each lead has a private chat for staff, under `/admin/leads/<id>`. A note is sent with **Send**
+(Enter on a keyboard, Shift+Enter for a new line) and becomes its own message with the author's
+name and the time. Everyone on staff can read the whole history, and an open page picks up a
+colleague's message within a few seconds without a reload.
+
+- Messages are up to 4,000 characters and cannot be edited.
+- Every staff role (super admin, editor, SEO manager) can read and send. Only a **super admin**
+  can delete a message, after a confirmation, and the deletion is written to the audit log.
+- The author and the time are stamped by the database, not trusted from the browser.
+- The old single notes field is kept: its text appears as the first message ("Earlier note").
+- `supabase/migrations/20261109210000_lead_notes.sql` creates the table, its policies and
+  grants (paste-ready copy: `supabase/apply/03-lead-notes.sql`). If the lead page says the notes
+  are not switched on, that file has not been applied yet (see First setup, step 2).
 
 ### Invitations and email
 
