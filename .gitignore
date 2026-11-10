@@ -20,7 +20,8 @@ notes/lighthouse/*.json
 notes/server*.log
 
 # Generated paste-safe SQL wrappers (node scripts/make-apply-blobs.mjs). The large schema and
-# seed copies stay out of git; the small notes one is committed so it can be copied from GitHub.
-# npm run test:unit fails if it ever stops matching its migration.
+# seed copies stay out of git; the small notes and core-services ones are committed so they can
+# be copied from GitHub. npm run test:unit fails if either stops matching its migrations.
 supabase/apply/*
 !supabase/apply/03-lead-notes.sql
+!supabase/apply/04-core-services.sql

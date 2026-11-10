@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CoreServiceNotice } from "@/components/admin/CoreServiceNotice";
 import { Flash } from "@/components/admin/Flash";
 import { PageHeader } from "@/components/admin/PageHeader";
 import { SchemaNotice } from "@/components/admin/SchemaNotice";
@@ -7,6 +8,8 @@ import { canEdit } from "@/lib/auth/dal";
 import { requireStaff } from "@/lib/auth/dal";
 import { isMissingSchema } from "@/lib/admin/errors";
 import { istLabel } from "@/lib/admin/forms";
+import { coreServiceGaps } from "@/lib/content/core-services";
+import { coreServiceSlugs } from "@/lib/content/service-taxonomy";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -41,6 +44,9 @@ export default async function ServicesListPage({
   const rows = (data ?? []) as Row[];
   const editable = canEdit(user);
   const now = Date.now();
+  // Only for a table that has rows: a failed read, or an empty table (the empty state below
+  // already says to run the seed), would otherwise flag all six.
+  const gaps = error || !rows.length ? [] : coreServiceGaps(coreServiceSlugs, rows, now);
 
   return (
     <>
@@ -58,6 +64,8 @@ export default async function ServicesListPage({
       />
 
       <Flash saved={params.saved} deleted={params.deleted} error={params.error} />
+
+      <CoreServiceNotice gaps={gaps} />
 
       {error ? (
         <p role="alert" className="mt-4 rounded-md border border-coral-ink/30 bg-coral/10 px-4 py-3 text-[0.85rem] text-coral-ink">

@@ -105,7 +105,10 @@ needs editing. Licensed photography can replace any entry the same way.
    `service_role` JWT). It is server-only and must never be exposed to the browser.
 2. Apply the schema, then the seed. The migration creates the tables, roles, policies, audit
    triggers and the public `media` storage bucket. The seed copies the frontend content in and
-   skips any table that already has rows, so it is safe to re-run.
+   skips any table that already has rows, so it is safe to re-run. That also means it only ever
+   fills an empty table: it never adds a page that is missing from a table that already has
+   rows, so a database seeded before a page existed does not get it by re-running the seed (see
+   [Core services missing from the site](#core-services-missing-from-the-site)).
 
    The dashboard SQL editor splits a pasted script into statements and can cut a
    `create policy … for update …` statement in half (`syntax error at or near "for"`). If that
@@ -133,6 +136,14 @@ needs editing. Licensed photography can replace any entry the same way.
    single statement, committed to the repository (the unit tests fail if the two ever differ;
    regenerate it with `node scripts/make-apply-blobs.mjs`). Until the file is applied the CMS
    keeps working: lead pages show the old single notes box and a short notice.
+
+   A database that was seeded before AI Automations and Application Development existed needs
+   one more file, `supabase/apply/04-core-services.sql` (readable copies:
+   `20261106150000_split_automation_application_services.sql` and
+   `20261110090000_publish_core_services.sql`). Run it with **Role: postgres**. A database made
+   from the current seed already has both services, so skip the file there: it would only reset
+   their text to the version in the repository. The symptom and the check are under
+   [Core services missing from the site](#core-services-missing-from-the-site).
 
    Supabase no longer exposes new `public` tables to the API on its own: that is the default for
    projects created since 30 May 2026 and applies to every project from 30 October 2026. On such
@@ -364,6 +375,68 @@ on conflict (id) do update set role = 'super_admin';
 
 Then reload `/admin/login`. The session is still valid, so the CMS opens without signing in again.
 
+### Core services missing from the site
+
+The home page and `/services` show six core services: IT Infrastructure, Cybersecurity,
+Cloud & Datacenter, Turnkey Projects, AI Automations and Application Development. If a grid
+shows fewer cards than its heading says, and the missing service's own page (for example
+`/services/ai-automations`) answers "That page is not on the map", the database has no
+**published** row for it.
+
+The site reads services from the database and the database wins. A service that is not there,
+or is a draft, archived or dated for later, is left out of the grid without a message, and its
+page is a 404. The checked-in seed is not a fallback for this: the site uses it only when
+Supabase is not configured or a read fails outright (for example, the schema has not been
+applied). That is deliberate, so that unpublishing a page in the CMS can never bring it back.
+
+**How you find out.** `/admin/services` shows a notice that names each core service visitors
+cannot see and why: not in the database, a draft, archived, or dated for later. It stays quiet
+when all six are live, and while the table is empty (the empty state already says to run the
+seed).
+
+**Not in the database.** This is what happens to a project that was seeded before the page
+existed: the seed skips a table that already has rows, and the content migrations below are not
+part of it. In the SQL editor, with **Role: postgres**, paste and run
+`supabase/apply/04-core-services.sql`. It renames the old combined "Automation & Custom
+Software" row in place if there is one, adds whichever of AI Automations and Application
+Development is missing, publishes both, then checks what a visitor can see. If either is still
+hidden it stops with an error that names it and keeps none of its changes. Success reads
+"Success. No rows returned." If the two services already exist and someone has edited them in the
+CMS, the file puts their text back to the version in the repository (the earlier wording stays in
+`audit_log`), so in that case use **Exists but hidden**, below, instead. To check:
+
+```sql
+select slug, status
+from public.services
+where slug in ('it-infrastructure', 'cybersecurity', 'cloud-datacenter',
+               'turnkey-projects', 'ai-automations', 'application-development')
+order by sort_order;
+```
+
+All six rows should say `published`. The public pages are cached for up to five minutes
+(`revalidate = 300`) and a SQL run does not clear the cache, so allow five to ten minutes
+before judging the site, or redeploy. Saving in the CMS does refresh straight away.
+
+**Exists but hidden.** Open the service under `/admin/services` and set **Status** to
+**Published**, and clear a publish date that is still in the future.
+
+**Other content migrations.** Each of these rewrites page text in an existing database. A
+database made from the current seed already has their result, so they matter only for one made
+earlier, and each is safe to run again. They overwrite the wording they set, so look at the
+CMS first if anyone has edited those pages there.
+
+| Migration | What it does to an existing database |
+| :--- | :--- |
+| `20261106120000_service_hierarchy.sql` | Rewrites the wording of IT Infrastructure and Remote IT Services. |
+| `20261106150000_split_automation_application_services.sql` | Replaces the old combined Automation & Custom Software service with AI Automations and Application Development. Included in `04`. |
+| `20261106160000_route_contact_through_form.sql` | Replaces the published email address in the legal documents with "the website contact form". |
+| `20261107120000_cybersecurity_service_hub.sql` | Rewrites the wording of the Cybersecurity page. |
+| `20261110090000_publish_core_services.sql` | Publishes AI Automations and Application Development if they exist as drafts, and checks they are visible. Included in `04`. |
+
+When a change needs a new row or a new page in the database, not just new wording, it ships as
+a migration like these, and it has to be run on the live project: merging and deploying the code
+does not change the database.
+
 ## Redirects
 
 `lib/redirects.ts` maps all 77 URLs from the previous sitemap:
@@ -395,7 +468,7 @@ The Playwright MCP server is configured in `.mcp.json` for MCP-compatible client
 - `npm run test:e2e` — full Playwright browser suite: public route rendering, navigation, contact validation, cookie choices, admin authentication and role permissions.
 - `npm run test:e2e:list` — list discovered browser tests without launching a browser.
 - `npm run test:http` — HTTP/API smoke tests against a running app (defaults to `http://127.0.0.1:3000`).
-- `npm run test:unit` — unit tests for the rule that decides who the CMS lets in (`lib/auth/access.ts`). No server or Supabase needed.
+- `npm run test:unit` — unit tests for the rule that decides who the CMS lets in (`lib/auth/access.ts`), the Overview analytics and lead notes chat, and the core services (the CMS notice, and the check that `supabase/apply/04-core-services.sql` still matches its migrations). No server or Supabase needed.
 
 The browser suite starts an isolated, non-Supabase Next dev server on port 3100 by default. Set `PLAYWRIGHT_PORT` to change it or `PLAYWRIGHT_BASE_URL` to target a test deployment. Optional staff-role checks require an isolated test deployment identified by `PLAYWRIGHT_BASE_URL`, `PLAYWRIGHT_ADMIN_TEST_HOST` (exact hostname match), and `PLAYWRIGHT_ADMIN_ISOLATED_TEST=true`, plus the relevant credentials: `PLAYWRIGHT_SUPER_ADMIN_EMAIL` / `PLAYWRIGHT_SUPER_ADMIN_PASSWORD`, `PLAYWRIGHT_EDITOR_EMAIL` / `PLAYWRIGHT_EDITOR_PASSWORD`, and `PLAYWRIGHT_SEO_MANAGER_EMAIL` / `PLAYWRIGHT_SEO_MANAGER_PASSWORD`. Known Infeara production hostnames are blocked. The create/edit/delete CMS workflow has an additional `PLAYWRIGHT_ADMIN_ALLOW_MUTATIONS=true` opt-in; point the test deployment at an isolated Supabase project only.
 
