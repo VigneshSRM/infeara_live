@@ -36,6 +36,8 @@ export function Header({ variant = "solid" }: Props) {
             }
 
             const wide = children.length > 8;
+            // The label of the closing "see everything" link; menus without a hub page omit it.
+            const overviewLabel = "overviewLabel" in item ? item.overviewLabel : null;
 
             return (
               <details key={item.href} className="group relative">
@@ -103,12 +105,14 @@ export function Header({ variant = "solid" }: Props) {
                         );
                       })}
                     </ul>
-                    <Link
-                      href={item.href}
-                      className="mt-1 block rounded-sm border-t border-navy/10 px-3 pt-3 pb-2 font-heading text-[0.72rem] uppercase tracking-[0.12em] text-blue hover:text-navy"
-                    >
-                      {item.href === "/services" ? "All services" : item.href === "/industries" ? "All industries" : "About Infeara"}
-                    </Link>
+                    {overviewLabel ? (
+                      <Link
+                        href={item.href}
+                        className="mt-1 block rounded-sm border-t border-navy/10 px-3 pt-3 pb-2 font-heading text-[0.72rem] uppercase tracking-[0.12em] text-blue hover:text-navy"
+                      >
+                        {overviewLabel}
+                      </Link>
+                    ) : null}
                   </div>
                 </div>
               </details>
@@ -146,6 +150,7 @@ export function Header({ variant = "solid" }: Props) {
               <ul className="space-y-1">
                 {nav.map((item) => {
                   const children = "children" in item && item.children ? item.children : null;
+                  const overviewLabel = "overviewLabel" in item ? item.overviewLabel : null;
                   return (
                     <li key={item.href}>
                       {children ? (
@@ -197,14 +202,16 @@ export function Header({ variant = "solid" }: Props) {
                                 </li>
                               );
                             })}
-                            <li>
-                              <Link
-                                href={item.href}
-                                className="mt-1 block border-t border-navy/10 px-3 py-2 text-[0.75rem] font-semibold uppercase tracking-[0.12em] text-blue"
-                              >
-                                {item.href === "/services" ? "All services" : item.href === "/industries" ? "All industries" : "About Infeara"}
-                              </Link>
-                            </li>
+                            {overviewLabel ? (
+                              <li>
+                                <Link
+                                  href={item.href}
+                                  className="mt-1 block border-t border-navy/10 px-3 py-2 text-[0.75rem] font-semibold uppercase tracking-[0.12em] text-blue"
+                                >
+                                  {overviewLabel}
+                                </Link>
+                              </li>
+                            ) : null}
                           </ul>
                         </details>
                       ) : (

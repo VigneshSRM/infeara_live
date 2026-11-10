@@ -55,8 +55,10 @@ app/
   services/[slug]          9 practice pages
   industries/[slug]        8 sector pages
   insights/[slug]          3 editorial articles
+  blogs/[slug]             blog posts, written in lib/content/blogs.ts (3 starter posts)
   legal/[slug]             privacy, terms, cookies
   about, approach, why-infeara, case-studies, partners, sla, faq, careers, contact
+  white-papers             placeholder page; nothing is published yet
   api/contact              validated form; writes to the leads table
   admin/                   CMS (login, dashboard, content, leads, media, audit, users)
   login, forgot-password   route handlers returning 410 Gone
@@ -93,6 +95,27 @@ Every page therefore shows two different photographs, and each one carries descr
 taken from the library entry while the caption stays in the `figcaption`. To change a picture,
 drop the file in `public/site/`, add it to `siteImages`, and repoint the seed or label — no page
 needs editing. Licensed photography can replace any entry the same way.
+
+### Blogs, white papers and the Technical resources menu
+
+The **Technical resources** item in the header is a dropdown of four pages: Insights
+(`/insights`), Blogs (`/blogs`), Case Studies (`/case-studies`) and White Papers
+(`/white-papers`). The menu is the `nav` array in `lib/content/site.ts`, and the footer's
+Resources column is `footerColumns` in the same file. A menu that has a hub page sets
+`overviewLabel` to get a closing link to its own `href` ("All services"); Technical resources has
+no hub page, so it has no closing link. Case Studies is also still listed under About.
+
+- **Blogs are not in the database.** Each post is an entry in `blogPosts` in
+  `lib/content/blogs.ts`. To publish one, add an entry and deploy; the index, the post page, the
+  sitemap and the reading time all follow from it. A slug is the public URL, so do not change it
+  once a post is live. To retire a post, delete its entry and add a redirect in
+  `lib/redirects.ts` if the URL was shared. Unlike insights, posts cannot be edited in the CMS.
+- The three posts that ship are **starter content**, written to show the layout. They make no
+  claims about clients, results or figures. Replace or remove them in the content swap, before
+  `SITE_INDEXABLE` is switched on.
+- **White papers** is a placeholder that says none are published yet. It is `noindex` and is left
+  out of the sitemap. When the first paper exists, remove `noIndex` in
+  `app/white-papers/page.tsx`, add the route to `app/sitemap.ts`, and replace the placeholder copy.
 
 ## Content management
 
@@ -468,7 +491,7 @@ The Playwright MCP server is configured in `.mcp.json` for MCP-compatible client
 - `npm run test:e2e` — full Playwright browser suite: public route rendering, navigation, contact validation, cookie choices, admin authentication and role permissions.
 - `npm run test:e2e:list` — list discovered browser tests without launching a browser.
 - `npm run test:http` — HTTP/API smoke tests against a running app (defaults to `http://127.0.0.1:3000`).
-- `npm run test:unit` — unit tests for the rule that decides who the CMS lets in (`lib/auth/access.ts`), the Overview analytics and lead notes chat, and the core services (the CMS notice, and the check that `supabase/apply/04-core-services.sql` still matches its migrations). No server or Supabase needed.
+- `npm run test:unit` — unit tests for the rule that decides who the CMS lets in (`lib/auth/access.ts`), the Overview analytics and lead notes chat, and the core services (the CMS notice, and the check that `supabase/apply/04-core-services.sql` still matches its migrations), and the blog posts and the Technical resources menu (`tests/blogs.test.mjs`). No server or Supabase needed.
 
 The browser suite starts an isolated, non-Supabase Next dev server on port 3100 by default. Set `PLAYWRIGHT_PORT` to change it or `PLAYWRIGHT_BASE_URL` to target a test deployment. Optional staff-role checks require an isolated test deployment identified by `PLAYWRIGHT_BASE_URL`, `PLAYWRIGHT_ADMIN_TEST_HOST` (exact hostname match), and `PLAYWRIGHT_ADMIN_ISOLATED_TEST=true`, plus the relevant credentials: `PLAYWRIGHT_SUPER_ADMIN_EMAIL` / `PLAYWRIGHT_SUPER_ADMIN_PASSWORD`, `PLAYWRIGHT_EDITOR_EMAIL` / `PLAYWRIGHT_EDITOR_PASSWORD`, and `PLAYWRIGHT_SEO_MANAGER_EMAIL` / `PLAYWRIGHT_SEO_MANAGER_PASSWORD`. Known Infeara production hostnames are blocked. The create/edit/delete CMS workflow has an additional `PLAYWRIGHT_ADMIN_ALLOW_MUTATIONS=true` opt-in; point the test deployment at an isolated Supabase project only.
 

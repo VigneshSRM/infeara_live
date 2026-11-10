@@ -4,6 +4,7 @@ import { cybersecuritySubservices } from "@/lib/content/cybersecurity-subservice
 import { cloudSubservices } from "@/lib/content/cloud-subservices";
 import { productSubservices } from "@/lib/content/product-subservices";
 import { legalDocuments } from "@/lib/content/legal";
+import { blogPosts } from "@/lib/content/blogs";
 import { SITE_INDEXABLE, SITE_URL } from "@/lib/site";
 
 const staticRoutes: { path: string; priority: number; changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"] }[] = [
@@ -17,6 +18,7 @@ const staticRoutes: { path: string; priority: number; changeFrequency: MetadataR
   { path: "/sla", priority: 0.7, changeFrequency: "monthly" },
   { path: "/case-studies", priority: 0.7, changeFrequency: "monthly" },
   { path: "/insights", priority: 0.7, changeFrequency: "weekly" },
+  { path: "/blogs", priority: 0.7, changeFrequency: "weekly" },
   { path: "/partners", priority: 0.6, changeFrequency: "yearly" },
   { path: "/faq", priority: 0.6, changeFrequency: "monthly" },
   { path: "/careers", priority: 0.6, changeFrequency: "weekly" },
@@ -81,6 +83,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.5,
   }));
 
+  const blogRoutes = blogPosts.map((post) => ({
+    url: `${SITE_URL}/blogs/${post.slug}`,
+    lastModified: new Date(`${post.publishedAt}T00:00:00Z`),
+    changeFrequency: "yearly" as const,
+    priority: 0.5,
+  }));
+
   const legalRoutes = legalDocuments.map((document) => ({
     url: `${SITE_URL}/legal/${document.slug}`,
     lastModified,
@@ -101,6 +110,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...productSubserviceRoutes,
     ...industryRoutes,
     ...insightRoutes,
+    ...blogRoutes,
     ...legalRoutes,
   ];
 }

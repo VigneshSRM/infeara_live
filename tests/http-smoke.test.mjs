@@ -58,6 +58,8 @@ const publicRoutes = [
   "/insights/what-managed-it-actually-covers",
   "/insights/three-questions-before-a-cloud-migration",
   "/insights/a-backup-is-not-a-recovery-plan",
+  "/blogs",
+  "/white-papers",
   "/legal/privacy-policy",
   "/legal/terms",
   "/legal/cookies",
@@ -69,6 +71,37 @@ test("all public pages return 200 and contain one primary heading", async () => 
     const body = await response.text();
     assert.equal(response.status, 200, `${path} returned ${response.status}`);
     assert.equal((body.match(/<h1\b/g) ?? []).length, 1, `${path} should have one h1`);
+  }
+});
+
+test("every blog post the blog page links to returns 200, and other addresses under /blogs do not", async () => {
+  const index = await (await fetch(`${baseURL}/blogs`)).text();
+  const posts = [...new Set([...index.matchAll(/href="(\/blogs\/[a-z0-9-]+)"/g)].map((match) => match[1]))];
+  assert.ok(posts.length > 0, "/blogs links to no posts");
+
+  for (const path of posts) {
+    const response = await fetch(`${baseURL}${path}`);
+    const body = await response.text();
+    assert.equal(response.status, 200, `${path} returned ${response.status}`);
+    assert.equal((body.match(/<h1\b/g) ?? []).length, 1, `${path} should have one h1`);
+    assert.match(body, /"@type":"BlogPosting"/, `${path} has no BlogPosting data`);
+  }
+
+  const missing = await fetch(`${baseURL}/blogs/this-post-does-not-exist`);
+  assert.equal(missing.status, 404);
+});
+
+test("the header's Technical resources menu links to Insights, Blogs, Case Studies and White Papers", async () => {
+  for (const path of ["/", "/contact", "/blogs"]) {
+    const page = await (await fetch(`${baseURL}${path}`)).text();
+    // Only the header counts: the footer links to some of the same pages and would hide a gap.
+    const header = page.slice(page.indexOf("<header"), page.indexOf("</header>"));
+    const start = header.indexOf("Technical resources");
+    assert.ok(start > 0, `${path}: no Technical resources menu in the header`);
+    const menu = header.slice(start, header.indexOf("</details>", start));
+    for (const href of ["/insights", "/blogs", "/case-studies", "/white-papers"]) {
+      assert.ok(menu.includes(`href="${href}"`), `${path}: the menu has no link to ${href}`);
+    }
   }
 });
 
