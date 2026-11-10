@@ -14,6 +14,7 @@ export const nav = [
   {
     label: "About",
     href: "/about",
+    overviewLabel: "About Infeara",
     children: [
       { label: "Our Approach", href: "/approach" },
       { label: "Why Infeara", href: "/why-infeara" },
@@ -25,6 +26,7 @@ export const nav = [
   {
     label: "Services",
     href: "/services",
+    overviewLabel: "All services",
     children: [
       {
         label: "IT Infrastructure",
@@ -84,6 +86,7 @@ export const nav = [
   {
     label: "Industries",
     href: "/industries",
+    overviewLabel: "All industries",
     children: [
       { label: "Banking & Financial Services", href: "/industries/banking-financial-services" },
       { label: "Healthcare", href: "/industries/healthcare" },
@@ -95,7 +98,17 @@ export const nav = [
       { label: "Enterprise & Corporate Offices", href: "/industries/enterprise-offices" },
     ],
   },
-  { label: "Technical resources", href: "/insights" },
+  {
+    // No hub page sits above these four, so the menu has no "overview" link at the bottom.
+    label: "Technical resources",
+    href: "/insights",
+    children: [
+      { label: "Insights", href: "/insights" },
+      { label: "Blogs", href: "/blogs" },
+      { label: "Case Studies", href: "/case-studies" },
+      { label: "White Papers", href: "/white-papers" },
+    ],
+  },
   { label: "Contact", href: "/contact" },
 ] as const;
 
@@ -126,7 +139,9 @@ export const footerColumns = [
   {
     title: "Resources",
     links: [
-      { label: "Technical resources", href: "/insights" },
+      { label: "Insights", href: "/insights" },
+      { label: "Blogs", href: "/blogs" },
+      { label: "White papers", href: "/white-papers" },
       { label: "SLA & support model", href: "/sla" },
       { label: "FAQ", href: "/faq" },
       { label: "Contact", href: "/contact" },

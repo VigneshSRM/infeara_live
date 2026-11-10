@@ -276,6 +276,8 @@ const figureSeeds: Record<number, SiteImageKey> = {
   139: "runbook-desk", // /careers/opportunities — application review
   141: "client-meeting", // /contact — first conversation
   151: "runbook-desk", // /legal/[slug] — review cycle
+  161: "runbook-desk", // /blogs — notes from the desk (each post passes its own seed)
+  171: "banking-office", // /white-papers — document review
 };
 
 /**
