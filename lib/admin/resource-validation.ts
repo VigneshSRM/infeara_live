@@ -116,3 +116,14 @@ export function blogProblem(input: { status: string; sections: number }): Proble
   if (input.status === "published" && input.sections === 0) return "Add at least one section to the body before publishing.";
   return null;
 }
+
+/**
+ * Links typed in a post as [text](address) whose address is not allowed (the list comes from
+ * unsafeBlogLinks in lib/content/blogs.ts, which decides what is). Empty list: nothing to say.
+ */
+export function blogLinkProblem(badAddresses: readonly string[]): Problem {
+  if (badAddresses.length === 0) return null;
+  const first = badAddresses[0];
+  const shown = first.length > 60 ? `${first.slice(0, 57)}...` : first;
+  return `“${shown}” cannot be used as a link. A link starts with https:// or http://, or with a single / for a page on this site, for example [Contact us](/contact).`;
+}

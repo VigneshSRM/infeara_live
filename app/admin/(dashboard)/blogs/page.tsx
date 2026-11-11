@@ -81,7 +81,7 @@ export default async function BlogsListPage({ searchParams }: { searchParams: Pr
       <PageHeader
         eyebrow="Technical resources"
         title="Blog posts"
-        description="Short posts shown at /blogs. Each post gets its own page and search listing; new ones work without a deploy."
+        description="Posts shown at /blogs. Each post gets its own page and search listing; new ones work without a deploy."
         actions={
           canEdit(user) ? (
             <Link href={`${PATH}/new`} className="admin-btn admin-btn-primary">

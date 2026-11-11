@@ -1,4 +1,5 @@
-type Crumb = { label: string; href: string };
+import { breadcrumbListSchema, type Crumb } from "@/lib/seo/schema";
+import { SITE_URL } from "@/lib/site";
 
 export function Breadcrumbs({ items }: { items: Crumb[] }) {
   const list = [{ label: "Home", href: "/" }, ...items];
@@ -32,16 +33,7 @@ export function Breadcrumbs({ items }: { items: Crumb[] }) {
   );
 }
 
+/** BreadcrumbList data for the same trail. The addresses are absolute: see lib/seo/schema.ts. */
 export function breadcrumbSchema(items: Crumb[]) {
-  const list = [{ label: "Home", href: "/" }, ...items];
-  return {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: list.map((item, index) => ({
-      "@type": "ListItem",
-      position: index + 1,
-      name: item.label,
-      item: item.href,
-    })),
-  };
+  return breadcrumbListSchema(SITE_URL, items);
 }

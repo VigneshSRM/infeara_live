@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { JsonLd } from "@/components/seo/JsonLd";
+import { BlogBody } from "@/components/site/BlogBody";
 import { BlogCard } from "@/components/site/BlogCard";
 import { Breadcrumbs, breadcrumbSchema } from "@/components/site/Breadcrumbs";
 import { CtaBand } from "@/components/site/CtaBand";
@@ -8,9 +9,11 @@ import { Figure } from "@/components/site/Figure";
 import { PageFrame } from "@/components/site/PageFrame";
 import { SectionHeading } from "@/components/site/SectionHeading";
 import { getBlogPost, listBlogPosts } from "@/lib/content";
-import { formatPostDate, readingMinutes, type BlogPost } from "@/lib/content/blogs";
+import { formatPostDate, readingMinutes } from "@/lib/content/blogs";
 import { pageMetadata } from "@/lib/metadata";
+import { blogPostingSchema } from "@/lib/seo/schema";
 import { SITE_URL } from "@/lib/site";
+import { figureImage } from "@/lib/site-images";
 
 // Posts are managed in the admin (Admin → Resources → Blogs). The pages that exist at build time
 // are built ahead; a post published later is rendered on its first visit, and an address that is
@@ -37,35 +40,6 @@ export async function generateMetadata({ params }: Props) {
   });
 }
 
-function postSchema(post: BlogPost) {
-  return {
-    "@context": "https://schema.org",
-    "@type": "BlogPosting",
-    headline: post.title,
-    description: post.seo.description,
-    datePublished: post.publishedAt,
-    dateModified: post.publishedAt,
-    author: {
-      "@type": "Organization",
-      name: "Infeara Technologies",
-      url: SITE_URL,
-    },
-    publisher: {
-      "@type": "Organization",
-      name: "Infeara Technologies",
-      logo: {
-        "@type": "ImageObject",
-        url: `${SITE_URL}/brand/infeara-logo.png`,
-      },
-    },
-    mainEntityOfPage: {
-      "@type": "WebPage",
-      "@id": `${SITE_URL}/blogs/${post.slug}`,
-    },
-    inLanguage: "en-IN",
-  };
-}
-
 export default async function BlogPostPage({ params }: Props) {
   const { slug } = await params;
   const post = await getBlogPost(slug);
@@ -80,7 +54,17 @@ export default async function BlogPostPage({ params }: Props) {
 
   return (
     <>
-      <JsonLd data={postSchema(post)} />
+      <JsonLd
+        data={blogPostingSchema({
+          siteUrl: SITE_URL,
+          slug: post.slug,
+          headline: post.title,
+          description: post.seo.description,
+          category: post.category,
+          publishedAt: post.publishedAt,
+          imagePath: figureImage(post.figureSeed).src,
+        })}
+      />
       <JsonLd data={breadcrumbSchema(crumbs)} />
 
       <PageFrame>
@@ -123,13 +107,7 @@ export default async function BlogPostPage({ params }: Props) {
                   <h2 className="font-heading text-[1.2rem] font-semibold leading-[1.3] text-navy">
                     {section.heading}
                   </h2>
-                  <div className="mt-4 space-y-4">
-                    {section.paragraphs.map((paragraph, paragraphIndex) => (
-                      <p key={`${paragraphIndex}-${paragraph.slice(0, 24)}`} className="text-[1rem] leading-[1.75] text-charcoal/80">
-                        {paragraph}
-                      </p>
-                    ))}
-                  </div>
+                  <BlogBody paragraphs={section.paragraphs} />
                 </section>
               ))}
 
@@ -155,7 +133,7 @@ export default async function BlogPostPage({ params }: Props) {
               ) : null}
             </div>
 
-            <aside className="space-y-10">
+            <aside className="space-y-10 lg:sticky lg:top-28 lg:self-start">
               <Figure
                 seed={post.figureSeed}
                 layout="portrait"

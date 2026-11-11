@@ -43,7 +43,7 @@ const meanwhile = [
   },
   {
     title: "Blogs",
-    detail: "Short posts on IT, security and software, written for the people making the decision.",
+    detail: "Posts on IT, security and software, written for the people making the decision.",
     href: "/blogs",
     action: "Read the blog",
   },
