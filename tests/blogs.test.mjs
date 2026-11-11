@@ -105,10 +105,11 @@ test("related-service buttons point at pages that exist in the site navigation",
   }
 });
 
-test("the starter posts make no claims about clients, results or figures", () => {
+test("the shipped posts make no claims about clients, results or figures", () => {
   // The site's rule (see app/case-studies/page.tsx): nothing is published that a client has
   // not approved or that cannot be evidenced. A new post can break that by accident, so the
   // obvious shapes are checked: percentages, money, multipliers and named-client wording.
+  // This covers the later posts too, including the list of other companies.
   const patterns = [
     [/\d+\s?%|\bper cent\b|\bpercent\b/i, "a percentage"],
     [/[₹$€£]\s?\d|\b(rs\.?|inr)\s?\d/i, "an amount of money"],
@@ -120,6 +121,130 @@ test("the starter posts make no claims about clients, results or figures", () =>
     const all = [p.title, p.excerpt, p.seo.description, ...p.body.flatMap((s) => [s.heading, ...s.paragraphs])].join("\n");
     for (const [pattern, what] of patterns) assert.doesNotMatch(all, pattern, `${p.slug} contains ${what}`);
   }
+});
+
+/* ── The two lists, and the text inside a paragraph ──────────────────────────── */
+
+test("blogPosts is the starter posts followed by the later ones, and no slug appears twice", () => {
+  assert.deepEqual(blogs.blogPosts, [...blogs.starterBlogPosts, ...blogs.laterBlogPosts]);
+  assert.equal(blogs.starterBlogPosts.length, 3, "the starter set is what the database was seeded with: do not add to it");
+  assert.ok(blogs.laterBlogPosts.length >= 1);
+  const slugs = blogs.blogPosts.map((p) => p.slug);
+  assert.equal(new Set(slugs).size, slugs.length, "a slug is used twice across the two lists");
+});
+
+test("a link is allowed only to http(s) addresses and to a path on this site", () => {
+  const kind = blogs.blogLinkKind;
+  assert.equal(kind("https://example.com/"), "external");
+  assert.equal(kind("http://example.com/a?b=c#d"), "external");
+  assert.equal(kind("HTTPS://EXAMPLE.COM"), "external");
+  assert.equal(kind("/contact"), "internal");
+  assert.equal(kind("/services/managed-it"), "internal");
+  for (const bad of [
+    "javascript:alert(1)",
+    "JaVaScRiPt:alert(1)",
+    "data:text/html;base64,AAAA",
+    "vbscript:x",
+    "//evil.example/steal", // protocol-relative: another site
+    "ftp://example.com",
+    "mailto:someone@example.com",
+    "example.com",
+    "www.example.com",
+    "https://",
+    "https://exa mple.com",
+    'https://example.com/"onmouseover="x',
+    "https://example.com/<script>",
+    "/path with space",
+    "",
+    `https://example.com/${"a".repeat(500)}`,
+  ]) {
+    assert.equal(kind(bad), null, `should be refused: ${bad.slice(0, 50)}`);
+  }
+});
+
+test("a paragraph can hold a link, bold text and plain text, in order", () => {
+  const nodes = blogs.parseBlogInline("Read **this** on [our site](/contact) or at [Acme](https://acme.example/x) now.");
+  assert.deepEqual(nodes, [
+    { type: "text", text: "Read " },
+    { type: "bold", text: "this" },
+    { type: "text", text: " on " },
+    { type: "link", text: "our site", href: "/contact", external: false },
+    { type: "text", text: " or at " },
+    { type: "link", text: "Acme", href: "https://acme.example/x", external: true },
+    { type: "text", text: " now." },
+  ]);
+  assert.deepEqual(blogs.parseBlogInline("nothing special"), [{ type: "text", text: "nothing special" }]);
+  assert.deepEqual(blogs.parseBlogInline(""), []);
+});
+
+test("a link to a disallowed address is shown as the text it was typed as, never as a link", () => {
+  for (const bad of ["javascript:alert(1)", "//evil.example", "data:text/html,x", "www.example.com", "ftp://x.example"]) {
+    const typed = `[click here](${bad})`;
+    const nodes = blogs.parseBlogInline(`before ${typed} after`);
+    assert.ok(!nodes.some((n) => n.type === "link"), `${bad} became a link`);
+    assert.equal(nodes.map((n) => n.text).join(""), `before ${typed} after`, "the text must come out unchanged");
+  }
+});
+
+test("link text and address cannot break out of each other or swallow the rest of the line", () => {
+  // Two links on a line stay two links.
+  const two = blogs.parseBlogInline("[a](/one) and [b](/two)").filter((n) => n.type === "link");
+  assert.deepEqual(two.map((n) => [n.text, n.href]), [["a", "/one"], ["b", "/two"]]);
+  // One level of brackets inside an address (as in a Wikipedia address) is kept whole.
+  const wiki = blogs.parseBlogInline("[Foo](https://en.wikipedia.org/wiki/Foo_(bar)) end").find((n) => n.type === "link");
+  assert.equal(wiki.href, "https://en.wikipedia.org/wiki/Foo_(bar)");
+  // Unbalanced markers are plain text.
+  assert.deepEqual(blogs.parseBlogInline("**not closed and [not a link]"), [{ type: "text", text: "**not closed and [not a link]" }]);
+  // A bracket and a bracket with a space between them is not a link.
+  assert.ok(!blogs.parseBlogInline("see [1] (below)").some((n) => n.type === "link"));
+});
+
+test("lines starting with ### become sub-headings, and neighbouring bullets become one list", () => {
+  const blocks = blogs.parseBlogBlocks([
+    "Intro line.",
+    "### A company",
+    "About it.",
+    "- **Services:** many",
+    "- **Site:** [x.example](https://x.example/)",
+    "Middle line.",
+    "- another list",
+    "",
+    "   ",
+  ]);
+  assert.deepEqual(blocks.map((b) => b.type), ["paragraph", "subheading", "paragraph", "list", "paragraph", "list"]);
+  assert.equal(blocks[1].text, "A company");
+  assert.equal(blocks[3].items.length, 2);
+  assert.equal(blocks[3].items[0][0].type, "bold");
+  assert.equal(blocks[3].items[1].find((n) => n.type === "link").href, "https://x.example/");
+  assert.equal(blocks[5].items.length, 1);
+});
+
+test("markers that are not followed by a space are ordinary text", () => {
+  const blocks = blogs.parseBlogBlocks(["-5 degrees is cold", "###no space", "- ", "###"]);
+  assert.equal(blocks[0].type, "paragraph");
+  assert.equal(blocks[1].type, "paragraph");
+  assert.ok(blocks.every((b) => b.type === "paragraph"), JSON.stringify(blocks.map((b) => b.type)));
+});
+
+test("plainBlogText gives what a reader reads, with no markers, and unsafeBlogLinks lists what is refused", () => {
+  assert.equal(blogs.plainBlogText("### **A** [b](/c) d"), "A b d");
+  assert.equal(blogs.plainBlogText("- **Services:** [x](https://x.example/) and more"), "Services: x and more");
+  assert.equal(blogs.plainBlogText("  plain  "), "plain");
+  assert.deepEqual(blogs.unsafeBlogLinks(["[ok](/contact) [no](javascript:alert(1)) **b**", "[fine](https://a.example)", "[bad](www.a.example)"]), [
+    "javascript:alert(1)",
+    "www.a.example",
+  ]);
+  assert.deepEqual(blogs.unsafeBlogLinks(["nothing to see", "[a](/b)"]), []);
+});
+
+test("markers are not counted as words, so the reading time describes what is read", () => {
+  const plain = post({ title: "T", excerpt: "E", body: [{ heading: "H", paragraphs: ["one two three"] }] });
+  const marked = post({
+    title: "T",
+    excerpt: "E",
+    body: [{ heading: "H", paragraphs: ["### one", "- **two** [three](https://example.com/a-long-address-without-spaces)"] }],
+  });
+  assert.equal(blogs.wordCount(marked), blogs.wordCount(plain));
 });
 
 /* ── Helpers ───────────────────────────────────────────────────────────────── */

@@ -25,7 +25,7 @@ import ts from "typescript";
 const root = new URL("../", import.meta.url);
 export const SEED_PATH = "supabase/migrations/20261110200100_resource_modules_seed.sql";
 
-async function load(path) {
+export async function load(path) {
   const source = readFileSync(new URL(path, root), "utf8");
   const { outputText } = ts.transpileModule(source, {
     compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 },
@@ -33,7 +33,7 @@ async function load(path) {
   return import(`data:text/javascript;base64,${Buffer.from(outputText).toString("base64")}`);
 }
 
-const q = (value) => {
+export const q = (value) => {
   if (value === null || value === undefined) return "null";
   const text = String(value);
   // The blocks are wrapped in $$ … $$; a literal $$ in the content would end them early.
@@ -41,13 +41,13 @@ const q = (value) => {
   return `'${text.replaceAll("'", "''")}'`;
 };
 
-const json = (value) => `${q(JSON.stringify(value))}::jsonb`;
+export const json = (value) => `${q(JSON.stringify(value))}::jsonb`;
 
 // An array built from JSON avoids every array-literal escaping rule.
 const textArray = (values) => `array(select jsonb_array_elements_text(${json(values ?? [])}))::text[]`;
 
 // A calendar date is midnight in India (the operating timezone), not midnight UTC.
-const stamp = (date) => (date ? q(`${date}T00:00:00+05:30`) : "null");
+export const stamp = (date) => (date ? q(`${date}T00:00:00+05:30`) : "null");
 
 function guarded(table, columns, rows) {
   return `do $$
@@ -72,7 +72,9 @@ export async function buildResourceSeed() {
     load("lib/content/case-studies.ts"),
   ]);
 
-  const posts = blogs.blogPosts; // in the order they were written
+  // Only the starter posts: this migration has already been run, and must not change. A post
+  // added later has its own migration (scripts/generate-blog-migrations.mjs).
+  const posts = blogs.starterBlogPosts; // in the order they were written
   const caseStudies = studies.caseStudies;
 
   const blocks = [

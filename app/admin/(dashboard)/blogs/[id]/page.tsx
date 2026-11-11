@@ -83,7 +83,7 @@ export default async function BlogEditorPage({
       <PageHeader
         eyebrow="Blog posts"
         title={isNew ? "New post" : row.title}
-        description={isNew ? "Write a short post. Its address will be /blogs/slug." : `Editing /blogs/${row.slug}`}
+        description={isNew ? "Write a post. Its address will be /blogs/slug." : `Editing /blogs/${row.slug}`}
         actions={
           <>
             <Link href="/admin/blogs" className="admin-btn admin-btn-ghost">
@@ -112,7 +112,14 @@ export default async function BlogEditorPage({
           {editable ? (
             <>
               <Panel title="Post details" columns={2}>
-                <TextField name="title" label="Title" defaultValue={row.title} required className="sm:col-span-2" />
+                <TextField
+                  name="title"
+                  label="Title"
+                  defaultValue={row.title}
+                  hint="One page per topic: if a post on this subject already exists, update it instead of publishing another version of the same list."
+                  required
+                  className="sm:col-span-2"
+                />
                 {isNew ? (
                   <TextField
                     name="slug"
@@ -147,7 +154,10 @@ export default async function BlogEditorPage({
                 <FigureSeedField defaultValue={row.figure_seed} />
               </Panel>
 
-              <Panel title="Body" description="One block per heading. Paragraphs are split on blank lines or newlines.">
+              <Panel
+                title="Body"
+                description="One block per heading. Each line is a paragraph. Start a line with “- ” for a bullet or “### ” for a sub-heading, write [text](https://example.com) for a link (a path such as /contact for a page on this site) and **text** for bold."
+              >
                 <Repeater
                   name="body"
                   label="Sections"

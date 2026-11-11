@@ -1,9 +1,12 @@
+import { serializeJsonLd } from "@/lib/seo/schema";
+
 export function JsonLd({ data }: { data: unknown }) {
   return (
     <script
       type="application/ld+json"
-      // Data is assembled on the server from typed content, never from user input.
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+      // Built on the server from typed content. Blog titles come from the database and staff can
+      // edit them, so "<" is escaped: a title cannot close this tag and add markup to the page.
+      dangerouslySetInnerHTML={{ __html: serializeJsonLd(data) }}
     />
   );
 }

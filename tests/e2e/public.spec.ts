@@ -119,7 +119,7 @@ test("Technical resources opens a menu of Insights, Blogs, Case Studies and Whit
 
   await menu.getByRole("link", { name: "Blogs", exact: true }).click();
   await expect(page).toHaveURL(/\/blogs$/);
-  await expect(page.locator("h1")).toHaveText("Short posts on IT, security and software.");
+  await expect(page.locator("h1")).toHaveText("Posts on IT, security and software.");
 });
 
 test("the other menus keep their closing link", async ({ page }) => {
@@ -170,6 +170,90 @@ test("the blog lists its posts, and a post shows its date, services and a way ba
   await expect(page.locator("time").first()).toHaveText(formatPostDate(latest.publishedAt));
   await expect(page.locator("main a[href^='/services/']").first()).toBeVisible();
   await expect(page.locator('nav[aria-label="Breadcrumb"]').getByRole("link", { name: "Blogs" })).toHaveAttribute("href", "/blogs");
+});
+
+const chennaiList = listBlogPosts().find((post) => post.slug === "top-10-managed-it-services-companies-in-chennai");
+
+test("the Chennai managed IT list shows ten companies A to Z, each with an official link that opens safely", async ({ page }) => {
+  expect(chennaiList).toBeTruthy();
+  await page.goto(`/blogs/${chennaiList!.slug}`);
+  await expect(page.locator("h1")).toHaveText("Top 10 Managed IT Services Companies in Chennai");
+
+  // Ten companies, each a sub-heading, in alphabetical order: position is not a rank.
+  const names = await page.locator("article h3").allTextContents();
+  expect(names).toHaveLength(10);
+  expect(names).toEqual([...names].sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase(), "en")));
+  expect(names).toContain("Infeara Technologies");
+
+  // Every company has an official website link: https, a new tab, and noopener.
+  const outside = page.locator('article a[href^="https://"]');
+  await expect(outside).toHaveCount(10);
+  for (const link of await outside.all()) {
+    await expect(link).toHaveAttribute("target", "_blank");
+    await expect(link).toHaveAttribute("rel", /noopener/);
+    await expect(link).toContainText("(opens in a new tab)");
+    await expect(link).toHaveCSS("text-decoration-line", "underline");
+  }
+
+  // Each company has a description, services, a location and a website, as list items.
+  await expect(page.locator("article li", { hasText: "Services:" })).toHaveCount(10);
+  await expect(page.locator("article li", { hasText: "Location:" })).toHaveCount(10);
+  await expect(page.locator("article li", { hasText: "Official website:" })).toHaveCount(10);
+
+  // The criteria are on the page, and the page says it is not a ranking.
+  await expect(page.locator("article")).toContainText("The criteria we used");
+  await expect(page.locator("article")).toContainText("not a league table");
+  await expect(page.locator("article")).toContainText("alphabetical order, so position means nothing");
+});
+
+test("the Infeara enquiry is its own section, apart from the list, with a service link and an enquiry link", async ({ page }) => {
+  await page.goto(`/blogs/${chennaiList!.slug}`);
+
+  const cta = page.locator("article section", { has: page.getByRole("heading", { name: "Talk to Infeara about managed IT" }) });
+  await expect(cta.getByRole("link", { name: "Read about Infeara's managed IT services" })).toHaveAttribute("href", "/services/managed-it");
+  await expect(cta.getByRole("link", { name: "Send an enquiry to Infeara" })).toHaveAttribute("href", "/contact");
+  await expect(cta.locator('a[href^="https://"]')).toHaveCount(0);
+
+  // The list section has no enquiry link in it.
+  const list = page.locator("article section", { has: page.getByRole("heading", { name: /^Ten managed IT services companies/ }) });
+  await expect(list.locator('a[href="/contact"]')).toHaveCount(0);
+
+  await cta.getByRole("link", { name: "Send an enquiry to Infeara" }).click();
+  await expect(page).toHaveURL(/\/contact$/);
+});
+
+test("the Chennai list carries Article and BreadcrumbList data with absolute addresses", async ({ page }) => {
+  await page.goto(`/blogs/${chennaiList!.slug}`);
+  const blocks = (await page.locator('script[type="application/ld+json"]').allTextContents()).map((text) => JSON.parse(text));
+
+  const article = blocks.find((block) => block["@type"] === "BlogPosting");
+  expect(article).toBeTruthy();
+  expect(article.headline).toBe("Top 10 Managed IT Services Companies in Chennai");
+  expect(article.datePublished).toBe("2026-11-11T00:00:00+05:30");
+  expect(article.author.name).toBe("Infeara Technologies");
+  expect(article.publisher.name).toBe("Infeara Technologies");
+  expect(article.image[0]).toMatch(/^https:\/\/.+\/site\/.+\.(jpg|webp)$/);
+  expect(article.mainEntityOfPage["@id"]).toMatch(new RegExp(`^https://[^/]+/blogs/${chennaiList!.slug}$`));
+
+  const crumbs = blocks.find((block) => block["@type"] === "BreadcrumbList");
+  expect(crumbs).toBeTruthy();
+  expect(crumbs.itemListElement.map((item: { position: number; name: string }) => [item.position, item.name])).toEqual([
+    [1, "Home"],
+    [2, "Blogs"],
+    [3, "Top 10 Managed IT Services Companies in Chennai"],
+  ]);
+  for (const item of crumbs.itemListElement) expect(item.item).toMatch(/^https:\/\//);
+});
+
+test("on a phone the Chennai list does not scroll sideways, and its links can still be tapped", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(`/blogs/${chennaiList!.slug}`);
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+  expect(overflow).toBeLessThanOrEqual(0);
+  const first = page.locator('article a[href^="https://"]').first();
+  await first.scrollIntoViewIfNeeded();
+  const box = await first.boundingBox();
+  expect(box && box.height).toBeGreaterThanOrEqual(16);
 });
 
 test("an address under /blogs that is not a post is a 404", async ({ page }) => {

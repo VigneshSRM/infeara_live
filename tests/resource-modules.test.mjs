@@ -152,9 +152,10 @@ test("the three case studies are representative: no client, no figures", () => {
   assert.equal(studies.caseStudyLabel({ kind: "client", clientName: "Acme" }), "Client: Acme");
 });
 
-test("the three blog posts are dated the day they are published, in India time", () => {
-  assert.equal(blogs.blogPosts.length, 3);
-  for (const post of blogs.blogPosts) assert.equal(post.publishedAt, "2026-11-10", post.slug);
+test("the three starter blog posts are dated the day they were published, in India time", () => {
+  // Posts added later (laterBlogPosts) have their own dates and their own migrations: tests/blog-directory.test.mjs.
+  assert.equal(blogs.starterBlogPosts.length, 3);
+  for (const post of blogs.starterBlogPosts) assert.equal(post.publishedAt, "2026-11-10", post.slug);
 });
 
 test("there are no white papers in code: none are published yet", () => {

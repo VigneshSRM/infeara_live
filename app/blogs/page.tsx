@@ -17,7 +17,7 @@ export const revalidate = 300;
 export const metadata = pageMetadata({
   title: "IT, Security and Software Blog",
   description:
-    "Short posts from Infeara on choosing between security tests, planning AI automation and scoping software, written for the people who have to make the decision.",
+    "Posts from Infeara on choosing security tests, planning AI automation, scoping software and shortlisting managed IT providers, for people making the decision.",
   path: "/blogs",
 });
 
@@ -30,8 +30,8 @@ export default async function BlogsPage() {
       <PageHero
         image={figureImage(161)}
         eyebrow="Blogs"
-        title="Short posts on IT, security and software."
-        intro="Shorter and more focused than our guides: how to think about scoping, testing and automation, written for the people who have to make the decision."
+        title="Posts on IT, security and software."
+        intro="How to think about scoping, testing, automation and choosing a provider, written for the people who have to make the decision."
         crumbs={[{ label: "Blogs", href: "/blogs" }]}
         primary={{ label: "Talk to an expert", href: "/contact" }}
         secondary={{ label: "Read the guides", href: "/insights" }}

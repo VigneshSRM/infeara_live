@@ -9,12 +9,14 @@ import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireEditor, requireStaff } from "@/lib/auth/dal";
+import { unsafeBlogLinks } from "@/lib/content/blogs";
 import { isSubserviceParent, parentBySlug, subservicePath } from "@/lib/content/subservice-model";
 import { DOCUMENTS_BUCKET, MAX_PAPER_BYTES, PAPER_PATH_PATTERN, safePdfName } from "@/lib/content/white-papers";
 import { createClient } from "@/lib/supabase/server";
 import { SAVE_FAILED, knownError } from "./errors";
 import { SLUG_PATTERN, lines, linesField, num, optional, publishState, rows, str } from "./forms";
 import {
+  blogLinkProblem,
   blogProblem,
   buildInfographic,
   caseStudyProblem,
@@ -205,6 +207,11 @@ export async function saveBlog(_state: ActionState, formData: FormData): Promise
   const body = rows<{ heading: string; paragraphs: string }>(formData, "body")
     .map((row) => ({ heading: String(row.heading ?? "").trim(), paragraphs: lines(String(row.paragraphs ?? "")) }))
     .filter((row) => row.heading);
+
+  // [text](address) links are the one thing in a body that can point off the site, so an address
+  // that is not http(s) or a path on this site is refused here rather than saved as plain text.
+  const linkProblem = blogLinkProblem(unsafeBlogLinks(body.flatMap((section) => section.paragraphs)));
+  if (linkProblem) return { error: linkProblem };
 
   const state = publishing(formData, true);
   const problem = blogProblem({ status: state.status, sections: body.length });

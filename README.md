@@ -56,7 +56,7 @@ app/
                            AI Automations and Application Development (database-managed)
   industries/[slug]        8 sector pages
   insights/[slug]          editorial guides
-  blogs/[slug]             short posts (database-managed)
+  blogs/[slug]             posts (database-managed)
   case-studies/[slug]      case studies (database-managed)
   white-papers/[slug]      PDF white papers (database-managed)
   legal/[slug]             privacy, terms, cookies
@@ -72,9 +72,10 @@ lib/admin/                 server actions, form helpers, error mapping
 lib/redirects.ts           legacy URL map (see below)
 supabase/migrations/       schema, roles, RLS, audit triggers, storage policies
 supabase/seed.sql          generated content parity seed
-supabase/apply/            single-statement copies of the SQL you paste by hand (03, 04, 05 are committed)
+supabase/apply/            single-statement copies of the SQL you paste by hand (03, 04, 05, 06 are committed)
 scripts/generate-seed.mjs  regenerates the seed from lib/content
 scripts/generate-resource-seed.mjs  the same for sub-services, blogs and case studies (script 05)
+scripts/generate-blog-migrations.mjs  one additive migration per blog post added later (script 06)
 scripts/sync-fonts.mjs     refreshes app/fonts from @fontsource-variable
 notes/                     build log, live-site audit, QA evidence
 ```
@@ -177,6 +178,16 @@ Automations, Application Development) are the one part of the menu that is not w
    its built-in copy of that content. Details are under
    [Sub-services, blogs, case studies and white papers](#sub-services-blogs-case-studies-and-white-papers).
 
+   One blog post is added by a separate script, because 05 has already been run on the live
+   database and only fills tables that are empty: `supabase/apply/06-blog-top-10-managed-it-chennai.sql`
+   (readable copy: `20261111120000_blog_top_10_managed_it_chennai.sql`) adds **Top 10 Managed IT
+   Services Companies in Chennai**. Run it the same way, with **Role: postgres**, after 05. It stops
+   with a clear message if the blog table is missing, adds the post only if no post already has that
+   address, and so is safe to run again: it never overwrites an edit made in the CMS. If the post is
+   deleted in the CMS, running it again brings it back. The post shows on `/blogs` within five
+   minutes of the script running (the pages refresh on a five-minute timer). Details are under
+   [Top 10 Managed IT Services Companies in Chennai](#top-10-managed-it-services-companies-in-chennai).
+
    Supabase no longer exposes new `public` tables to the API on its own: that is the default for
    projects created since 30 May 2026 and applies to every project from 30 October 2026. On such
    a project, also run `supabase/migrations/20261109120000_grant_data_api_access.sql` after the
@@ -235,11 +246,11 @@ Four content types are edited in the CMS, next to Insights, and shown at their u
 | CMS screen | Public pages | Notes |
 | :--- | :--- | :--- |
 | Sub-services | `/services/<service>/<slug>` and the lists on each service page and on `/services` | 18 to start: Cybersecurity 4, Cloud & Datacenter 7, AI Automations 4, Application Development 3. The service group is chosen on creation and fixed afterwards. |
-| Blogs | `/blogs`, `/blogs/<slug>` | Short posts: a title, an excerpt, sections, related service links and a picture. |
+| Blogs | `/blogs`, `/blogs/<slug>` | Posts: a title, an excerpt, sections, related service links and a picture. A post can hold links, bullets and sub-headings (see Text in a blog post below). |
 | Case studies | `/case-studies`, `/case-studies/<slug>` | Three representative studies to start. |
 | White papers | `/white-papers`, `/white-papers/<slug>` | A PDF uploaded in the CMS, or a link to a file kept elsewhere. |
 
-Insights (`/insights`) stays the place for longer guides; a blog post is the short form.
+Insights (`/insights`) stays the place for the long-form guides. A blog post is a focused piece, mostly short; one of them is a ten-company list, which is longer, and says so in its reading time.
 
 **Setup.** Run `supabase/apply/05-resource-modules.sql` once (see First setup). Until then each new
 screen explains what to run and the website uses its built-in copy. Existing content is
@@ -303,6 +314,62 @@ with its older source files, `blogs.ts`, `case-studies.ts`). After editing any o
 scripts: `node scripts/generate-resource-seed.mjs`, then `node scripts/make-apply-blobs.mjs`. The unit
 tests fail if the committed SQL no longer matches. A database that already has rows is not changed by
 re-running script 05; edit those rows in the CMS.
+
+The three starter blog posts (`starterBlogPosts` in `blogs.ts`) are what 05 seeded, and that
+migration is never edited again. A post added later goes in `laterBlogPosts`, with an entry in
+`scripts/generate-blog-migrations.mjs` that gives it its own migration and its own paste-ready script
+(then `node scripts/generate-blog-migrations.mjs` and `node scripts/make-apply-blobs.mjs`); a test
+fails if the entry is missing. The blog fallback in code is both lists together.
+
+**Text in a blog post.** In the editor each section has a heading and a box of paragraphs, one per
+line. Four conventions turn a line into more than plain text:
+
+| Type | You get |
+| :--- | :--- |
+| `### Heading` | A sub-heading inside the section. |
+| `- item` | A bullet. Bullets that follow one another make one list. |
+| `[text](https://example.com)` | A link to another site; it opens in a new tab. `[text](/contact)` is a link to a page on this site. |
+| `**text**` | Bold. |
+
+Anything else is shown exactly as typed. A link address that is not `https://`, `http://` or a path
+that starts with one `/` (so not `javascript:` and not `//other.site`) is refused when saving, and if
+one ever reached the page it would show as text, never as a link. The page builds its elements from
+the parsed text and never inserts it as HTML.
+
+**One page per keyword.** Do not publish a second list for a search that a post already answers
+("Best managed IT companies in Chennai" next to "Top 10 Managed IT Services Companies in Chennai"):
+two near-identical pages compete with each other. Update the existing post in place. The blog
+editor says so under the title, and `tests/blog-directory.test.mjs` fails if two shipped posts overlap
+on subject.
+
+### Top 10 Managed IT Services Companies in Chennai
+
+`/blogs/top-10-managed-it-services-companies-in-chennai` lists ten companies and links to each one's
+official website. A list of other companies is held to a stricter standard than a guide, and the
+tests pin it:
+
+- **Criteria, not a ranking.** Five published criteria (a Chennai head office; managed IT as a
+  published service line; business customers; details a reader can check; still operating). The
+  companies are in alphabetical order, the page says position means nothing, and no sentence calls a
+  company the best, the leader or the first. Revenue, size, awards, reviews and advertising were not used.
+- **Everything is the company's own claim, attributed to it.** Each entry has a description, services,
+  a location and an official website. The facts were read from each company's own website on 11
+  November 2026 (for one company's head office, from its owner's announcement, which that entry
+  names) and the page says so. `notes/chennai-managed-it-sources.md` records the pages read,
+  who was left out and why, and how to re-check.
+- **Infeara is one of the ten because it meets the same criteria,** written in the same format and
+  in alphabetical order, with the publisher's interest declared in the first section. It makes no
+  certification, client or figure claim that its own FAQ says it will not make.
+- **The Infeara enquiry is separate**: the last section, "Talk to Infeara about managed IT", links to
+  the Managed IT service page and to `/contact`. The list itself contains only the ten outside links.
+- **Structured data.** Each blog post carries `BlogPosting` (schema.org's Article subtype for blog
+  posts) with a headline, description, picture, author, publisher, dates (midnight India time, with
+  the offset) and its address, and `BreadcrumbList` (Home, Blogs, the post) with absolute addresses.
+  Both are built in `lib/seo/schema.ts`, and `<` is escaped in the JSON so a title cannot close the
+  script tag.
+
+It is dated 11 November 2026. Companies change, so re-check the list every few months (see the note),
+and change the dates in the post when you do.
 
 ### Contact form and leads
 
@@ -569,7 +636,7 @@ takes effect once DNS for the apex points at Vercel.
 
 Flip it only on the client's written instruction, after the content swap. With the gate on,
 Lighthouse SEO scores 69 purely because the page is blocked from indexing; with
-`SITE_INDEXABLE=true` the same pages score 100, and the sitemap lists 63 URLs with the starter content
+`SITE_INDEXABLE=true` the same pages score 100, and the sitemap lists 64 URLs with the content that ships in code
 (each published sub-service, blog post, case study and white paper adds one; a white paper's page is
 listed once the first one is published).
 
@@ -580,7 +647,7 @@ The Playwright MCP server is configured in `.mcp.json` for MCP-compatible client
 - `npm run test:e2e` — full Playwright browser suite: public route rendering, navigation, contact validation, cookie choices, admin authentication and role permissions.
 - `npm run test:e2e:list` — list discovered browser tests without launching a browser.
 - `npm run test:http` — HTTP/API smoke tests against a running app (defaults to `http://127.0.0.1:3000`).
-- `npm run test:unit` — unit tests for the rule that decides who the CMS lets in (`lib/auth/access.ts`), the Overview analytics and lead notes chat, and the core services (the CMS notice, and the check that `supabase/apply/04-core-services.sql` still matches its migrations), the blog posts and the Technical resources menu (`tests/blogs.test.mjs`), the list search, filters and page numbers of every admin table (`tests/admin-lists.test.mjs`), how each list page is wired, including a check that no admin table can go unpaged (`tests/admin-list-pages.test.mjs`), and the sub-service, blog, case-study and white-paper modules: the SQL, the content copied in, the PDF helpers, the admin wiring and the header menu (`tests/resource-modules.test.mjs`). No server or Supabase needed.
+- `npm run test:unit` — unit tests for the rule that decides who the CMS lets in (`lib/auth/access.ts`), the Overview analytics and lead notes chat, and the core services (the CMS notice, and the check that `supabase/apply/04-core-services.sql` still matches its migrations), the blog posts and the Technical resources menu (`tests/blogs.test.mjs`), the list search, filters and page numbers of every admin table (`tests/admin-lists.test.mjs`), how each list page is wired, including a check that no admin table can go unpaged (`tests/admin-list-pages.test.mjs`), and the sub-service, blog, case-study and white-paper modules: the SQL, the content copied in, the PDF helpers, the admin wiring and the header menu (`tests/resource-modules.test.mjs`), and the Chennai managed IT list: ten entries in A-to-Z order with official links, the published criteria, no ranking claims, Infeara's disclosed entry and its separate enquiry section, one list per keyword, the Article and breadcrumb data, how links in a post are parsed and refused, and the SQL that adds the post (`tests/blog-directory.test.mjs`). No server or Supabase needed.
 
 The browser suite starts an isolated, non-Supabase Next dev server on port 3100 by default. Set `PLAYWRIGHT_PORT` to change it or `PLAYWRIGHT_BASE_URL` to target a test deployment. Optional staff-role checks require an isolated test deployment identified by `PLAYWRIGHT_BASE_URL`, `PLAYWRIGHT_ADMIN_TEST_HOST` (exact hostname match), and `PLAYWRIGHT_ADMIN_ISOLATED_TEST=true`, plus the relevant credentials: `PLAYWRIGHT_SUPER_ADMIN_EMAIL` / `PLAYWRIGHT_SUPER_ADMIN_PASSWORD`, `PLAYWRIGHT_EDITOR_EMAIL` / `PLAYWRIGHT_EDITOR_PASSWORD`, and `PLAYWRIGHT_SEO_MANAGER_EMAIL` / `PLAYWRIGHT_SEO_MANAGER_PASSWORD`. Known Infeara production hostnames are blocked. The create/edit/delete CMS workflow has an additional `PLAYWRIGHT_ADMIN_ALLOW_MUTATIONS=true` opt-in; point the test deployment at an isolated Supabase project only.
 
