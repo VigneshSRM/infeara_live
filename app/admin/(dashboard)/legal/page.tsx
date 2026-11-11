@@ -1,14 +1,20 @@
 import Link from "next/link";
 import { Flash } from "@/components/admin/Flash";
+import { ListToolbar } from "@/components/admin/ListToolbar";
 import { PageHeader } from "@/components/admin/PageHeader";
+import { Pager } from "@/components/admin/Pager";
 import { SchemaNotice } from "@/components/admin/SchemaNotice";
+import { ListError, ResourceTable, type Column } from "@/components/admin/ResourceTable";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { canEdit, requireStaff } from "@/lib/auth/dal";
 import { isMissingSchema } from "@/lib/admin/errors";
 import { istLabel } from "@/lib/admin/forms";
-import { createClient } from "@/lib/supabase/server";
+import { fetchListPage } from "@/lib/admin/list-query";
+import { isFiltered, parseListParams, type RawParams } from "@/lib/admin/list-params";
 
 export const dynamic = "force-dynamic";
+
+const PATH = "/admin/legal";
 
 type Row = {
   id: string;
@@ -20,25 +26,50 @@ type Row = {
   updated_at: string;
 };
 
-export default async function LegalListPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ saved?: string; deleted?: string; error?: string }>;
-}) {
-  const user = await requireStaff();
-  const params = await searchParams;
-  const supabase = await createClient();
+const one = (value: string | string[] | undefined) => (Array.isArray(value) ? value[0] : value);
 
-  const { data, error } = await supabase
-    .from("legal_documents")
-    .select("id,slug,title,updated_label,status,published_at,updated_at")
-    .order("title");
+export default async function LegalListPage({ searchParams }: { searchParams: Promise<RawParams> }) {
+  const user = await requireStaff();
+  const raw = await searchParams;
+  const params = parseListParams(raw);
+
+  const { rows, window, error } = await fetchListPage<Row>({
+    table: "legal_documents",
+    columns: "id,slug,title,updated_label,status,published_at,updated_at",
+    params,
+    searchColumns: ["title", "slug", "updated_label", "description"],
+    order: [{ column: "title" }],
+  });
 
   if (isMissingSchema(error)) return <SchemaNotice table="legal_documents" />;
 
-  const rows = (data ?? []) as Row[];
   const editable = canEdit(user);
   const now = Date.now();
+
+  const columns: Column<Row>[] = [
+    {
+      header: "Document",
+      className: "",
+      cell: (row) => (
+        <Link href={`${PATH}/${row.id}`} className="font-heading text-navy underline-offset-4 hover:underline">
+          {row.title}
+        </Link>
+      ),
+    },
+    { header: "Slug", className: "font-mono text-[0.76rem] text-charcoal/60", cell: (row) => row.slug },
+    { header: "Label", cell: (row) => row.updated_label },
+    {
+      header: "Status",
+      className: "",
+      cell: (row) => (
+        <StatusBadge
+          status={row.status}
+          scheduled={row.status === "published" && Boolean(row.published_at && new Date(row.published_at).getTime() > now)}
+        />
+      ),
+    },
+    { header: "Updated", className: "whitespace-nowrap text-charcoal/70", cell: (row) => istLabel(row.updated_at) },
+  ];
 
   return (
     <>
@@ -48,63 +79,29 @@ export default async function LegalListPage({
         description="Privacy, terms and the security statement. Changes here are public immediately when published."
         actions={
           editable ? (
-            <Link href="/admin/legal/new" className="admin-btn admin-btn-primary">
+            <Link href={`${PATH}/new`} className="admin-btn admin-btn-primary">
               New document
             </Link>
           ) : null
         }
       />
 
-      <Flash saved={params.saved} deleted={params.deleted} error={params.error} />
+      <Flash saved={one(raw.saved)} deleted={one(raw.deleted)} error={one(raw.error)} />
 
-      {error ? (
-        <p role="alert" className="mt-4 rounded-md border border-coral-ink/30 bg-coral/10 px-4 py-3 text-[0.85rem] text-coral-ink">
-          {error.message}
-        </p>
-      ) : null}
+      <ListToolbar action={PATH} params={params} label="Search legal documents" placeholder="Title, slug or label" />
 
-      <div className="admin-card mt-6 overflow-hidden">
-        {rows.length ? (
-          <table className="w-full text-left text-[0.86rem]">
-            <thead className="border-b border-navy/10 bg-ivory/50">
-              <tr className="font-heading text-[0.68rem] uppercase tracking-[0.14em] text-charcoal/60">
-                <th className="px-4 py-3 font-medium">Document</th>
-                <th className="px-4 py-3 font-medium">Slug</th>
-                <th className="px-4 py-3 font-medium">Label</th>
-                <th className="px-4 py-3 font-medium">Status</th>
-                <th className="px-4 py-3 font-medium">Updated</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-navy/8">
-              {rows.map((row) => (
-                <tr key={row.id} className="hover:bg-ivory/40">
-                  <td className="px-4 py-3">
-                    <Link
-                      href={`/admin/legal/${row.id}`}
-                      className="font-heading text-navy underline-offset-4 hover:underline"
-                    >
-                      {row.title}
-                    </Link>
-                  </td>
-                  <td className="px-4 py-3 font-mono text-[0.76rem] text-charcoal/60">{row.slug}</td>
-                  <td className="px-4 py-3 text-charcoal/70">{row.updated_label}</td>
-                  <td className="px-4 py-3">
-                    <StatusBadge
-                      status={row.status}
-                      scheduled={Boolean(row.published_at && new Date(row.published_at).getTime() > now)}
-                    />
-                  </td>
-                  <td className="px-4 py-3 text-charcoal/70">{istLabel(row.updated_at)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : (
-          <p className="px-4 py-10 text-center text-[0.86rem] text-charcoal/70">
-            No documents yet. Run the seed to import the published set.
-          </p>
-        )}
-      </div>
+      {error ? <ListError /> : null}
+
+      <ResourceTable
+        caption="Legal documents"
+        rows={rows}
+        columns={columns}
+        filtered={isFiltered(params)}
+        clearHref={PATH}
+        emptyMessage="No documents yet. Run the seed to import the published set."
+      />
+
+      <Pager basePath={PATH} params={params} window={window} noun="documents" />
     </>
   );
 }

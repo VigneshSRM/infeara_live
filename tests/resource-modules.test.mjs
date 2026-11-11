@@ -396,8 +396,25 @@ test("the shared query builds one search condition, counts first, and then asks 
   // that the setup script has not been run.
   assert.doesNotMatch(query, /head: true/, "the count is a GET, so an error keeps its body");
   assert.match(query, /\.select\("id", \{ count: "exact" \}\)\.limit\(1\)/);
-  assert.match(query, /\.range\(window\.from, window\.from \+ PAGE_SIZE - 1\)/);
+  assert.match(query, /\.range\(window\.from, window\.from \+ window\.size - 1\)/);
   assert.ok(query.indexOf("count: \"exact\"") < query.indexOf(".range("), "the count comes before the rows, so an out-of-range page can be clamped");
+});
+
+test("the shared query pages by the list's own size, breaks ties by id, and filters by time window", () => {
+  const query = text("../lib/admin/list-query.ts").replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+  // 20 a page unless a list says otherwise (the audit log says 40).
+  assert.match(query, /const size = config\.pageSize \?\? PAGE_SIZE/);
+  assert.match(query, /pageWindow\(counted\.count \?\? 0, config\.params\.page, size\)/);
+  // Rows that tie on every sort column are put in a fixed order, or a page boundary between them
+  // could show one twice and skip another. A list that already sorts by id keeps its own direction.
+  assert.match(query, /config\.order\.some\(\(order\) => order\.column === "id"\)/);
+  assert.match(query, /query\.order\("id", \{ ascending: true \}\)/);
+  // A "last N days" filter compares a timestamp column with the start of the window.
+  assert.match(query, /gte\(column: string, value: string\): Chain/);
+  assert.match(query, /next\.gte\(windowColumn, windowStart\(nowMs, days\)\)/);
+  assert.match(query, /if \(days > 0\)/, "a window that is not a positive number filters nothing instead of throwing");
+  // The numbers beside a filter and the notice about waiting accounts count with the same filters.
+  assert.match(query, /export async function countListRows\(/);
 });
 
 test("the audit log can be filtered to the four new tables", () => {

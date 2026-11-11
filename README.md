@@ -247,13 +247,27 @@ database-first: once the tables exist, a page that is not published is not shown
 copy never brings it back. The built-in copy is used only when Supabase is not configured, a table
 is missing, or a read fails.
 
-**Lists.** Every table in the CMS that holds content (these four, and Insights) searches, filters
-and pages in the database: 20 rows a page, with the search, status and page number in the address
-(`?q=…&status=…&page=…`) so a view can be bookmarked or shared. Status is All, Published, Scheduled
-(published, with a date still ahead), Draft or Archived; sub-services also filter by service and case
-studies by kind. Changing a filter starts again at page 1, and a page number past the end shows the
-last page. The audit log pages in the same way (40 rows a page); leads, users, services, industries,
-legal pages and FAQs do not page yet.
+**Lists.** Every table in the CMS searches, filters and pages in the database: Leads, Users and
+roles, Practices, Sectors, Insights, Legal documents, FAQ groups, the audit log, and the four modules
+above. It is 20 rows a page (the audit log shows 40), with the search, filters and page number in the
+address (`?q=…&status=…&page=…`) so a view can be bookmarked or shared. Content lists filter by status:
+All, Published, Scheduled (published, with a date still ahead), Draft or Archived. Published includes
+the scheduled ones, as the badges do. Sub-services also filter by service and case studies by kind. A
+filter change starts again at page 1, and a page number past the end shows the last page.
+
+| List | Search looks in | Filters |
+| :--- | :--- | :--- |
+| Leads | name, email, company, phone, topic, message | The status buttons, each showing how many enquiries match the current search, and when it arrived (last 24 hours, 7, 30 or 90 days). |
+| Users and roles | name, email | Role. A notice above the list counts the accounts waiting for access and links to them, and changing a role returns to the same view and page. |
+| Practices | name, short name, slug, tagline | Status. |
+| Sectors | name, slug, tagline | Status. |
+| Legal documents | title, slug, label, description | Status. |
+| FAQ groups | title, introduction (not the text of the questions) | Status. |
+| Audit log | the actor's email, the record id | Record type, action (created, updated, deleted) and when (last 24 hours, 7 or 30 days). |
+
+The Practices screen still warns when one of the six core services is hidden from visitors, and it
+judges that from its own read of those six rows, so a search or a page never causes a false warning.
+The Media library is a gallery of images with an edit form on each, not a table, and is not paged.
 
 **Rules, enforced by the database and not only by the screens.**
 
@@ -294,7 +308,8 @@ re-running script 05; edit those rows in the CMS.
 
 `/api/contact` validates the submission, ignores honeypot hits, applies a best-effort
 per-instance rate limit and inserts into `leads` using the anonymous publishable key. Staff
-see the enquiry at `/admin/leads`, where they can set a status (new, contacted, qualified,
+see the enquiries at `/admin/leads`: 20 a page, searchable, with filters for status and for how
+recently they arrived (see Lists above). There they can set a status (new, contacted, qualified,
 closed, spam) and keep internal notes as a chat (see below). Nothing on that screen is public.
 
 ### Overview: visitors and leads
@@ -565,7 +580,7 @@ The Playwright MCP server is configured in `.mcp.json` for MCP-compatible client
 - `npm run test:e2e` — full Playwright browser suite: public route rendering, navigation, contact validation, cookie choices, admin authentication and role permissions.
 - `npm run test:e2e:list` — list discovered browser tests without launching a browser.
 - `npm run test:http` — HTTP/API smoke tests against a running app (defaults to `http://127.0.0.1:3000`).
-- `npm run test:unit` — unit tests for the rule that decides who the CMS lets in (`lib/auth/access.ts`), the Overview analytics and lead notes chat, and the core services (the CMS notice, and the check that `supabase/apply/04-core-services.sql` still matches its migrations), the blog posts and the Technical resources menu (`tests/blogs.test.mjs`), the list search, filters and page numbers of every admin table (`tests/admin-lists.test.mjs`), and the sub-service, blog, case-study and white-paper modules: the SQL, the content copied in, the PDF helpers, the admin wiring and the header menu (`tests/resource-modules.test.mjs`). No server or Supabase needed.
+- `npm run test:unit` — unit tests for the rule that decides who the CMS lets in (`lib/auth/access.ts`), the Overview analytics and lead notes chat, and the core services (the CMS notice, and the check that `supabase/apply/04-core-services.sql` still matches its migrations), the blog posts and the Technical resources menu (`tests/blogs.test.mjs`), the list search, filters and page numbers of every admin table (`tests/admin-lists.test.mjs`), how each list page is wired, including a check that no admin table can go unpaged (`tests/admin-list-pages.test.mjs`), and the sub-service, blog, case-study and white-paper modules: the SQL, the content copied in, the PDF helpers, the admin wiring and the header menu (`tests/resource-modules.test.mjs`). No server or Supabase needed.
 
 The browser suite starts an isolated, non-Supabase Next dev server on port 3100 by default. Set `PLAYWRIGHT_PORT` to change it or `PLAYWRIGHT_BASE_URL` to target a test deployment. Optional staff-role checks require an isolated test deployment identified by `PLAYWRIGHT_BASE_URL`, `PLAYWRIGHT_ADMIN_TEST_HOST` (exact hostname match), and `PLAYWRIGHT_ADMIN_ISOLATED_TEST=true`, plus the relevant credentials: `PLAYWRIGHT_SUPER_ADMIN_EMAIL` / `PLAYWRIGHT_SUPER_ADMIN_PASSWORD`, `PLAYWRIGHT_EDITOR_EMAIL` / `PLAYWRIGHT_EDITOR_PASSWORD`, and `PLAYWRIGHT_SEO_MANAGER_EMAIL` / `PLAYWRIGHT_SEO_MANAGER_PASSWORD`. Known Infeara production hostnames are blocked. The create/edit/delete CMS workflow has an additional `PLAYWRIGHT_ADMIN_ALLOW_MUTATIONS=true` opt-in; point the test deployment at an isolated Supabase project only.
 

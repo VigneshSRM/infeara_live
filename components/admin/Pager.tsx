@@ -12,12 +12,17 @@ export function Pager({
   params,
   window,
   noun,
+  previousLabel = "Previous",
+  nextLabel = "Next",
 }: {
   basePath: string;
   params: ListParams;
   window: PageWindow;
   /** Plural, lower case: "blog posts". */
   noun: string;
+  /** For a list with a direction in time: "Newer" and "Older". */
+  previousLabel?: string;
+  nextLabel?: string;
 }) {
   if (window.total === 0) return null;
 
@@ -31,11 +36,11 @@ export function Pager({
         <p className="flex items-center gap-3">
           {window.page > 1 ? (
             <Link href={listHref(basePath, params, { page: window.page - 1 })} rel="prev" className={buttonClass}>
-              Previous
+              {previousLabel}
             </Link>
           ) : (
             <span aria-disabled="true" className={`${buttonClass} pointer-events-none opacity-45`}>
-              Previous
+              {previousLabel}
             </span>
           )}
           <span aria-current="page">
@@ -43,11 +48,11 @@ export function Pager({
           </span>
           {window.page < window.pages ? (
             <Link href={listHref(basePath, params, { page: window.page + 1 })} rel="next" className={buttonClass}>
-              Next
+              {nextLabel}
             </Link>
           ) : (
             <span aria-disabled="true" className={`${buttonClass} pointer-events-none opacity-45`}>
-              Next
+              {nextLabel}
             </span>
           )}
         </p>

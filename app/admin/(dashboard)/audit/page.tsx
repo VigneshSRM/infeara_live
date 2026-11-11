@@ -1,14 +1,19 @@
-import Link from "next/link";
+import { ListToolbar } from "@/components/admin/ListToolbar";
 import { PageHeader } from "@/components/admin/PageHeader";
+import { Pager } from "@/components/admin/Pager";
 import { SchemaNotice } from "@/components/admin/SchemaNotice";
+import { ListError, ResourceTable, type Column } from "@/components/admin/ResourceTable";
 import { isMissingSchema } from "@/lib/admin/errors";
 import { istLabel } from "@/lib/admin/forms";
+import { fetchListPage } from "@/lib/admin/list-query";
+import { isFiltered, parseListParams, windowFilter, type ExtraFilterSpec, type RawParams } from "@/lib/admin/list-params";
 import { requireStaff } from "@/lib/auth/dal";
-import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
+const PATH = "/admin/audit";
 const PAGE_SIZE = 40;
+
 const TABLES = [
   "services",
   "sub_services",
@@ -23,6 +28,27 @@ const TABLES = [
   "profiles",
   "media",
 ];
+
+// Three dropdowns: what kind of record, what was done to it, and how long ago. The kind keeps the
+// name `table` that the old filter buttons used, so a saved link to one still works.
+const TABLE_FILTER: ExtraFilterSpec = {
+  name: "table",
+  label: "Record type",
+  anyLabel: "All records",
+  options: TABLES.map((name) => ({ value: name, label: name.replaceAll("_", " ") })),
+};
+const ACTION_FILTER: ExtraFilterSpec = {
+  name: "action",
+  label: "Action",
+  anyLabel: "All actions",
+  options: [
+    { value: "insert", label: "Created" },
+    { value: "update", label: "Updated" },
+    { value: "delete", label: "Deleted" },
+  ],
+};
+const WHEN_FILTER = windowFilter("when", "When", [1, 7, 30]);
+const EXTRAS = [TABLE_FILTER, ACTION_FILTER, WHEN_FILTER];
 
 type Entry = {
   id: number;
@@ -54,32 +80,61 @@ function summarise(entry: Entry) {
   return label ? String(label) : entry.row_id ?? "";
 }
 
-export default async function AuditPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ table?: string; page?: string }>;
-}) {
+export default async function AuditPage({ searchParams }: { searchParams: Promise<RawParams> }) {
   await requireStaff();
-  const params = await searchParams;
-  const table = TABLES.includes(params.table ?? "") ? (params.table as string) : "";
-  const page = Math.max(1, Number(params.page ?? "1") || 1);
-  const from = (page - 1) * PAGE_SIZE;
+  const raw = await searchParams;
+  // The log has no status of its own: the action says what happened.
+  const params = parseListParams(raw, EXTRAS, []);
 
-  const supabase = await createClient();
-  let query = supabase
-    .from("audit_log")
-    .select("id,actor_email,action,table_name,row_id,diff,created_at", { count: "exact" })
-    .order("created_at", { ascending: false })
-    .range(from, from + PAGE_SIZE - 1);
+  const { rows, window, error } = await fetchListPage<Entry>({
+    table: "audit_log",
+    columns: "id,actor_email,action,table_name,row_id,diff,created_at",
+    params,
+    pageSize: PAGE_SIZE,
+    searchColumns: ["actor_email", "row_id"],
+    extraColumns: { table: "table_name", action: "action" },
+    windowColumns: { when: "created_at" },
+    // Newest first, and the id keeps entries made in the same instant in the order they happened.
+    order: [
+      { column: "created_at", ascending: false },
+      { column: "id", ascending: false },
+    ],
+  });
 
-  if (table) query = query.eq("table_name", table);
-
-  const { data, error, count } = await query;
   if (isMissingSchema(error)) return <SchemaNotice table="audit_log" />;
 
-  const rows = (data ?? []) as Entry[];
-  const total = count ?? 0;
-  const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const columns: Column<Entry>[] = [
+    { header: "When (IST)", className: "whitespace-nowrap text-charcoal/70", cell: (entry) => istLabel(entry.created_at) },
+    { header: "Actor", className: "text-charcoal", cell: (entry) => entry.actor_email ?? "System" },
+    {
+      header: "Action",
+      className: "",
+      cell: (entry) => (
+        <span
+          className={`rounded-sm px-2 py-0.5 font-heading text-[0.66rem] uppercase tracking-[0.1em] ${
+            entry.action === "delete"
+              ? "bg-coral-ink/10 text-coral-ink"
+              : entry.action === "insert"
+                ? "bg-blue/10 text-blue"
+                : "bg-charcoal/10 text-charcoal/75"
+          }`}
+        >
+          {ACTION_LABEL[entry.action] ?? entry.action}
+        </span>
+      ),
+    },
+    {
+      header: "Record",
+      className: "font-mono text-[0.74rem] text-charcoal/65",
+      cell: (entry) => (
+        <>
+          {entry.table_name}
+          {entry.row_id ? <span className="block truncate">{entry.row_id}</span> : null}
+        </>
+      ),
+    },
+    { header: "Detail", className: "max-w-[24rem] text-charcoal/75", cell: (entry) => summarise(entry) },
+  ];
 
   return (
     <>
@@ -89,109 +144,28 @@ export default async function AuditPage({
         description="Every create, update and delete on content and leads, with the actor and the changed fields. Written by the database, not the application."
       />
 
-      {error ? (
-        <p role="alert" className="mt-4 rounded-md border border-coral-ink/30 bg-coral/10 px-4 py-3 text-[0.85rem] text-coral-ink">
-          {error.message}
-        </p>
-      ) : null}
+      <ListToolbar
+        action={PATH}
+        params={params}
+        label="Search the audit log"
+        placeholder="Who made the change, or a record id"
+        extras={EXTRAS}
+        statuses={[]}
+        showStatus={false}
+      />
 
-      <nav aria-label="Filter by table" className="mt-5 flex flex-wrap gap-2">
-        <Link
-          href="/admin/audit"
-          aria-current={!table ? "page" : undefined}
-          className={`rounded-sm border px-3 py-1 font-heading text-[0.74rem] ${
-            !table ? "border-navy bg-navy text-ivory" : "border-navy/15 text-charcoal/75 hover:border-navy/35"
-          }`}
-        >
-          All
-        </Link>
-        {TABLES.map((name) => (
-          <Link
-            key={name}
-            href={`/admin/audit?table=${name}`}
-            aria-current={table === name ? "page" : undefined}
-            className={`rounded-sm border px-3 py-1 font-heading text-[0.74rem] ${
-              table === name
-                ? "border-navy bg-navy text-ivory"
-                : "border-navy/15 text-charcoal/75 hover:border-navy/35"
-            }`}
-          >
-            {name.replaceAll("_", " ")}
-          </Link>
-        ))}
-      </nav>
+      {error ? <ListError /> : null}
 
-      <div className="admin-card mt-4 overflow-hidden">
-        {rows.length ? (
-          <table className="w-full text-left text-[0.84rem]">
-            <thead className="border-b border-navy/10 bg-ivory/50">
-              <tr className="font-heading text-[0.68rem] uppercase tracking-[0.14em] text-charcoal/60">
-                <th className="px-4 py-3 font-medium">When (IST)</th>
-                <th className="px-4 py-3 font-medium">Actor</th>
-                <th className="px-4 py-3 font-medium">Action</th>
-                <th className="px-4 py-3 font-medium">Record</th>
-                <th className="px-4 py-3 font-medium">Detail</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-navy/8">
-              {rows.map((entry) => (
-                <tr key={entry.id} className="hover:bg-ivory/40">
-                  <td className="whitespace-nowrap px-4 py-3 text-charcoal/70">{istLabel(entry.created_at)}</td>
-                  <td className="px-4 py-3 text-charcoal">{entry.actor_email ?? "System"}</td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`rounded-sm px-2 py-0.5 font-heading text-[0.66rem] uppercase tracking-[0.1em] ${
-                        entry.action === "delete"
-                          ? "bg-coral-ink/10 text-coral-ink"
-                          : entry.action === "insert"
-                            ? "bg-blue/10 text-blue"
-                            : "bg-charcoal/10 text-charcoal/75"
-                      }`}
-                    >
-                      {ACTION_LABEL[entry.action] ?? entry.action}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 font-mono text-[0.74rem] text-charcoal/65">
-                    {entry.table_name}
-                    {entry.row_id ? <span className="block truncate">{entry.row_id}</span> : null}
-                  </td>
-                  <td className="max-w-[24rem] px-4 py-3 text-charcoal/75">{summarise(entry)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : (
-          <p className="px-4 py-10 text-center text-[0.86rem] text-charcoal/70">
-            No entries yet. Changes appear here as soon as they are made.
-          </p>
-        )}
-      </div>
+      <ResourceTable
+        caption="Audit log"
+        rows={rows}
+        columns={columns}
+        filtered={isFiltered(params)}
+        clearHref={PATH}
+        emptyMessage="No entries yet. Changes appear here as soon as they are made."
+      />
 
-      {pages > 1 ? (
-        <nav aria-label="Pagination" className="mt-4 flex items-center justify-between text-[0.8rem] text-charcoal/70">
-          <span>
-            Page {page} of {pages} · {total} entries
-          </span>
-          <span className="flex gap-2">
-            {page > 1 ? (
-              <Link
-                href={`/admin/audit?${table ? `table=${table}&` : ""}page=${page - 1}`}
-                className="admin-btn admin-btn-ghost !px-3 !py-1 !text-[0.74rem]"
-              >
-                Newer
-              </Link>
-            ) : null}
-            {page < pages ? (
-              <Link
-                href={`/admin/audit?${table ? `table=${table}&` : ""}page=${page + 1}`}
-                className="admin-btn admin-btn-ghost !px-3 !py-1 !text-[0.74rem]"
-              >
-                Older
-              </Link>
-            ) : null}
-          </span>
-        </nav>
-      ) : null}
+      <Pager basePath={PATH} params={params} window={window} noun="entries" previousLabel="Newer" nextLabel="Older" />
     </>
   );
 }
