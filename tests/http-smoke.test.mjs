@@ -115,7 +115,26 @@ test("public contact surfaces do not expose a company mailbox or mailto link", a
 });
 
 test("admin dashboard pages redirect signed-out visitors to login", async () => {
-  for (const path of ["/admin", "/admin/leads", "/admin/services", "/admin/industries", "/admin/users", "/admin/audit"]) {
+  const paths = [
+    "/admin",
+    "/admin/leads",
+    "/admin/services",
+    "/admin/industries",
+    "/admin/users",
+    "/admin/audit",
+    // Sub-services, blog posts, case studies and white papers, each with its editor, and a filtered list.
+    "/admin/subservices",
+    "/admin/subservices/new",
+    "/admin/blogs",
+    "/admin/blogs/new",
+    "/admin/blogs?q=zero&status=draft&page=2",
+    "/admin/case-studies",
+    "/admin/case-studies/new",
+    "/admin/white-papers",
+    "/admin/white-papers/new",
+    "/admin/insights?q=zero&page=2",
+  ];
+  for (const path of paths) {
     const response = await fetch(`${baseURL}${path}`, { redirect: "manual" });
     assert.ok([307, 308].includes(response.status), `${path} should redirect, got ${response.status}`);
     assert.match(response.headers.get("location") ?? "", /\/admin\/login/);

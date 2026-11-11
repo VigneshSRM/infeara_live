@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { Logo } from "@/components/brand/Logo";
-import { nav, primaryCta } from "@/lib/content/site";
+import { getNav } from "@/lib/content/nav";
+import { primaryCta } from "@/lib/content/site";
 
 type Props = { variant?: "overlay" | "solid" };
 
-export function Header({ variant = "solid" }: Props) {
+export async function Header({ variant = "solid" }: Props) {
   const overlay = variant === "overlay";
+  const nav = await getNav();
 
   return (
     <header

@@ -1,29 +1,38 @@
 import { notFound } from "next/navigation";
 import { CloudSubservicePage } from "@/components/site/CloudSubservicePage";
-import { cloudSubservices, cloudSubserviceBySlug } from "@/lib/content/cloud-subservices";
+import { getSubservice, listSubservices } from "@/lib/content";
+import { siblingsOf, subservicePath } from "@/lib/content/subservice-model";
 import { pageMetadata } from "@/lib/metadata";
 
+// Rows in the database (Admin → Services → Sub-services). Pages that exist at build time are built
+// ahead; a sub-service published later is rendered on first visit. Anything else is a 404.
 export const revalidate = 300;
-export const dynamicParams = false;
 
-export function generateStaticParams() {
-  return cloudSubservices.map((service) => ({ slug: service.slug }));
+const PARENT = "cloud-datacenter";
+
+type Props = { params: Promise<{ slug: string }> };
+
+export async function generateStaticParams() {
+  const items = await listSubservices(PARENT);
+  return items.map((item) => ({ slug: item.slug }));
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+export async function generateMetadata({ params }: Props) {
   const { slug } = await params;
-  const service = cloudSubserviceBySlug(slug);
+  const service = await getSubservice(PARENT, slug);
   if (!service) return {};
   return pageMetadata({
     title: service.seo.title,
     description: service.seo.description,
-    path: `/services/cloud-datacenter/${service.slug}`,
+    path: subservicePath(PARENT, service.slug),
   });
 }
 
-export default async function CloudSubserviceRoute({ params }: { params: Promise<{ slug: string }> }) {
+export default async function CloudSubserviceRoute({ params }: Props) {
   const { slug } = await params;
-  const service = cloudSubserviceBySlug(slug);
+  const service = await getSubservice(PARENT, slug);
   if (!service) notFound();
-  return <CloudSubservicePage service={service} />;
+
+  const related = siblingsOf(await listSubservices(PARENT), service, 3);
+  return <CloudSubservicePage service={service} related={related} />;
 }

@@ -1,14 +1,20 @@
 import Link from "next/link";
 import { Flash } from "@/components/admin/Flash";
+import { ListToolbar } from "@/components/admin/ListToolbar";
 import { PageHeader } from "@/components/admin/PageHeader";
+import { Pager } from "@/components/admin/Pager";
 import { SchemaNotice } from "@/components/admin/SchemaNotice";
+import { ListError, ResourceTable, type Column } from "@/components/admin/ResourceTable";
 import { StatusBadge } from "@/components/admin/StatusBadge";
-import { canEdit, requireStaff } from "@/lib/auth/dal";
 import { isMissingSchema } from "@/lib/admin/errors";
 import { istLabel } from "@/lib/admin/forms";
-import { createClient } from "@/lib/supabase/server";
+import { fetchListPage } from "@/lib/admin/list-query";
+import { isFiltered, parseListParams, type RawParams } from "@/lib/admin/list-params";
+import { canEdit, requireStaff } from "@/lib/auth/dal";
 
 export const dynamic = "force-dynamic";
+
+const PATH = "/admin/insights";
 
 type Row = {
   id: string;
@@ -20,92 +26,87 @@ type Row = {
   updated_at: string;
 };
 
-export default async function InsightsListPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ saved?: string; deleted?: string; error?: string }>;
-}) {
-  const user = await requireStaff();
-  const params = await searchParams;
-  const supabase = await createClient();
+const one = (value: string | string[] | undefined) => (Array.isArray(value) ? value[0] : value);
 
-  const { data, error } = await supabase
-    .from("insights")
-    .select("id,slug,title,category,status,published_at,updated_at")
-    .order("published_at", { ascending: false, nullsFirst: false });
+export default async function InsightsListPage({ searchParams }: { searchParams: Promise<RawParams> }) {
+  const user = await requireStaff();
+  const raw = await searchParams;
+  const params = parseListParams(raw);
+
+  const { rows, window, error } = await fetchListPage<Row>({
+    table: "insights",
+    columns: "id,slug,title,category,status,published_at,updated_at",
+    params,
+    searchColumns: ["title", "slug", "category", "excerpt"],
+    // Newest first, with drafts (no date yet) at the top where the work in progress is.
+    order: [
+      { column: "published_at", ascending: false, nullsFirst: true },
+      { column: "updated_at", ascending: false },
+    ],
+  });
 
   if (isMissingSchema(error)) return <SchemaNotice table="insights" />;
 
-  const rows = (data ?? []) as Row[];
-  const editable = canEdit(user);
   const now = Date.now();
+  const columns: Column<Row>[] = [
+    {
+      header: "Guide",
+      className: "",
+      cell: (row) => (
+        <>
+          <Link href={`${PATH}/${row.id}`} className="font-heading text-navy underline-offset-4 hover:underline">
+            {row.title}
+          </Link>
+          <span className="block font-mono text-[0.74rem] text-charcoal/60">{row.slug}</span>
+        </>
+      ),
+    },
+    { header: "Category", cell: (row) => row.category },
+    {
+      header: "Status",
+      className: "",
+      cell: (row) => (
+        <StatusBadge
+          status={row.status}
+          scheduled={row.status === "published" && Boolean(row.published_at && new Date(row.published_at).getTime() > now)}
+        />
+      ),
+    },
+    { header: "Published", className: "whitespace-nowrap text-charcoal/70", cell: (row) => istLabel(row.published_at) },
+    { header: "Updated", className: "whitespace-nowrap text-charcoal/70", cell: (row) => istLabel(row.updated_at) },
+  ];
 
   return (
     <>
       <PageHeader
-        eyebrow="Content library"
-        title="Technical resources"
-        description="Guides published to the technical resource library. New URLs work without a deploy."
+        eyebrow="Technical resources"
+        title="Insights"
+        description="In-depth guides shown at /insights. New URLs work without a deploy."
         actions={
-          editable ? (
-            <Link href="/admin/insights/new" className="admin-btn admin-btn-primary">
+          canEdit(user) ? (
+            <Link href={`${PATH}/new`} className="admin-btn admin-btn-primary">
               New guide
             </Link>
           ) : null
         }
       />
 
-      <Flash saved={params.saved} deleted={params.deleted} error={params.error} />
+      <Flash saved={one(raw.saved)} deleted={one(raw.deleted)} error={one(raw.error)} />
 
-      {error ? (
-        <p role="alert" className="mt-4 rounded-md border border-coral-ink/30 bg-coral/10 px-4 py-3 text-[0.85rem] text-coral-ink">
-          {error.message}
-        </p>
-      ) : null}
+      <ListToolbar action={PATH} params={params} label="Search guides" placeholder="Title, slug, category or text" />
 
-      <div className="admin-card mt-6 overflow-hidden">
-        {rows.length ? (
-          <table className="w-full text-left text-[0.86rem]">
-            <thead className="border-b border-navy/10 bg-ivory/50">
-              <tr className="font-heading text-[0.68rem] uppercase tracking-[0.14em] text-charcoal/60">
-                <th className="px-4 py-3 font-medium">Guide</th>
-                <th className="px-4 py-3 font-medium">Category</th>
-                <th className="px-4 py-3 font-medium">Status</th>
-                <th className="px-4 py-3 font-medium">Published</th>
-                <th className="px-4 py-3 font-medium">Updated</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-navy/8">
-              {rows.map((row) => (
-                <tr key={row.id} className="hover:bg-ivory/40">
-                  <td className="px-4 py-3">
-                    <Link
-                      href={`/admin/insights/${row.id}`}
-                      className="font-heading text-navy underline-offset-4 hover:underline"
-                    >
-                      {row.title}
-                    </Link>
-                    <span className="block font-mono text-[0.74rem] text-charcoal/60">{row.slug}</span>
-                  </td>
-                  <td className="px-4 py-3 text-charcoal/70">{row.category}</td>
-                  <td className="px-4 py-3">
-                    <StatusBadge
-                      status={row.status}
-                      scheduled={Boolean(row.published_at && new Date(row.published_at).getTime() > now)}
-                    />
-                  </td>
-                  <td className="px-4 py-3 text-charcoal/70">{istLabel(row.published_at)}</td>
-                  <td className="px-4 py-3 text-charcoal/70">{istLabel(row.updated_at)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : (
-          <p className="px-4 py-10 text-center text-[0.86rem] text-charcoal/70">
-            No guides yet. Create one, or run the seed to import the initial resources.
-          </p>
-        )}
-      </div>
+      {error ? <ListError /> : null}
+
+      <ResourceTable
+        caption="Insights"
+        rows={rows}
+        columns={columns}
+        filtered={isFiltered(params)}
+        clearHref={PATH}
+        emptyMessage="No guides yet. Create one, or run the seed to import the initial resources."
+      />
+
+      <Pager basePath={PATH} params={params} window={window} noun="guides" />
     </>
   );
 }

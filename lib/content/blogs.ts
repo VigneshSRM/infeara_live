@@ -1,13 +1,19 @@
-// Blog posts are plain TypeScript, not database rows (unlike the guides under /insights).
+// The blog lives in the database and is managed in the admin (Admin → Resources → Blogs).
+// This file is two things:
 //
-//   Publish a post   add an entry to `blogPosts` below and deploy.
-//   Retire a post    delete its entry; add a redirect in lib/redirects.ts if the URL was shared.
-//   Slugs            a slug is the public URL, so do not change one once the post is live.
+//   * the pure helpers every blog page uses (reading time, dates, ordering), and
+//   * `blogPosts`, the three starter posts. They are the seed that
+//     supabase/migrations/20261110200100_resource_modules_seed.sql copies into the database,
+//     and the fallback the site shows only while the blog_posts table does not exist yet.
+//     Once it does, the database is the single source: edits, unpublishing and deleting a
+//     post in the admin take effect and this list is no longer read.
 //
-// The three posts below are STARTER CONTENT, written to show the layout and to give the page
-// something real to render. They make no claims about clients, results or figures. Replace or
-// remove them as part of the content swap, before SITE_INDEXABLE is switched on (see "Launch
-// gate" in the README).
+// Changing a post here does NOT change the live site. Edit it in the admin. If you change the
+// starter posts anyway, run `node scripts/generate-resource-seed.mjs` so the seed follows.
+//
+// The three starter posts make no claims about clients, results or figures. Replace or remove
+// them as part of the content swap, before SITE_INDEXABLE is switched on (see "Launch gate"
+// in the README).
 //
 // This file deliberately has no imports, so tests/blogs.test.mjs can load it as it is.
 
@@ -16,7 +22,7 @@ export type BlogPost = {
   title: string;
   excerpt: string;
   category: string;
-  /** Calendar date as YYYY-MM-DD. Posts are listed newest first. */
+  /** Calendar date (India time) as YYYY-MM-DD. Posts are listed newest first. */
   publishedAt: string;
   /** Picks the photograph from the library in lib/site-images.ts (the same seeds Figure uses). */
   figureSeed: number;
@@ -24,6 +30,8 @@ export type BlogPost = {
   /** Service pages worth reading next. The first becomes the primary button. */
   relatedServices: { label: string; href: string }[];
   seo: { title: string; description: string };
+  /** Set by an editor to override the calculated reading time; empty means "work it out". */
+  readingMinutesOverride?: number | null;
 };
 
 export const blogPosts: BlogPost[] = [
@@ -33,7 +41,7 @@ export const blogPosts: BlogPost[] = [
     excerpt:
       "A scan lists the known weaknesses across your systems. A penetration test shows what someone could actually do with them. Many organisations need both, at different points.",
     category: "Cybersecurity",
-    publishedAt: "2026-11-09",
+    publishedAt: "2026-11-10",
     figureSeed: 201,
     body: [
       {
@@ -80,7 +88,7 @@ export const blogPosts: BlogPost[] = [
     excerpt:
       "AI projects often stall on scope rather than technology. Choosing one well-understood process, with a clear handoff to people, decides whether the rest works.",
     category: "AI & automation",
-    publishedAt: "2026-11-09",
+    publishedAt: "2026-11-10",
     figureSeed: 19,
     body: [
       {
@@ -127,7 +135,7 @@ export const blogPosts: BlogPost[] = [
     excerpt:
       "The right shape for a digital product follows from who uses it, what they need to do and what it has to connect to, not from what is fashionable.",
     category: "Application development",
-    publishedAt: "2026-11-09",
+    publishedAt: "2026-11-10",
     figureSeed: 20,
     body: [
       {
@@ -168,9 +176,14 @@ export const blogPosts: BlogPost[] = [
   },
 ];
 
-/** Newest first. Posts that share a date keep the order they have in `blogPosts`. */
+/** Newest first. Posts that share a date keep the order they were given in. */
+export function sortNewestFirst<T extends { publishedAt: string }>(posts: readonly T[]): T[] {
+  return [...posts].sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
+}
+
+/** The starter posts, newest first. The live site reads the database; see the header. */
 export function listBlogPosts(): BlogPost[] {
-  return [...blogPosts].sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
+  return sortNewestFirst(blogPosts);
 }
 
 export function getBlogPost(slug: string): BlogPost | undefined {
@@ -178,13 +191,15 @@ export function getBlogPost(slug: string): BlogPost | undefined {
 }
 
 /** Words in everything a reader sees on the post page. */
-export function wordCount(post: BlogPost): number {
+export function wordCount(post: Pick<BlogPost, "title" | "excerpt" | "body">): number {
   const text = [post.title, post.excerpt, ...post.body.flatMap((section) => [section.heading, ...section.paragraphs])];
   return text.join(" ").split(/\s+/).filter(Boolean).length;
 }
 
-/** About 200 words a minute, never less than one minute. */
+/** An editor's own figure if there is one, otherwise about 200 words a minute (never under one). */
 export function readingMinutes(post: BlogPost): number {
+  const own = post.readingMinutesOverride;
+  if (typeof own === "number" && Number.isFinite(own) && own >= 1) return Math.round(own);
   return Math.max(1, Math.round(wordCount(post) / 200));
 }
 

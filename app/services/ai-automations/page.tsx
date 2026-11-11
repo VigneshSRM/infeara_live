@@ -1,10 +1,10 @@
 import { notFound } from "next/navigation";
 import { ServiceDetailPage } from "@/components/site/ServiceDetailPage";
-import { getService } from "@/lib/content";
+import { getService, listSubservices } from "@/lib/content";
 import { pageMetadata } from "@/lib/metadata";
 import { SectionHeading } from "@/components/site/SectionHeading";
 import { SubserviceCard } from "@/components/site/SubserviceCard";
-import { aiAutomationSubservices } from "@/lib/content/product-subservices";
+import { subservicePath } from "@/lib/content/subservice-model";
 
 export const revalidate = 300;
 
@@ -24,17 +24,19 @@ export async function generateMetadata() {
 export default async function AIAutomationsServicePage() {
   const service = await getService(serviceSlug);
   if (!service) notFound();
+  const subservices = await listSubservices(serviceSlug);
 
   return (
     <ServiceDetailPage service={service}>
+      {subservices.length > 0 ? (
       <section className="border-y border-navy/10 bg-ivory py-20 md:py-28">
         <div className="shell">
           <SectionHeading eyebrow="AI Automation sub-services" title="Focused AI services for conversational and operational workflows." intro="Choose chatbot, voice, language-model or infrastructure automation capabilities with the right controls and human review." />
           <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {aiAutomationSubservices.map((item, index) => (
+            {subservices.map((item, index) => (
               <SubserviceCard
                 key={item.slug}
-                href={`${item.parentHref}/${item.slug}`}
+                href={subservicePath(item.parentSlug, item.slug)}
                 title={item.name}
                 summary={item.summary}
                 index={index}
@@ -43,6 +45,7 @@ export default async function AIAutomationsServicePage() {
           </div>
         </div>
       </section>
+      ) : null}
     </ServiceDetailPage>
   );
 }

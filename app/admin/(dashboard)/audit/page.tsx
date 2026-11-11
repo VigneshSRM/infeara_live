@@ -9,7 +9,20 @@ import { createClient } from "@/lib/supabase/server";
 export const dynamic = "force-dynamic";
 
 const PAGE_SIZE = 40;
-const TABLES = ["services", "industries", "insights", "legal_documents", "faq_groups", "leads", "profiles", "media"];
+const TABLES = [
+  "services",
+  "sub_services",
+  "industries",
+  "insights",
+  "blog_posts",
+  "case_studies",
+  "white_papers",
+  "legal_documents",
+  "faq_groups",
+  "leads",
+  "profiles",
+  "media",
+];
 
 type Entry = {
   id: number;

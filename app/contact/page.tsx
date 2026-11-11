@@ -6,6 +6,8 @@ import { ContactForm } from "@/components/site/ContactForm";
 import { Figure } from "@/components/site/Figure";
 import { Schematic } from "@/components/site/Schematic";
 import { SectionHeading } from "@/components/site/SectionHeading";
+import { listSubservices } from "@/lib/content/index";
+import { subserviceOptionGroups } from "@/lib/content/nav-model";
 import { company } from "@/lib/content/site";
 import { pageMetadata } from "@/lib/metadata";
 
@@ -31,7 +33,12 @@ const nextSteps = [
   },
 ];
 
-export default function ContactPage() {
+// The form's service list follows the sub-services published in the admin.
+export const revalidate = 300;
+
+export default async function ContactPage() {
+  const subserviceGroups = subserviceOptionGroups(await listSubservices());
+
   return (
     <PageFrame>
       <PageHero
@@ -53,7 +60,7 @@ export default function ContactPage() {
               intro="The more specific the description, the more useful our first reply. Systems, site count, what changed recently and any deadline all help."
             />
             <div className="mt-8">
-              <ContactForm />
+              <ContactForm subserviceGroups={subserviceGroups} />
             </div>
           </div>
 

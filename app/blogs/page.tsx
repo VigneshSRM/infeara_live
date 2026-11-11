@@ -5,9 +5,14 @@ import { Figure } from "@/components/site/Figure";
 import { PageFrame } from "@/components/site/PageFrame";
 import { PageHero } from "@/components/site/PageHero";
 import { SectionHeading } from "@/components/site/SectionHeading";
-import { formatPostDate, listBlogPosts, readingMinutes } from "@/lib/content/blogs";
+import { listBlogPosts } from "@/lib/content";
+import { formatPostDate, readingMinutes } from "@/lib/content/blogs";
 import { pageMetadata } from "@/lib/metadata";
 import { figureImage } from "@/lib/site-images";
+
+// Posts are managed in the admin (Admin → Resources → Blogs), so the list is read from the
+// database and refreshed every five minutes.
+export const revalidate = 300;
 
 export const metadata = pageMetadata({
   title: "IT, Security and Software Blog",
@@ -16,8 +21,8 @@ export const metadata = pageMetadata({
   path: "/blogs",
 });
 
-export default function BlogsPage() {
-  const posts = listBlogPosts();
+export default async function BlogsPage() {
+  const posts = await listBlogPosts();
   const [featured, ...rest] = posts;
 
   return (

@@ -7,30 +7,26 @@ import { CtaBand } from "@/components/site/CtaBand";
 import { Figure } from "@/components/site/Figure";
 import { PageFrame } from "@/components/site/PageFrame";
 import { SectionHeading } from "@/components/site/SectionHeading";
-import {
-  blogPosts,
-  formatPostDate,
-  getBlogPost,
-  listBlogPosts,
-  readingMinutes,
-  type BlogPost,
-} from "@/lib/content/blogs";
+import { getBlogPost, listBlogPosts } from "@/lib/content";
+import { formatPostDate, readingMinutes, type BlogPost } from "@/lib/content/blogs";
 import { pageMetadata } from "@/lib/metadata";
 import { SITE_URL } from "@/lib/site";
 
-// Posts live in lib/content/blogs.ts, so every page is built ahead of time and any other
-// address under /blogs is a 404.
-export const dynamicParams = false;
+// Posts are managed in the admin (Admin → Resources → Blogs). The pages that exist at build time
+// are built ahead; a post published later is rendered on its first visit, and an address that is
+// not a published post is a 404. Edits show within five minutes.
+export const revalidate = 300;
 
-export function generateStaticParams() {
-  return blogPosts.map((post) => ({ slug: post.slug }));
+export async function generateStaticParams() {
+  const posts = await listBlogPosts();
+  return posts.map((post) => ({ slug: post.slug }));
 }
 
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props) {
   const { slug } = await params;
-  const post = getBlogPost(slug);
+  const post = await getBlogPost(slug);
 
   if (!post) return {};
 
@@ -72,13 +68,11 @@ function postSchema(post: BlogPost) {
 
 export default async function BlogPostPage({ params }: Props) {
   const { slug } = await params;
-  const post = getBlogPost(slug);
+  const post = await getBlogPost(slug);
 
   if (!post) notFound();
 
-  const related = listBlogPosts()
-    .filter((item) => item.slug !== post.slug)
-    .slice(0, 2);
+  const related = (await listBlogPosts()).filter((item) => item.slug !== post.slug).slice(0, 2);
   const crumbs = [
     { label: "Blogs", href: "/blogs" },
     { label: post.title, href: `/blogs/${post.slug}` },
@@ -117,7 +111,7 @@ export default async function BlogPostPage({ params }: Props) {
             <div>
               {post.body.map((section, index) => (
                 <section
-                  key={section.heading}
+                  key={`${index}-${section.heading}`}
                   className={`${index === 0 ? "" : "mt-10"} border-t border-navy/10 pt-6`}
                 >
                   <div className="mb-3 flex items-center gap-3">
@@ -130,8 +124,8 @@ export default async function BlogPostPage({ params }: Props) {
                     {section.heading}
                   </h2>
                   <div className="mt-4 space-y-4">
-                    {section.paragraphs.map((paragraph) => (
-                      <p key={paragraph} className="text-[1rem] leading-[1.75] text-charcoal/80">
+                    {section.paragraphs.map((paragraph, paragraphIndex) => (
+                      <p key={`${paragraphIndex}-${paragraph.slice(0, 24)}`} className="text-[1rem] leading-[1.75] text-charcoal/80">
                         {paragraph}
                       </p>
                     ))}
@@ -149,7 +143,7 @@ export default async function BlogPostPage({ params }: Props) {
                   <div className="mt-5 flex flex-wrap gap-3">
                     {post.relatedServices.map((service, index) => (
                       <Link
-                        key={service.href}
+                        key={`${index}-${service.href}`}
                         href={service.href}
                         className={`${index === 0 ? "btn-solid" : "btn-outline"} text-sm`}
                       >

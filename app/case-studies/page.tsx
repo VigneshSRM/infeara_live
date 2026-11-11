@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CaseStudyServiceLinks } from "@/components/site/CaseStudyServiceLinks";
 import { PageFrame } from "@/components/site/PageFrame";
 import { PageHero } from "@/components/site/PageHero";
 import { figureImage } from "@/lib/site-images";
@@ -6,7 +7,16 @@ import { CtaBand } from "@/components/site/CtaBand";
 import { SectionHeading } from "@/components/site/SectionHeading";
 import { Figure } from "@/components/site/Figure";
 import { Schematic } from "@/components/site/Schematic";
+import { listCaseStudies, listServices } from "@/lib/content";
+import { caseStudyLabel } from "@/lib/content/case-studies";
 import { pageMetadata } from "@/lib/metadata";
+
+// Case studies are managed in the admin (Admin → Resources → Case studies). The three
+// representative engagements that were written into this page are the first entries. The
+// site's rule stays the same: nothing is attributed to a named client, and no figure is shown,
+// until the client has approved it (the database refuses to publish a named study without
+// that approval).
+export const revalidate = 300;
 
 export const metadata = pageMetadata({
   title: "Representative IT Projects",
@@ -15,70 +25,36 @@ export const metadata = pageMetadata({
   path: "/case-studies",
 });
 
-const engagements = [
-  {
-    sector: "Professional services",
-    title: "Taking over an undocumented server estate",
-    situation:
-      "A firm had servers installed over several years by different suppliers. Documentation was partial, backup jobs existed but had not been restored, and no one could describe the dependency between the file services and the line-of-business application.",
-    work: [
-      "Recorded the estate, including the undocumented virtual hosts and storage paths.",
-      "Verified backup integrity and ran a restore test into an isolated environment.",
-      "Documented the dependency map and the access model.",
-      "Moved monitoring and patching into a defined operating service.",
-    ],
-    result: "The estate became supportable by someone other than the original installer, with a verified restore and a current record.",
-    services: ["it-infrastructure", "managed-it"],
-  },
-  {
-    sector: "Manufacturing",
-    title: "Separating plant and office networks",
-    situation:
-      "Production equipment and corporate systems shared a flat network. A single compromised office endpoint could reach the plant floor, and change windows for either side were coordinated informally.",
-    work: [
-      "Mapped the traffic paths between plant equipment, servers and office users.",
-      "Designed segmentation with documented rules and a phased cutover.",
-      "Applied firewall changes with a rollback position for each phase.",
-      "Recorded the resulting topology and change process.",
-    ],
-    result: "Plant and office traffic follow documented paths, with changes coordinated through a single record.",
-    services: ["network-engineering", "cybersecurity"],
-  },
-  {
-    sector: "Healthcare",
-    title: "Making recovery a tested capability",
-    situation:
-      "A clinical environment had nightly backups and an assumed recovery time. The backup product reported success, but no restore had been attempted and the dependency on directory services was unclear.",
-    work: [
-      "Defined recovery point and recovery time expectations per system.",
-      "Confirmed an off-site copy existed and was independent of the primary storage.",
-      "Tested restores for the clinical application and its directory dependencies.",
-      "Recorded actual recovery times and the sequence for restoring service.",
-    ],
-    result: "Recovery expectations are now based on measured restores rather than on backup job status.",
-    services: ["cloud-datacenter", "managed-it"],
-  },
-];
+export default async function CaseStudiesPage() {
+  const [studies, services] = await Promise.all([listCaseStudies(), listServices()]);
+  const knownServices = new Set(services.map((service) => service.slug));
+  const hasRepresentative = studies.some((study) => study.kind === "representative");
+  const hasClient = studies.some((study) => study.kind === "client");
 
-export default function CaseStudiesPage() {
   return (
     <PageFrame>
       <PageHero
         image={figureImage(6)}
         eyebrow="Case studies"
-        title="Representative IT projects, documented honestly."
-        intro="We publish outcomes only when a client has approved them and the evidence exists. Until then, this page describes the shape of representative engagements without attributing them to named clients or attaching figures we cannot substantiate."
+        title={hasRepresentative ? "Representative IT projects, documented honestly." : "IT projects, documented honestly."}
+        intro={
+          hasRepresentative
+            ? "We publish outcomes only when a client has approved them and the evidence exists. Until then, this page describes the shape of representative engagements without attributing them to named clients or attaching figures we cannot substantiate."
+            : "We publish outcomes only when a client has approved them and the evidence exists. Each study below was approved by the client it describes."
+        }
         crumbs={[{ label: "Case studies", href: "/case-studies" }]}
         primary={{ label: "Discuss a similar situation", href: "/contact" }}
         secondary={{ label: "See our approach", href: "/approach" }}
       />
 
+      {hasRepresentative ? (
       <section className="bg-ivory py-14 md:py-16">
         <div className="shell">
           <div className="rounded-[var(--radius-card)] border border-blue/20 bg-ivory p-7 md:p-8">
             <p className="eyebrow text-blue">How to read this page</p>
             <p className="mt-4 max-w-[58rem] text-[0.94rem] leading-relaxed text-charcoal/75">
-              The engagements below are <strong className="font-semibold text-navy">representative patterns</strong>,
+              {hasClient ? "The entries that do not name a client are" : "The engagements below are"}{" "}
+              <strong className="font-semibold text-navy">representative patterns</strong>,
               not attributed client stories. They describe the situation, the work and the change in operating
               state. There are no percentages, time savings or availability figures, because those numbers
               belong to a specific client and require their approval to publish. Named studies will replace
@@ -87,19 +63,32 @@ export default function CaseStudiesPage() {
           </div>
         </div>
       </section>
+      ) : null}
 
-      <section className="bg-ivory pb-20 md:pb-28">
+      <section className={`bg-ivory pb-20 md:pb-28 ${hasRepresentative ? "" : "pt-14 md:pt-16"}`}>
         <div className="shell space-y-6">
-          {engagements.map((item, index) => (
+          {studies.length === 0 ? (
+            <p className="max-w-[40rem] text-[0.95rem] leading-relaxed text-charcoal/70">
+              No case studies are published at the moment. If you would like to talk through a situation like
+              yours, <Link href="/contact" className="underline underline-offset-4 hover:text-blue">get in touch</Link>.
+            </p>
+          ) : null}
+
+          {studies.map((item, index) => (
             <article
-              key={item.title}
+              key={item.slug}
               className="grid gap-8 rounded-[var(--radius-card)] border border-navy/10 bg-ivory p-7 md:p-10 lg:grid-cols-[0.9fr_1.4fr] lg:gap-14"
             >
               <div>
                 <p className="font-display text-sm text-blue">{String(index + 1).padStart(2, "0")}</p>
-                <p className="eyebrow mt-4 text-blue">{item.sector}</p>
+                <p className="eyebrow mt-4 text-blue">
+                  {item.sector}
+                  {item.kind === "client" ? ` · ${caseStudyLabel(item)}` : ""}
+                </p>
                 <h2 className="mt-4 font-display text-[1.6rem] font-medium leading-[1.12] tracking-[-0.025em] text-navy">
-                  {item.title}
+                  <Link href={`/case-studies/${item.slug}`} className="transition-colors hover:text-blue">
+                    {item.title}
+                  </Link>
                 </h2>
                 <p className="mt-5 text-[0.9rem] leading-relaxed text-charcoal/70">{item.situation}</p>
               </div>
@@ -107,8 +96,8 @@ export default function CaseStudiesPage() {
               <div>
                 <h3 className="font-heading text-[10px] uppercase tracking-[0.18em] text-charcoal/75">What we did</h3>
                 <ul className="mt-4 space-y-2.5">
-                  {item.work.map((step) => (
-                    <li key={step} className="flex items-start gap-3 text-[0.9rem] leading-relaxed text-charcoal/75">
+                  {item.work.map((step, stepIndex) => (
+                    <li key={`${stepIndex}-${step}`} className="flex items-start gap-3 text-[0.9rem] leading-relaxed text-charcoal/75">
                       <span aria-hidden="true" className="mt-[0.45rem] h-1.5 w-1.5 shrink-0 rounded-full bg-blue/60" />
                       {step}
                     </li>
@@ -120,17 +109,11 @@ export default function CaseStudiesPage() {
                   <p className="mt-2 text-[0.9rem] leading-relaxed text-charcoal/80">{item.result}</p>
                 </div>
 
-                <div className="mt-6 flex flex-wrap gap-3">
-                  {item.services.map((slug) => (
-                    <Link
-                      key={slug}
-                      href={`/services/${slug}`}
-                      className="rounded-sm border border-navy/15 px-4 py-1.5 font-heading text-[0.76rem] text-navy transition-colors hover:border-blue/50 hover:text-blue"
-                    >
-                      {slug.replace(/-/g, " ")}
-                    </Link>
-                  ))}
-                </div>
+                <CaseStudyServiceLinks slugs={item.services.filter((slug) => knownServices.has(slug))} />
+
+                <Link href={`/case-studies/${item.slug}`} className="link-arrow mt-6">
+                  Open this entry <span aria-hidden="true">→</span>
+                </Link>
               </div>
             </article>
           ))}
