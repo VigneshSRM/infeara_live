@@ -1,5 +1,11 @@
 import Link from "next/link";
-import { STATUS_FILTERS, isFiltered, type ExtraFilterSpec, type ListParams } from "@/lib/admin/list-params";
+import {
+  STATUS_FILTERS,
+  isFiltered,
+  type ExtraFilterSpec,
+  type ListParams,
+  type StatusOption,
+} from "@/lib/admin/list-params";
 
 /**
  * Search box and filters for an admin list.
@@ -14,6 +20,7 @@ export function ListToolbar({
   label,
   placeholder,
   extras = [],
+  statuses = STATUS_FILTERS,
   showStatus = true,
 }: {
   /** The page's own path, e.g. /admin/blogs. */
@@ -23,6 +30,13 @@ export function ListToolbar({
   label: string;
   placeholder?: string;
   extras?: readonly ExtraFilterSpec[];
+  /** The status choices, first one "all". Defaults to the content statuses. */
+  statuses?: readonly StatusOption[];
+  /**
+   * False when the page has no status dropdown: either it has no status at all, or it shows the
+   * statuses as buttons of its own (Leads). In the second case the chosen status is still carried
+   * through the form, so searching does not drop it.
+   */
   showStatus?: boolean;
 }) {
   const active = isFiltered(params);
@@ -63,13 +77,15 @@ export function ListToolbar({
             Status
           </label>
           <select id="list-status" name="status" defaultValue={params.status} className="admin-select">
-            {STATUS_FILTERS.map((option) => (
+            {statuses.map((option) => (
               <option key={option.value} value={option.value}>
-                {option.label}
+                {option.value === "all" ? "All statuses" : option.label}
               </option>
             ))}
           </select>
         </div>
+      ) : params.status !== "all" ? (
+        <input type="hidden" name="status" value={params.status} />
       ) : null}
 
       {extras.map((extra) => (
@@ -83,7 +99,7 @@ export function ListToolbar({
             defaultValue={params.extra[extra.name] ?? ""}
             className="admin-select"
           >
-            <option value="">All</option>
+            <option value="">{extra.anyLabel ?? "All"}</option>
             {extra.options.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}

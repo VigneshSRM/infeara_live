@@ -106,18 +106,30 @@ for (const account of roles) {
     const adminNav = page.getByRole("navigation", { name: "Admin" });
     await expect(adminNav.getByRole("link", { name: "Overview" })).toBeVisible();
     await expect(adminNav.getByRole("link", { name: "Leads" })).toBeVisible();
-    await expect(adminNav.getByRole("link", { name: "Services" })).toBeVisible();
+    // Exact: a plain "Services" would also match "Sub-services".
+    await expect(adminNav.getByRole("link", { name: "Services", exact: true })).toBeVisible();
+    await expect(adminNav.getByRole("link", { name: "Sub-services", exact: true })).toBeVisible();
     await expect(adminNav.getByRole("link", { name: "Audit log" })).toBeVisible();
 
     if (account.role === "super admin") {
       await expect(adminNav.getByRole("link", { name: "Users" })).toBeVisible();
       await page.goto("/admin/users");
       await expect(page).toHaveURL(/\/admin\/users$/);
+      await expect(page.getByRole("search", { name: "Search users" })).toBeVisible();
+      await expect(page.getByLabel("Role", { exact: true })).toBeVisible();
     } else {
       await expect(adminNav.getByRole("link", { name: "Users" })).toHaveCount(0);
       await page.goto("/admin/users");
       await expect(page).toHaveURL(/\/admin\?denied=super_admin$/);
-      await expect(page.getByRole("status")).toContainText("Only a super admin can manage users");
+      // By its text: the Overview also shows a loading skeleton that has role="status" while it streams.
+      await expect(page.getByRole("status").filter({ hasText: "Only a super admin can manage users" })).toBeVisible();
+    }
+
+    // Every list searches and filters (and pages, once it holds more than one page of rows).
+    for (const path of ["/admin/leads", "/admin/audit", "/admin/services", "/admin/industries", "/admin/legal", "/admin/faqs", "/admin/insights"]) {
+      await page.goto(path);
+      await expect(page.getByRole("search"), path).toBeVisible();
+      await expect(page.getByRole("button", { name: "Apply" }), path).toBeVisible();
     }
 
     await page.goto("/admin/services");
@@ -150,23 +162,26 @@ test("super admin can create, edit and delete an isolated draft practice", async
 
   try {
     await page.goto("/admin/services/new");
-    await page.getByLabel("Name").fill(name);
-    await page.getByLabel("Slug").fill(slug);
+    await page.getByLabel("Name", { exact: true }).fill(name);
+    await page.getByLabel("Slug", { exact: true }).fill(slug);
     await page.getByLabel("Summary").fill("Temporary draft created by the opt-in Playwright admin test.");
     await page.getByRole("button", { name: "Create practice" }).click();
     await expect(page).toHaveURL(/\/admin\/services\?saved=created$/);
     created = true;
 
+    // The list is paged (20 a page), so find the new practice by searching for its slug.
+    await page.goto(`/admin/services?q=${slug}`);
     await page.getByRole("link", { name }).click();
     await page.getByLabel("Tagline").fill("Edited by the Playwright test.");
     await page.getByRole("button", { name: "Save changes" }).click();
     await expect(page).toHaveURL(/\/admin\/services\?saved=updated$/);
 
+    await page.goto(`/admin/services?q=${slug}`);
     await page.getByRole("link", { name }).click();
     await expect(page.getByLabel("Tagline")).toHaveValue("Edited by the Playwright test.");
   } finally {
     if (created) {
-      await page.goto("/admin/services");
+      await page.goto(`/admin/services?q=${slug}`);
       const createdLink = page.getByRole("link", { name });
       if (await createdLink.count()) {
         await createdLink.click();

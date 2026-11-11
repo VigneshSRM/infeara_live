@@ -7,6 +7,8 @@ import { createAdminClient, hasServiceRole } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { friendlyError } from "./errors";
 import { str } from "./forms";
+import { listHrefFromQuery } from "./list-params";
+import { ROLE_FILTER, USERS_PATH } from "./user-roles";
 
 const ROLES = ["super_admin", "editor", "seo_manager", "pending"] as const;
 type Role = (typeof ROLES)[number];
@@ -20,13 +22,19 @@ export async function updateUserRole(formData: FormData) {
   const id = str(formData, "id");
   const role = asRole(str(formData, "role"));
 
-  if (!id) redirect("/admin/users?error=Missing%20user%20id.");
-  if (!role) redirect("/admin/users?error=Unknown%20role.");
+  // The list the button was on: its search, role filter and page. The form carries them as a query
+  // string, and it is rebuilt from the known names and values only, so the browser goes back to
+  // the same view and never anywhere else.
+  const list = listHrefFromQuery(USERS_PATH, str(formData, "return_query"), [ROLE_FILTER], []);
+  const back = (flash: string) => `${list}${list.includes("?") ? "&" : "?"}${flash}`;
+
+  if (!id) redirect(back("error=Missing%20user%20id."));
+  if (!role) redirect(back("error=Unknown%20role."));
 
   const supabase = await createClient();
 
   if (id === actor.id && role !== "super_admin") {
-    redirect("/admin/users?error=You%20cannot%20remove%20your%20own%20super%20admin%20role.");
+    redirect(back("error=You%20cannot%20remove%20your%20own%20super%20admin%20role."));
   }
 
   if (role !== "super_admin") {
@@ -39,15 +47,15 @@ export async function updateUserRole(formData: FormData) {
 
     const current = await supabase.from("profiles").select("role").eq("id", id).maybeSingle();
     if (current.data?.role === "super_admin" && (count ?? 0) <= 1) {
-      redirect("/admin/users?error=At%20least%20one%20super%20admin%20must%20remain.");
+      redirect(back("error=At%20least%20one%20super%20admin%20must%20remain."));
     }
   }
 
   const { error } = await supabase.from("profiles").update({ role }).eq("id", id);
-  if (error) redirect(`/admin/users?error=${encodeURIComponent(friendlyError(error))}`);
+  if (error) redirect(back(`error=${encodeURIComponent(friendlyError(error))}`));
 
   revalidatePath("/admin/users");
-  redirect("/admin/users?saved=1");
+  redirect(back("saved=1"));
 }
 
 /**

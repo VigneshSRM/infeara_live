@@ -24,6 +24,8 @@ async function load(path) {
 }
 
 const lp = await load("../lib/admin/list-params.ts");
+const leadStats = await load("../lib/admin/lead-stats.ts");
+const userRoles = await load("../lib/admin/user-roles.ts");
 const rv = await load("../lib/admin/resource-validation.ts");
 
 /* ── The search text ───────────────────────────────────────────────────────── */
@@ -187,7 +189,7 @@ test("a hostile search cannot add a condition, close a group or reach another co
     const parts = filter.split(",");
     assert.equal(parts.length, columns.length, `${attack} -> ${filter}`);
     parts.forEach((part, index) => {
-      assert.match(part, new RegExp(`^${columns[index]}\\.ilike\\.%[\\p{L}\\p{N} .-]+%$`, "u"), part);
+      assert.match(part, new RegExp(`^${columns[index]}\\.ilike\\.%[\\p{L}\\p{N} .@-]+%$`, "u"), part);
     });
     assert.doesNotMatch(filter, /[()'"\\*]/);
   }
@@ -331,4 +333,172 @@ test("a blog post with no sections cannot be published, but can be saved as a dr
   assert.match(rv.blogProblem({ status: "published", sections: 0 }), /section/);
   assert.equal(rv.blogProblem({ status: "draft", sections: 0 }), null);
   assert.equal(rv.blogProblem({ status: "published", sections: 2 }), null);
+});
+
+/* ── Search keeps what an email address is made of ─────────────────────────── */
+
+test("an email address can be searched for as typed", () => {
+  assert.equal(lp.cleanSearch("info@infeara.com"), "info@infeara.com");
+  assert.equal(lp.cleanSearch("  Ann.Lee@Example.co.in  "), "Ann.Lee@Example.co.in");
+  assert.equal(lp.searchFilter(["email", "name"], "info@infeara.com"), "email.ilike.%info@infeara.com%,name.ilike.%info@infeara.com%");
+});
+
+test("keeping @ does not let anything else through", () => {
+  assert.equal(lp.cleanSearch("a@b,c"), "a@b c");
+  assert.equal(lp.cleanSearch("a@b)"), "a@b");
+  assert.equal(lp.cleanSearch("@%@"), "@ @");
+  assert.doesNotMatch(lp.cleanSearch("x@y.com),email.eq.z"), /[,()]/);
+});
+
+/* ── A list with statuses of its own ───────────────────────────────────────── */
+
+test("the Leads statuses are the five statuses of an enquiry, All first", () => {
+  assert.deepEqual(
+    lp.LEAD_STATUS_FILTERS.map((option) => option.value),
+    ["all", ...leadStats.LEAD_STATUSES],
+    "tests must fail when lead-stats.ts and list-params.ts name different statuses",
+  );
+  assert.equal(lp.LEAD_STATUS_FILTERS[0].label, "All");
+});
+
+test("a list takes the statuses it is given, and only those", () => {
+  const status = (value) => lp.parseListParams({ status: value }, [], lp.LEAD_STATUS_FILTERS).status;
+  for (const good of ["all", "new", "contacted", "qualified", "closed", "spam"]) assert.equal(status(good), good);
+  for (const bad of ["published", "scheduled", "draft", "archived", "New", "' or 1=1 --", "", undefined]) {
+    assert.equal(status(bad), "all", String(bad));
+  }
+});
+
+test("a content list still takes the content statuses when none are given", () => {
+  assert.equal(lp.parseListParams({ status: "scheduled" }).status, "scheduled");
+  assert.equal(lp.parseListParams({ status: "new" }).status, "all", "an enquiry status means nothing on a content list");
+});
+
+test("a list with no status of its own ignores ?status= altogether", () => {
+  for (const value of ["draft", "published", "new", "all", "anything"]) {
+    assert.equal(lp.parseListParams({ status: value }, [], []).status, "all", value);
+  }
+  assert.equal(lp.isFiltered(lp.parseListParams({ status: "draft" }, [], [])), false);
+});
+
+/* ── The "last N days" filter ──────────────────────────────────────────────── */
+
+test("a time-window filter lists its days, with 1 day worded as 24 hours", () => {
+  const spec = lp.windowFilter("when", "When", [1, 7, 30]);
+  assert.equal(spec.name, "when");
+  assert.equal(spec.label, "When");
+  assert.equal(spec.anyLabel, "Any time");
+  assert.deepEqual(spec.options, [
+    { value: "1", label: "Last 24 hours" },
+    { value: "7", label: "Last 7 days" },
+    { value: "30", label: "Last 30 days" },
+  ]);
+  assert.equal(lp.windowFilter("when", "When", [7], "Ever").anyLabel, "Ever");
+});
+
+test("a time window is kept only when it is one of the listed numbers of days", () => {
+  const extras = [lp.windowFilter("received", "Received", [1, 7, 30, 90])];
+  const read = (value) => lp.parseListParams({ received: value }, extras).extra;
+  assert.deepEqual(read("7"), { received: "7" });
+  assert.deepEqual(read("90"), { received: "90" });
+  for (const bad of ["5", "0", "-7", "7.5", "1e3", "abc", "", "7 days", undefined]) assert.deepEqual(read(bad), {}, String(bad));
+});
+
+test("a window opens exactly that many days before now, as an ISO time", () => {
+  const now = Date.UTC(2026, 10, 11, 12, 30, 0);
+  assert.equal(lp.windowStart(now, 1), "2026-11-10T12:30:00.000Z");
+  assert.equal(lp.windowStart(now, 7), "2026-11-04T12:30:00.000Z");
+  assert.equal(lp.windowStart(now, 30), "2026-10-12T12:30:00.000Z");
+  assert.equal(lp.windowStart(now, 90), "2026-08-13T12:30:00.000Z");
+});
+
+/* ── Addresses with a list's own status and window ─────────────────────────── */
+
+test("a leads address carries the search, the status, the window and the page", () => {
+  const extras = [lp.windowFilter("received", "Received", [1, 7, 30, 90])];
+  const params = lp.parseListParams({ q: "acme", status: "new", received: "7", page: "2" }, extras, lp.LEAD_STATUS_FILTERS);
+  assert.equal(lp.listHref("/admin/leads", params), "/admin/leads?q=acme&status=new&received=7&page=2");
+  assert.equal(lp.listQueryString(params), "q=acme&status=new&received=7&page=2");
+});
+
+test("a status button keeps the search and the window and starts again at page 1", () => {
+  const extras = [lp.windowFilter("received", "Received", [1, 7, 30, 90])];
+  const params = lp.parseListParams({ q: "acme", status: "new", received: "7", page: "3" }, extras, lp.LEAD_STATUS_FILTERS);
+  assert.equal(lp.listHref("/admin/leads", params, { status: "closed", page: 1 }), "/admin/leads?q=acme&status=closed&received=7");
+  assert.equal(lp.listHref("/admin/leads", params, { status: "all", page: 1 }), "/admin/leads?q=acme&received=7");
+});
+
+test("an address with no filters has an empty query string", () => {
+  assert.equal(lp.listQueryString(lp.parseListParams({})), "");
+});
+
+/* ── Coming back to the list a form was on ─────────────────────────────────── */
+
+test("coming back rebuilds the list's address from the query the form carried", () => {
+  const role = [userRoles.ROLE_FILTER];
+  assert.equal(lp.listHrefFromQuery("/admin/users", "role=pending&page=2&q=ann", role, []), "/admin/users?q=ann&role=pending&page=2");
+  assert.equal(lp.listHrefFromQuery("/admin/users", "?role=editor", role, []), "/admin/users?role=editor");
+  assert.equal(lp.listHrefFromQuery("/admin/users", "", role, []), "/admin/users");
+  assert.equal(lp.listHrefFromQuery("/admin/users", null, role, []), "/admin/users");
+  assert.equal(lp.listHrefFromQuery("/admin/users", undefined, role, []), "/admin/users");
+});
+
+test("coming back keeps only names and values the list knows, and never leaves the list", () => {
+  const role = [userRoles.ROLE_FILTER];
+  const attacks = [
+    "role=evil&page=-3",
+    "redirect=https://evil.example",
+    "next=//evil.example/x",
+    "q=%0d%0aLocation:%20https://evil.example",
+    "q=https://evil.example&role=editor",
+    "q=..%2F..%2Fadmin&page=2",
+    "status=draft",
+    "//evil.example",
+    "https://evil.example/?role=editor",
+    "role=editor&role=pending&page=2&page=9",
+    "\\\\evil.example",
+  ];
+  for (const attack of attacks) {
+    const href = lp.listHrefFromQuery("/admin/users", attack, role, []);
+    // The path never changes, and the address holds no scheme, no double slash, no backslash and no
+    // line break. (A hostile search text is cleaned down to plain words, so a word like "evil" can
+    // survive inside q=; it is only a search term there.)
+    assert.equal(href.split("?")[0], "/admin/users", `${attack} -> ${href}`);
+    assert.match(href, /^\/admin\/users(\?[a-z0-9=&+%._-]*)?$/i, `${attack} -> ${href}`);
+    assert.doesNotMatch(href, /:\/|\/\/|\\|%0[da]/i, `${attack} -> ${href}`);
+    assert.doesNotMatch(href, /status=/, "a list with no statuses never carries one");
+  }
+  // A parameter the list does not know adds nothing at all.
+  for (const unknown of ["redirect=https://evil.example", "next=//evil.example/x", "//evil.example", "status=draft"]) {
+    assert.equal(lp.listHrefFromQuery("/admin/users", unknown, role, []), "/admin/users", unknown);
+  }
+});
+
+test("a repeated parameter in the carried query uses its first value", () => {
+  const role = [userRoles.ROLE_FILTER];
+  assert.equal(lp.listHrefFromQuery("/admin/users", "role=editor&role=pending&page=2&page=9", role, []), "/admin/users?role=editor&page=2");
+});
+
+/* ── The roles the Users list filters by ───────────────────────────────────── */
+
+test("the Users role filter offers the four roles, with no status of its own", () => {
+  assert.equal(userRoles.ROLE_FILTER.name, "role");
+  assert.equal(userRoles.ROLE_FILTER.anyLabel, "All roles");
+  assert.deepEqual(
+    userRoles.ROLE_FILTER.options.map((option) => option.value),
+    ["super_admin", "editor", "seo_manager", "pending"],
+  );
+  assert.deepEqual(Object.keys(userRoles.USER_ROLE_HELP).sort(), userRoles.USER_ROLES.map((role) => role.value).sort());
+  assert.equal(userRoles.WAITING_HREF, "/admin/users?role=pending");
+  assert.equal(
+    lp.listHref(userRoles.USERS_PATH, lp.parseListParams({ role: "pending" }, [userRoles.ROLE_FILTER], [])),
+    userRoles.WAITING_HREF,
+    "the link to those waiting is the address the filter itself builds",
+  );
+});
+
+test("a page size of 40 works as the audit log uses it", () => {
+  const window = lp.pageWindow(95, 3, 40);
+  assert.deepEqual(window, { total: 95, size: 40, pages: 3, page: 3, from: 80, first: 81, last: 95 });
+  assert.equal(lp.pageWindow(95, 4, 40).page, 3);
 });

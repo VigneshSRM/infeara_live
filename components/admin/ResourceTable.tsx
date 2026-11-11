@@ -24,7 +24,7 @@ export type Column<Row> = {
  * The table of an admin list, with a different message for "nothing here yet" and "nothing
  * matches the search". Wide tables scroll inside their card instead of breaking the page.
  */
-export function ResourceTable<Row extends { id: string }>({
+export function ResourceTable<Row extends { id: string | number }>({
   caption,
   rows,
   columns,
@@ -42,7 +42,10 @@ export function ResourceTable<Row extends { id: string }>({
   return (
     <div className="admin-card mt-6 overflow-hidden">
       {rows.length ? (
-        <div className="overflow-x-auto">
+        // `relative`, so the wrapper is the containing block of anything positioned inside a row. A
+        // visually hidden label (class sr-only) is positioned absolutely, and without this it ignores
+        // the wrapper's scrolling and widens the whole page, even though the table itself scrolls.
+        <div className="relative overflow-x-auto">
           <table className="w-full text-left text-[0.86rem]">
             <caption className="sr-only">{caption}</caption>
             <thead className="border-b border-navy/10 bg-ivory/50">

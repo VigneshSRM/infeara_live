@@ -1,28 +1,20 @@
+import Link from "next/link";
 import { Flash } from "@/components/admin/Flash";
+import { ListToolbar } from "@/components/admin/ListToolbar";
 import { PageHeader } from "@/components/admin/PageHeader";
+import { Pager } from "@/components/admin/Pager";
 import { SchemaNotice } from "@/components/admin/SchemaNotice";
+import { ListError, ResourceTable, type Column } from "@/components/admin/ResourceTable";
 import { isMissingSchema } from "@/lib/admin/errors";
 import { istLabel } from "@/lib/admin/forms";
+import { countListRows, fetchListPage } from "@/lib/admin/list-query";
+import { isFiltered, listQueryString, parseListParams, type RawParams } from "@/lib/admin/list-params";
 import { createStaffAccount, inviteUser, updateUserRole } from "@/lib/admin/user-actions";
+import { ROLE_FILTER, USERS_PATH as PATH, USER_ROLES as ROLES, USER_ROLE_HELP as ROLE_HELP, WAITING_HREF } from "@/lib/admin/user-roles";
 import { requireSuperAdmin } from "@/lib/auth/dal";
 import { hasServiceRole } from "@/lib/supabase/admin";
-import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
-
-const ROLES = [
-  { value: "super_admin", label: "Super admin" },
-  { value: "editor", label: "Editor" },
-  { value: "seo_manager", label: "SEO manager" },
-  { value: "pending", label: "No access (pending)" },
-];
-
-const ROLE_HELP: Record<string, string> = {
-  super_admin: "Everything, including users and deletions.",
-  editor: "Create, edit, publish and delete content.",
-  seo_manager: "Edit SEO titles, meta descriptions and publish dates only.",
-  pending: "Signed up but has no access. Set a role to admit them.",
-};
 
 type Profile = {
   id: string;
@@ -32,26 +24,108 @@ type Profile = {
   created_at: string;
 };
 
-export default async function UsersPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ saved?: string; invited?: string; created?: string; error?: string }>;
-}) {
-  const actor = await requireSuperAdmin();
-  const flash = await searchParams;
-  const supabase = await createClient();
+const one = (value: string | string[] | undefined) => (Array.isArray(value) ? value[0] : value);
 
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("id,email,full_name,role,created_at")
-    .order("role")
-    .order("created_at");
+export default async function UsersPage({ searchParams }: { searchParams: Promise<RawParams> }) {
+  const actor = await requireSuperAdmin();
+  const raw = await searchParams;
+  // The role is this list's status, so it has no status dropdown of its own.
+  const params = parseListParams(raw, [ROLE_FILTER], []);
+
+  const [{ rows, window, error }, waiting] = await Promise.all([
+    fetchListPage<Profile>({
+      table: "profiles",
+      columns: "id,email,full_name,role,created_at",
+      params,
+      searchColumns: ["full_name", "email"],
+      extraColumns: { role: "role" },
+      // Staff first, most access first (the database sorts a role by the order it declares them),
+      // then the accounts waiting for a role. Oldest first within a role.
+      order: [{ column: "role" }, { column: "created_at" }],
+    }),
+    // Everyone waiting for access, whatever the search or filter: the notice below is about them.
+    countListRows({
+      table: "profiles",
+      params: { q: "", status: "all", page: 1, extra: { role: "pending" } },
+      searchColumns: [],
+      extraColumns: { role: "role" },
+    }),
+  ]);
 
   if (isMissingSchema(error)) return <SchemaNotice table="profiles" />;
 
-  const rows = (data ?? []) as Profile[];
-  const staff = rows.filter((row) => row.role !== "pending");
-  const pending = rows.filter((row) => row.role === "pending");
+  // The view the role buttons are on, so a change brings you back to it and not to page 1.
+  const returnQuery = listQueryString(params);
+  const showingWaiting = params.extra.role === "pending";
+
+  const columns: Column<Profile>[] = [
+    {
+      header: "Person",
+      className: "align-top",
+      cell: (row) => (
+        <>
+          <p className="font-heading text-navy">{row.full_name ?? row.email}</p>
+          {row.full_name ? <p className="text-[0.76rem] text-charcoal/60">{row.email}</p> : null}
+          {row.id === actor.id ? (
+            <span className="mt-1 inline-block rounded-sm bg-blue/10 px-2 py-0.5 font-heading text-[0.62rem] uppercase tracking-[0.1em] text-blue">
+              You
+            </span>
+          ) : null}
+        </>
+      ),
+    },
+    {
+      header: "Role",
+      className: "align-top",
+      cell: (row) => (
+        <>
+          <p className="text-charcoal">{ROLES.find((role) => role.value === row.role)?.label ?? row.role}</p>
+          <p className="mt-0.5 max-w-[20rem] text-[0.74rem] leading-relaxed text-charcoal/60">{ROLE_HELP[row.role]}</p>
+        </>
+      ),
+    },
+    { header: "Added", className: "whitespace-nowrap align-top text-charcoal/70", cell: (row) => istLabel(row.created_at) },
+    {
+      header: "Change role",
+      className: "align-top",
+      cell: (row) => (
+        <form action={updateUserRole} className="flex flex-wrap items-center gap-2">
+          <input type="hidden" name="id" value={row.id} />
+          <input type="hidden" name="return_query" value={returnQuery} />
+          <label className="sr-only" htmlFor={`role-${row.id}`}>
+            Role for {row.email}
+          </label>
+          {row.role === "pending" ? (
+            <>
+              <select id={`role-${row.id}`} name="role" defaultValue="editor" className="admin-select !w-auto !py-1 !text-[0.8rem]">
+                {ROLES.filter((role) => role.value !== "pending").map((role) => (
+                  <option key={role.value} value={role.value}>
+                    {role.label}
+                  </option>
+                ))}
+              </select>
+              <button type="submit" className="admin-btn admin-btn-primary !px-3 !py-1 !text-[0.74rem]">
+                Admit
+              </button>
+            </>
+          ) : (
+            <>
+              <select id={`role-${row.id}`} name="role" defaultValue={row.role} className="admin-select !w-auto !py-1 !text-[0.8rem]">
+                {ROLES.map((role) => (
+                  <option key={role.value} value={role.value}>
+                    {role.label}
+                  </option>
+                ))}
+              </select>
+              <button type="submit" className="admin-btn admin-btn-ghost !px-3 !py-1 !text-[0.74rem]">
+                Update
+              </button>
+            </>
+          )}
+        </form>
+      ),
+    },
+  ];
 
   return (
     <>
@@ -61,115 +135,46 @@ export default async function UsersPage({
         description="Three working roles, enforced by the database. A public signup always lands in pending."
       />
 
-      <Flash saved={flash.saved ?? (flash.invited || flash.created ? "created" : undefined)} error={flash.error} />
+      <Flash saved={one(raw.saved) ?? (one(raw.invited) || one(raw.created) ? "created" : undefined)} error={one(raw.error)} />
 
-      {error ? (
-        <p role="alert" className="mt-4 rounded-md border border-coral-ink/30 bg-coral/10 px-4 py-3 text-[0.85rem] text-coral-ink">
-          {error.message}
+      {waiting && !showingWaiting ? (
+        <p className="mt-4 rounded-md border border-blue/25 bg-blue/8 px-4 py-3 text-[0.85rem] text-blue">
+          {waiting} {waiting === 1 ? "account is" : "accounts are"} waiting for access and cannot read or change anything until
+          you give {waiting === 1 ? "it" : "them"} a role.{" "}
+          <Link href={WAITING_HREF} className="font-heading underline underline-offset-4">
+            Show {waiting === 1 ? "it" : "them"}
+          </Link>
         </p>
       ) : null}
 
-      <div className="admin-card mt-6 overflow-hidden">
-        <table className="w-full text-left text-[0.86rem]">
-          <thead className="border-b border-navy/10 bg-ivory/50">
-            <tr className="font-heading text-[0.68rem] uppercase tracking-[0.14em] text-charcoal/60">
-              <th className="px-4 py-3 font-medium">Person</th>
-              <th className="px-4 py-3 font-medium">Role</th>
-              <th className="px-4 py-3 font-medium">Added</th>
-              <th className="px-4 py-3 font-medium">
-                <span className="sr-only">Change role</span>
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-navy/8">
-            {staff.map((row) => (
-              <tr key={row.id} className="align-top">
-                <td className="px-4 py-3">
-                  <p className="font-heading text-navy">{row.full_name ?? row.email}</p>
-                  {row.full_name ? <p className="text-[0.76rem] text-charcoal/60">{row.email}</p> : null}
-                  {row.id === actor.id ? (
-                    <span className="mt-1 inline-block rounded-sm bg-blue/10 px-2 py-0.5 font-heading text-[0.62rem] uppercase tracking-[0.1em] text-blue">
-                      You
-                    </span>
-                  ) : null}
-                </td>
-                <td className="px-4 py-3">
-                  <p className="text-charcoal">{ROLES.find((role) => role.value === row.role)?.label ?? row.role}</p>
-                  <p className="mt-0.5 max-w-[20rem] text-[0.74rem] leading-relaxed text-charcoal/60">
-                    {ROLE_HELP[row.role]}
-                  </p>
-                </td>
-                <td className="whitespace-nowrap px-4 py-3 text-charcoal/70">{istLabel(row.created_at)}</td>
-                <td className="px-4 py-3">
-                  <form action={updateUserRole} className="flex flex-wrap items-center gap-2">
-                    <input type="hidden" name="id" value={row.id} />
-                    <label className="sr-only" htmlFor={`role-${row.id}`}>
-                      Role for {row.email}
-                    </label>
-                    <select id={`role-${row.id}`} name="role" defaultValue={row.role} className="admin-select !w-auto !py-1 !text-[0.8rem]">
-                      {ROLES.map((role) => (
-                        <option key={role.value} value={role.value}>
-                          {role.label}
-                        </option>
-                      ))}
-                    </select>
-                    <button type="submit" className="admin-btn admin-btn-ghost !px-3 !py-1 !text-[0.74rem]">
-                      Update
-                    </button>
-                  </form>
-                </td>
-              </tr>
-            ))}
-            {!staff.length ? (
-              <tr>
-                <td colSpan={4} className="px-4 py-8 text-center text-[0.86rem] text-charcoal/70">
-                  No staff accounts yet. Promote your own profile with the SQL below.
-                </td>
-              </tr>
-            ) : null}
-          </tbody>
-        </table>
-      </div>
+      <ListToolbar
+        action={PATH}
+        params={params}
+        label="Search users"
+        placeholder="Name or email"
+        extras={[ROLE_FILTER]}
+        statuses={[]}
+        showStatus={false}
+      />
 
-      {pending.length ? (
-        <section className="mt-8">
-          <h2 className="font-display text-xl text-navy">Waiting for access</h2>
-          <p className="mt-1 text-[0.82rem] text-charcoal/65">
-            These accounts exist but cannot read or change anything until you give them a role.
-          </p>
-          <ul className="admin-card mt-3 divide-y divide-navy/8">
-            {pending.map((row) => (
-              <li key={row.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
-                <div>
-                  <p className="font-heading text-[0.88rem] text-navy">{row.email}</p>
-                  <p className="text-[0.74rem] text-charcoal/60">Signed up {istLabel(row.created_at)}</p>
-                </div>
-                <form action={updateUserRole} className="flex items-center gap-2">
-                  <input type="hidden" name="id" value={row.id} />
-                  <label className="sr-only" htmlFor={`pending-role-${row.id}`}>
-                    Role for {row.email}
-                  </label>
-                  <select
-                    id={`pending-role-${row.id}`}
-                    name="role"
-                    defaultValue="editor"
-                    className="admin-select !w-auto !py-1 !text-[0.8rem]"
-                  >
-                    {ROLES.filter((role) => role.value !== "pending").map((role) => (
-                      <option key={role.value} value={role.value}>
-                        {role.label}
-                      </option>
-                    ))}
-                  </select>
-                  <button type="submit" className="admin-btn admin-btn-primary !px-3 !py-1 !text-[0.74rem]">
-                    Admit
-                  </button>
-                </form>
-              </li>
-            ))}
-          </ul>
-        </section>
+      {showingWaiting ? (
+        <p className="mt-4 text-[0.82rem] text-charcoal/65">
+          These accounts exist but cannot read or change anything until you give them a role.
+        </p>
       ) : null}
+
+      {error ? <ListError /> : null}
+
+      <ResourceTable
+        caption="Users and roles"
+        rows={rows}
+        columns={columns}
+        filtered={isFiltered(params)}
+        clearHref={PATH}
+        emptyMessage="No staff accounts yet. Promote your own profile with the SQL below."
+      />
+
+      <Pager basePath={PATH} params={params} window={window} noun="accounts" />
 
       <section className="mt-8 grid gap-6 lg:grid-cols-2">
         <div className="admin-card p-5">
