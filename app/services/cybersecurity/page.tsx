@@ -8,8 +8,8 @@ import { PageFrame } from "@/components/site/PageFrame";
 import { PageHero } from "@/components/site/PageHero";
 import { SectionHeading } from "@/components/site/SectionHeading";
 import { SubserviceCard } from "@/components/site/SubserviceCard";
-import { getService } from "@/lib/content";
-import { cybersecuritySubservices } from "@/lib/content/cybersecurity-subservices";
+import { getService, listSubservices } from "@/lib/content";
+import { subservicePath } from "@/lib/content/subservice-model";
 import { figureImage } from "@/lib/site-images";
 import { pageMetadata } from "@/lib/metadata";
 import { SITE_URL } from "@/lib/site";
@@ -32,6 +32,7 @@ export async function generateMetadata() {
 export default async function CybersecurityCorePage() {
   const service = await getService(serviceSlug);
   if (!service) notFound();
+  const subservices = await listSubservices(serviceSlug);
 
   const crumbs = [
     { label: "Services", href: "/services" },
@@ -63,27 +64,29 @@ export default async function CybersecurityCorePage() {
           secondary={{ label: "All core services", href: "/services" }}
         />
 
-        <section className="border-b border-navy/10 bg-ivory py-20 md:py-28">
-          <div className="shell">
-            <SectionHeading
-              eyebrow="Cybersecurity sub-services"
-              title="Choose the assessment or analysis your environment needs."
-              intro="Each service has a defined scope, authorized methods and practical output. Combine them when you need a wider view of risk and resilience."
-            />
-            <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-              {cybersecuritySubservices.map((subservice, index) => (
-                <SubserviceCard
-                  key={subservice.slug}
-                  href={`/services/cybersecurity/${subservice.slug}`}
-                  title={subservice.name}
-                  summary={subservice.summary}
-                  index={index}
-                  image={figureImage(subservice.figure.seed)}
-                />
-              ))}
+        {subservices.length > 0 ? (
+          <section className="border-b border-navy/10 bg-ivory py-20 md:py-28">
+            <div className="shell">
+              <SectionHeading
+                eyebrow="Cybersecurity sub-services"
+                title="Choose the assessment or analysis your environment needs."
+                intro="Each service has a defined scope, authorized methods and practical output. Combine them when you need a wider view of risk and resilience."
+              />
+              <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                {subservices.map((subservice, index) => (
+                  <SubserviceCard
+                    key={subservice.slug}
+                    href={subservicePath(subservice.parentSlug, subservice.slug)}
+                    title={subservice.name}
+                    summary={subservice.summary}
+                    index={index}
+                    image={figureImage(subservice.figure.seed)}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        ) : null}
 
         <section className="bg-ivory py-20 md:py-28">
           <div className="shell grid items-start gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-20">

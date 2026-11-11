@@ -4,7 +4,7 @@ export function FaqList({ items, idPrefix = "faq" }: { items: Faq[]; idPrefix?: 
   return (
     <div className="divide-y divide-navy/10 border-y border-navy/10">
       {items.map((item, index) => (
-        <details key={item.question} className="group py-5">
+        <details key={`${index}-${item.question}`} className="group py-5">
           <summary className="flex cursor-pointer list-none items-start justify-between gap-6">
             <h3 className="font-heading text-[1rem] font-medium leading-snug text-navy">
               {item.question}

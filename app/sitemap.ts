@@ -1,10 +1,15 @@
 import type { MetadataRoute } from "next";
-import { listIndustries, listInsights, listServices } from "@/lib/content";
-import { cybersecuritySubservices } from "@/lib/content/cybersecurity-subservices";
-import { cloudSubservices } from "@/lib/content/cloud-subservices";
-import { productSubservices } from "@/lib/content/product-subservices";
+import {
+  listBlogPosts,
+  listCaseStudies,
+  listIndustries,
+  listInsights,
+  listServices,
+  listSubservices,
+  listWhitePapers,
+} from "@/lib/content";
 import { legalDocuments } from "@/lib/content/legal";
-import { blogPosts } from "@/lib/content/blogs";
+import { subservicePath } from "@/lib/content/subservice-model";
 import { SITE_INDEXABLE, SITE_URL } from "@/lib/site";
 
 const staticRoutes: { path: string; priority: number; changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"] }[] = [
@@ -31,10 +36,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // buy-off are complete.
   if (!SITE_INDEXABLE) return [];
 
-  const [services, industries, insights] = await Promise.all([
+  const [services, industries, insights, subservices, blogPosts, caseStudies, whitePapers] = await Promise.all([
     listServices(),
     listIndustries(),
     listInsights(),
+    listSubservices(),
+    listBlogPosts(),
+    listCaseStudies(),
+    listWhitePapers(),
   ]);
 
   const lastModified = new Date();
@@ -48,22 +57,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     }));
 
-  const cybersecurityRoutes = cybersecuritySubservices.map((service) => ({
-    url: `${SITE_URL}/services/cybersecurity/${service.slug}`,
-    lastModified,
-    changeFrequency: "monthly" as const,
-    priority: 0.7,
-  }));
-
-  const cloudRoutes = cloudSubservices.map((service) => ({
-    url: `${SITE_URL}/services/cloud-datacenter/${service.slug}`,
-    lastModified,
-    changeFrequency: "monthly" as const,
-    priority: 0.7,
-  }));
-
-  const productSubserviceRoutes = productSubservices.map((service) => ({
-    url: `${SITE_URL}${service.parentHref}/${service.slug}`,
+  // Every published sub-service, under whichever of the four service pages it belongs to.
+  const subserviceRoutes = subservices.map((service) => ({
+    url: `${SITE_URL}${subservicePath(service.parentSlug, service.slug)}`,
     lastModified,
     changeFrequency: "monthly" as const,
     priority: 0.7,
@@ -90,6 +86,27 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.5,
   }));
 
+  const caseStudyRoutes = caseStudies.map((study) => ({
+    url: `${SITE_URL}/case-studies/${study.slug}`,
+    lastModified,
+    changeFrequency: "yearly" as const,
+    priority: 0.5,
+  }));
+
+  // The /white-papers page is noindex while nothing is published (see app/white-papers/page.tsx),
+  // so it only joins the sitemap together with the first paper.
+  const whitePaperRoutes = whitePapers.length
+    ? [
+        { url: `${SITE_URL}/white-papers`, lastModified, changeFrequency: "monthly" as const, priority: 0.6 },
+        ...whitePapers.map((paper) => ({
+          url: `${SITE_URL}/white-papers/${paper.slug}`,
+          lastModified: paper.publishedAt ? new Date(`${paper.publishedAt}T00:00:00Z`) : lastModified,
+          changeFrequency: "yearly" as const,
+          priority: 0.5,
+        })),
+      ]
+    : [];
+
   const legalRoutes = legalDocuments.map((document) => ({
     url: `${SITE_URL}/legal/${document.slug}`,
     lastModified,
@@ -105,12 +122,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: route.priority,
     })),
     ...serviceRoutes,
-    ...cybersecurityRoutes,
-    ...cloudRoutes,
-    ...productSubserviceRoutes,
+    ...subserviceRoutes,
     ...industryRoutes,
     ...insightRoutes,
     ...blogRoutes,
+    ...caseStudyRoutes,
+    ...whitePaperRoutes,
     ...legalRoutes,
   ];
 }

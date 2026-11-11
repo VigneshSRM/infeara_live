@@ -7,16 +7,20 @@
 // splitter can break, while keeping the original files readable and diffable.
 //
 //   node scripts/make-apply-blobs.mjs
-//   → supabase/apply/01-schema.sql, 02-seed.sql, 03-lead-notes.sql, 04-core-services.sql
+//   → supabase/apply/01-schema.sql, 02-seed.sql, 03-lead-notes.sql, 04-core-services.sql,
+//     05-resource-modules.sql
 //
 // Run 01 first, then 02, each as a fresh query in the SQL editor. 03 adds the lead
 // notes chat and can be run at any time after 01 (it is safe to run again). 04 is for a
 // database that was set up before AI Automations and Application Development existed:
-// it adds them and publishes them (also safe to run again).
+// it adds them and publishes them (also safe to run again). 05 adds the tables, the
+// storage bucket and the starting content for managing sub-services, blog posts, case
+// studies and white papers in the admin (also safe to run again).
 //
-// 01 and 02 are large and stay out of git. 03 and 04 are small and ARE committed, so they
-// can be copied straight from GitHub; tests check they still match their migrations, so
-// run this script again whenever a migration they come from changes.
+// 01 and 02 are large and stay out of git. 03, 04 and 05 ARE committed, so they can be
+// copied straight from GitHub; tests check they still match their migrations, so run this
+// script again whenever a migration they come from changes. (05 is generated from two
+// files: the second is itself generated, by scripts/generate-resource-seed.mjs.)
 //
 // A migration may open with `begin;` and close with `commit;` so that psql and the CLI
 // keep it all-or-nothing. Inside the wrapper those two lines are dropped, because
@@ -37,6 +41,14 @@ const targets = [
     ],
     "supabase/apply/04-core-services.sql",
     "AI Automations and Application Development services",
+  ],
+  [
+    [
+      "supabase/migrations/20261110200000_resource_modules.sql",
+      "supabase/migrations/20261110200100_resource_modules_seed.sql",
+    ],
+    "supabase/apply/05-resource-modules.sql",
+    "sub-services, blog posts, case studies and white papers",
   ],
 ];
 

@@ -5,11 +5,9 @@ import { SectionHeading } from "@/components/site/SectionHeading";
 import { ServiceCard } from "@/components/site/ServiceCard";
 import { Figure } from "@/components/site/Figure";
 import { Schematic } from "@/components/site/Schematic";
-import { listServices } from "@/lib/content";
+import { listServices, listSubservices } from "@/lib/content";
 import { figureImage } from "@/lib/site-images";
-import { cybersecuritySubservices } from "@/lib/content/cybersecurity-subservices";
-import { cloudSubservices } from "@/lib/content/cloud-subservices";
-import { aiAutomationSubservices, applicationDevelopmentSubservices } from "@/lib/content/product-subservices";
+import { inParent, subservicePath } from "@/lib/content/subservice-model";
 import { coreServiceSlugs, infrastructureSubserviceSlugs } from "@/lib/content/service-taxonomy";
 import { SubserviceCard } from "@/components/site/SubserviceCard";
 import type { Service } from "@/lib/content/types";
@@ -40,7 +38,11 @@ const startSteps = [
 ];
 
 export default async function ServicesPage() {
-  const services = await listServices();
+  const [services, allSubservices] = await Promise.all([listServices(), listSubservices()]);
+  const cloudSubservices = inParent(allSubservices, "cloud-datacenter");
+  const aiAutomationSubservices = inParent(allSubservices, "ai-automations");
+  const applicationDevelopmentSubservices = inParent(allSubservices, "application-development");
+  const cybersecuritySubservices = inParent(allSubservices, "cybersecurity");
   const bySlug = new Map(services.map((service) => [service.slug, service]));
   const selectServices = (slugs: readonly string[]) =>
     slugs
@@ -93,6 +95,7 @@ export default async function ServicesPage() {
         </div>
       </section>
 
+      {cloudSubservices.length > 0 ? (
       <section className="border-y border-navy/10 bg-ivory py-20 md:py-28">
         <div className="shell">
           <SectionHeading
@@ -104,7 +107,7 @@ export default async function ServicesPage() {
             {cloudSubservices.map((service, index) => (
               <SubserviceCard
                 key={service.slug}
-                href={`/services/cloud-datacenter/${service.slug}`}
+                href={subservicePath(service.parentSlug, service.slug)}
                 title={service.name}
                 summary={service.summary}
                 index={index}
@@ -113,7 +116,9 @@ export default async function ServicesPage() {
           </div>
         </div>
       </section>
+      ) : null}
 
+      {aiAutomationSubservices.length > 0 ? (
       <section className="border-y border-navy/10 bg-ivory py-20 md:py-28">
         <div className="shell">
           <SectionHeading
@@ -123,12 +128,14 @@ export default async function ServicesPage() {
           />
           <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {aiAutomationSubservices.map((service, index) => (
-              <SubserviceCard key={service.slug} href={`${service.parentHref}/${service.slug}`} title={service.name} summary={service.summary} index={index} />
+              <SubserviceCard key={service.slug} href={subservicePath(service.parentSlug, service.slug)} title={service.name} summary={service.summary} index={index} />
             ))}
           </div>
         </div>
       </section>
+      ) : null}
 
+      {applicationDevelopmentSubservices.length > 0 ? (
       <section className="border-y border-navy/10 bg-ivory py-20 md:py-28">
         <div className="shell">
           <SectionHeading
@@ -138,12 +145,14 @@ export default async function ServicesPage() {
           />
           <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {applicationDevelopmentSubservices.map((service, index) => (
-              <SubserviceCard key={service.slug} href={`${service.parentHref}/${service.slug}`} title={service.name} summary={service.summary} index={index} />
+              <SubserviceCard key={service.slug} href={subservicePath(service.parentSlug, service.slug)} title={service.name} summary={service.summary} index={index} />
             ))}
           </div>
         </div>
       </section>
+      ) : null}
 
+      {cybersecuritySubservices.length > 0 ? (
       <section className="border-y border-navy/10 bg-ivory py-20 md:py-28">
         <div className="shell">
           <SectionHeading
@@ -155,7 +164,7 @@ export default async function ServicesPage() {
             {cybersecuritySubservices.map((service, index) => (
               <SubserviceCard
                 key={service.slug}
-                href={`/services/cybersecurity/${service.slug}`}
+                href={subservicePath(service.parentSlug, service.slug)}
                 title={service.name}
                 summary={service.summary}
                 index={index}
@@ -165,6 +174,7 @@ export default async function ServicesPage() {
           </div>
         </div>
       </section>
+      ) : null}
 
       <section className="border-y border-navy/10 bg-ivory py-20 md:py-28">
         <div className="shell grid items-center gap-12 lg:grid-cols-[1fr_1.05fr] lg:gap-20">

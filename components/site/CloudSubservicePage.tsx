@@ -7,17 +7,18 @@ import { Figure } from "@/components/site/Figure";
 import { PageFrame } from "@/components/site/PageFrame";
 import { SectionHeading } from "@/components/site/SectionHeading";
 import { SubserviceCard } from "@/components/site/SubserviceCard";
-import { cloudSubservices, type CloudSubservice } from "@/lib/content/cloud-subservices";
+import { SubserviceDiagram } from "@/components/site/SubserviceDiagram";
+import { subservicePath, type SubService } from "@/lib/content/subservice-model";
 import { SITE_URL } from "@/lib/site";
 
-export function CloudSubservicePage({ service }: { service: CloudSubservice }) {
-  const path = `/services/cloud-datacenter/${service.slug}`;
+/** `related` is a short row of the other published sub-services under Cloud & Datacenter. */
+export function CloudSubservicePage({ service, related }: { service: SubService; related: SubService[] }) {
+  const path = subservicePath(service.parentSlug, service.slug);
   const crumbs = [
     { label: "Services", href: "/services" },
     { label: "Cloud & Datacenter", href: "/services/cloud-datacenter" },
     { label: service.name, href: path },
   ];
-  const related = cloudSubservices.filter((item) => item.slug !== service.slug).slice(0, 3);
   const schema = {
     "@context": "https://schema.org",
     "@type": "Service",
@@ -62,7 +63,7 @@ export function CloudSubservicePage({ service }: { service: CloudSubservice }) {
               <SectionHeading eyebrow="Overview" title={`${service.name}, in practice.`} intro={service.intro} />
               <div className="mt-10 border-t border-navy/10">
                 {service.deliverables.map((item, index) => (
-                  <div key={item.title} className="grid gap-3 border-b border-navy/10 py-6 sm:grid-cols-[2rem_1fr] sm:gap-5">
+                  <div key={`${index}-${item.title}`} className="grid gap-3 border-b border-navy/10 py-6 sm:grid-cols-[2rem_1fr] sm:gap-5">
                     <span className="font-display text-sm text-blue">{String(index + 1).padStart(2, "0")}</span>
                     <div><h2 className="font-heading text-[1rem] font-semibold text-navy">{item.title}</h2><p className="mt-2 text-[0.92rem] leading-relaxed text-charcoal/70">{item.body}</p></div>
                   </div>
@@ -72,21 +73,17 @@ export function CloudSubservicePage({ service }: { service: CloudSubservice }) {
               <div className="lg:sticky lg:top-28">
                 <div className="rounded-[var(--radius-card)] border border-navy/10 bg-ivory p-6 md:p-8">
                   <p className="eyebrow text-blue">Expected outcomes</p>
-                  <ul className="mt-5 space-y-3">{service.outcomes.map((outcome) => <li key={outcome} className="flex items-start gap-3 text-[0.9rem] leading-relaxed text-charcoal/75"><span aria-hidden="true" className="mt-[0.45rem] h-1.5 w-1.5 shrink-0 rounded-full bg-blue/60" />{outcome}</li>)}</ul>
+                  <ul className="mt-5 space-y-3">{service.outcomes.map((outcome, index) => <li key={`${index}-${outcome}`} className="flex items-start gap-3 text-[0.9rem] leading-relaxed text-charcoal/75"><span aria-hidden="true" className="mt-[0.45rem] h-1.5 w-1.5 shrink-0 rounded-full bg-blue/60" />{outcome}</li>)}</ul>
                 </div>
               </div>
           </div>
         </section>
 
-        <section className="border-y border-navy/10 bg-ivory py-16 md:py-24">
-          <div className="shell">
-            <SectionHeading eyebrow="How it works" title={service.infographic.title} intro="A practical lifecycle with clear ownership and review at each stage." />
-            <figure className="mt-10 overflow-hidden rounded-[var(--radius-card)] border border-navy/10 bg-[#EAE6DE]">
-              <img src={`/site/infographics/${service.slug}.svg`} alt={`${service.infographic.title}: ${service.infographic.steps.map((step) => `${step.title}, ${step.description}`).join("; ")}`} width="1400" height="780" loading="lazy" className="h-auto w-full" />
-              <figcaption className="border-t border-navy/10 px-5 py-3 text-[0.8rem] leading-relaxed text-charcoal/65 md:px-7">A four-stage service infographic for {service.name}, from initial planning through operational review.</figcaption>
-            </figure>
-          </div>
-        </section>
+        <SubserviceDiagram
+          service={service}
+          intro="A practical lifecycle with clear ownership and review at each stage."
+          imageCaption={`A four-stage service infographic for ${service.name}, from initial planning through operational review.`}
+        />
 
         <section className="border-y border-navy/10 bg-ivory py-20 md:py-28">
           <div className="shell grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20">
@@ -95,14 +92,16 @@ export function CloudSubservicePage({ service }: { service: CloudSubservice }) {
           </div>
         </section>
 
+        {related.length > 0 ? (
         <section className="bg-ivory py-16 md:py-24">
           <div className="shell">
             <SectionHeading eyebrow="Related cloud services" title="Connected capabilities, one cloud plan." intro="Explore adjacent areas that can be combined where your environment needs a joined-up approach." />
             <div className="mt-9 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {related.map((item, index) => <SubserviceCard key={item.slug} href={`/services/cloud-datacenter/${item.slug}`} title={item.name} summary={item.summary} index={index} />)}
+              {related.map((item, index) => <SubserviceCard key={item.slug} href={subservicePath(item.parentSlug, item.slug)} title={item.name} summary={item.summary} index={index} />)}
             </div>
           </div>
         </section>
+        ) : null}
 
         <CtaBand title={`Plan your ${service.name.toLowerCase()} engagement.`} body="Share your cloud environment, operating priorities and the outcome you want. We will agree a practical scope and next step." primary={{ label: "Talk to a cloud expert", href: "/contact" }} secondary={{ label: "Back to Cloud & Datacenter", href: "/services/cloud-datacenter" }} />
       </PageFrame>

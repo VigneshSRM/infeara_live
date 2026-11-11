@@ -3,9 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { services } from "@/lib/content/services";
-import { cybersecuritySubservices } from "@/lib/content/cybersecurity-subservices";
-import { cloudSubservices } from "@/lib/content/cloud-subservices";
-import { aiAutomationSubservices, applicationDevelopmentSubservices } from "@/lib/content/product-subservices";
+import type { OptionGroup } from "@/lib/content/nav-model";
 import { coreServiceSlugs, infrastructureSubserviceSlugs } from "@/lib/content/service-taxonomy";
 
 type Status = "idle" | "submitting" | "success" | "error";
@@ -20,7 +18,7 @@ const standaloneCoreServiceSlugs = coreServiceSlugs.filter(
   (slug) => slug !== "it-infrastructure" && slug !== "cybersecurity",
 );
 
-export function ContactForm() {
+export function ContactForm({ subserviceGroups }: { subserviceGroups: readonly OptionGroup[] }) {
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -180,26 +178,15 @@ export function ContactForm() {
               <option value={serviceForSlug("cybersecurity")!.name}>Cybersecurity</option>
             ) : null}
           </optgroup>
-          <optgroup label="Cybersecurity sub-services">
-            {cybersecuritySubservices.map((service) => (
-              <option key={service.slug} value={service.name}>{service.name}</option>
-            ))}
-          </optgroup>
-          <optgroup label="Cloud & Datacenter sub-services">
-            {cloudSubservices.map((service) => (
-              <option key={service.slug} value={service.name}>{service.name}</option>
-            ))}
-          </optgroup>
-          <optgroup label="AI Automation sub-services">
-            {aiAutomationSubservices.map((service) => (
-              <option key={service.slug} value={service.name}>{service.name}</option>
-            ))}
-          </optgroup>
-          <optgroup label="Application Development sub-services">
-            {applicationDevelopmentSubservices.map((service) => (
-              <option key={service.slug} value={service.name}>{service.name}</option>
-            ))}
-          </optgroup>
+          {subserviceGroups.map((group) => (
+            <optgroup key={group.label} label={group.label}>
+              {group.names.map((name, index) => (
+                <option key={`${index}-${name}`} value={name}>
+                  {name}
+                </option>
+              ))}
+            </optgroup>
+          ))}
           <optgroup label="Other core services">
             {standaloneCoreServiceSlugs.map((slug) => {
               const service = serviceForSlug(slug);

@@ -31,6 +31,9 @@ const disciplines = [
   },
 ];
 
+// The header menu lists the sub-services published in the admin, so refresh it like the other public pages.
+export const revalidate = 300;
+
 export default function AboutPage() {
   return (
     <PageFrame>

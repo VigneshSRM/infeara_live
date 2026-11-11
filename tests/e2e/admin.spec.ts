@@ -18,6 +18,10 @@ const protectedRoutes = [
   "/admin",
   "/admin/account",
   "/admin/audit",
+  "/admin/blogs",
+  "/admin/blogs/new",
+  "/admin/case-studies",
+  "/admin/case-studies/new",
   "/admin/faqs",
   "/admin/industries",
   "/admin/insights",
@@ -25,7 +29,11 @@ const protectedRoutes = [
   "/admin/legal",
   "/admin/media",
   "/admin/services",
+  "/admin/subservices",
+  "/admin/subservices/new",
   "/admin/users",
+  "/admin/white-papers",
+  "/admin/white-papers/new",
 ];
 
 for (const route of protectedRoutes) {

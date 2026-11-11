@@ -6,11 +6,11 @@ import { FaqList, faqSchema } from "@/components/site/FaqList";
 import { Figure } from "@/components/site/Figure";
 import { PageFrame } from "@/components/site/PageFrame";
 import { SectionHeading } from "@/components/site/SectionHeading";
-import type { CybersecuritySubservice } from "@/lib/content/cybersecurity-subservices";
+import { subservicePath, type SubService } from "@/lib/content/subservice-model";
 import { SITE_URL } from "@/lib/site";
 
-export function CybersecuritySubservicePage({ service }: { service: CybersecuritySubservice }) {
-  const path = `/services/cybersecurity/${service.slug}`;
+export function CybersecuritySubservicePage({ service }: { service: SubService }) {
+  const path = subservicePath(service.parentSlug, service.slug);
   const crumbs = [
     { label: "Services", href: "/services" },
     { label: "Cybersecurity", href: "/services/cybersecurity" },
@@ -59,7 +59,7 @@ export function CybersecuritySubservicePage({ service }: { service: Cybersecurit
               <SectionHeading eyebrow="Overview" title={`${service.name}, in practice.`} intro={service.intro} />
               <div className="mt-10 border-t border-navy/10">
                 {service.deliverables.map((item, index) => (
-                  <div key={item.title} className="grid gap-3 border-b border-navy/10 py-6 sm:grid-cols-[2rem_1fr] sm:gap-5">
+                  <div key={`${index}-${item.title}`} className="grid gap-3 border-b border-navy/10 py-6 sm:grid-cols-[2rem_1fr] sm:gap-5">
                     <span className="font-display text-sm text-blue">{String(index + 1).padStart(2, "0")}</span>
                     <div>
                       <h2 className="font-heading text-[1rem] font-semibold text-navy">{item.title}</h2>
@@ -74,8 +74,8 @@ export function CybersecuritySubservicePage({ service }: { service: Cybersecurit
               <div className="rounded-[var(--radius-card)] border border-navy/10 bg-ivory p-7">
                 <p className="eyebrow text-blue">Expected outcomes</p>
                 <ul className="mt-5 space-y-3">
-                  {service.outcomes.map((outcome) => (
-                    <li key={outcome} className="flex items-start gap-3 text-[0.9rem] leading-relaxed text-charcoal/75">
+                  {service.outcomes.map((outcome, index) => (
+                    <li key={`${index}-${outcome}`} className="flex items-start gap-3 text-[0.9rem] leading-relaxed text-charcoal/75">
                       <span aria-hidden="true" className="mt-[0.45rem] h-1.5 w-1.5 shrink-0 rounded-full bg-blue/60" />
                       {outcome}
                     </li>

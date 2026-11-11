@@ -52,25 +52,29 @@ setup card in place of visitor numbers; nothing else changes.
 ```
 app/
   page.tsx                 homepage (16 sections)
-  services/[slug]          9 practice pages
+  services/<hub>/[slug]    the 18 sub-services under Cybersecurity, Cloud & Datacenter,
+                           AI Automations and Application Development (database-managed)
   industries/[slug]        8 sector pages
-  insights/[slug]          3 editorial articles
-  blogs/[slug]             blog posts, written in lib/content/blogs.ts (3 starter posts)
+  insights/[slug]          editorial guides
+  blogs/[slug]             short posts (database-managed)
+  case-studies/[slug]      case studies (database-managed)
+  white-papers/[slug]      PDF white papers (database-managed)
   legal/[slug]             privacy, terms, cookies
-  about, approach, why-infeara, case-studies, partners, sla, faq, careers, contact
-  white-papers             placeholder page; nothing is published yet
+  about, approach, why-infeara, partners, sla, faq, careers, contact
   api/contact              validated form; writes to the leads table
   admin/                   CMS (login, dashboard, content, leads, media, audit, users)
   login, forgot-password   route handlers returning 410 Gone
 components/site/           shared layout, cards, figures, forms, consent
 components/admin/          CMS form and navigation primitives
-lib/content/               typed content + Supabase reads with seed fallback
+lib/content/               typed content + Supabase reads with seed fallback; nav.ts builds the header menu
 lib/auth/dal.ts            session → staff identity and permission checks
 lib/admin/                 server actions, form helpers, error mapping
 lib/redirects.ts           legacy URL map (see below)
 supabase/migrations/       schema, roles, RLS, audit triggers, storage policies
 supabase/seed.sql          generated content parity seed
+supabase/apply/            single-statement copies of the SQL you paste by hand (03, 04, 05 are committed)
 scripts/generate-seed.mjs  regenerates the seed from lib/content
+scripts/generate-resource-seed.mjs  the same for sub-services, blogs and case studies (script 05)
 scripts/sync-fonts.mjs     refreshes app/fonts from @fontsource-variable
 notes/                     build log, live-site audit, QA evidence
 ```
@@ -96,7 +100,7 @@ taken from the library entry while the caption stays in the `figcaption`. To cha
 drop the file in `public/site/`, add it to `siteImages`, and repoint the seed or label — no page
 needs editing. Licensed photography can replace any entry the same way.
 
-### Blogs, white papers and the Technical resources menu
+### The Technical resources menu
 
 The **Technical resources** item in the header is a dropdown of four pages: Insights
 (`/insights`), Blogs (`/blogs`), Case Studies (`/case-studies`) and White Papers
@@ -105,17 +109,10 @@ Resources column is `footerColumns` in the same file. A menu that has a hub page
 `overviewLabel` to get a closing link to its own `href` ("All services"); Technical resources has
 no hub page, so it has no closing link. Case Studies is also still listed under About.
 
-- **Blogs are not in the database.** Each post is an entry in `blogPosts` in
-  `lib/content/blogs.ts`. To publish one, add an entry and deploy; the index, the post page, the
-  sitemap and the reading time all follow from it. A slug is the public URL, so do not change it
-  once a post is live. To retire a post, delete its entry and add a redirect in
-  `lib/redirects.ts` if the URL was shared. Unlike insights, posts cannot be edited in the CMS.
-- The three posts that ship are **starter content**, written to show the layout. They make no
-  claims about clients, results or figures. Replace or remove them in the content swap, before
-  `SITE_INDEXABLE` is switched on.
-- **White papers** is a placeholder that says none are published yet. It is `noindex` and is left
-  out of the sitemap. When the first paper exists, remove `noIndex` in
-  `app/white-papers/page.tsx`, add the route to `app/sitemap.ts`, and replace the placeholder copy.
+The four service groups in the **Services** dropdown (Cybersecurity, Cloud & Datacenter, AI
+Automations, Application Development) are the one part of the menu that is not written in
+`site.ts`: their sub-services come from the database, so the menu always matches the pages (see
+[Sub-services, blogs, case studies and white papers](#sub-services-blogs-case-studies-and-white-papers)).
 
 ## Content management
 
@@ -168,6 +165,18 @@ no hub page, so it has no closing link. Case Studies is also still listed under 
    their text to the version in the repository. The symptom and the check are under
    [Core services missing from the site](#core-services-missing-from-the-site).
 
+   Sub-services, blog posts, case studies and white papers are managed from the CMS once one more
+   script has been run: `supabase/apply/05-resource-modules.sql` (readable copies:
+   `20261110200000_resource_modules.sql` and `20261110200100_resource_modules_seed.sql`). Run it
+   in the SQL editor with **Role: postgres**, after the schema. It creates the four tables, their
+   grants, policies and audit triggers, and the `documents` storage bucket for white-paper PDFs,
+   then copies in what the site shows today (18 sub-services, 3 blog posts, 3 case studies) so
+   nothing disappears. It is safe to run again: it never overwrites anything, and it adds the starter
+   rows only to a table that is completely empty. Until it
+   has been run, the four new CMS screens show a notice that says so, and the site keeps showing
+   its built-in copy of that content. Details are under
+   [Sub-services, blogs, case studies and white papers](#sub-services-blogs-case-studies-and-white-papers).
+
    Supabase no longer exposes new `public` tables to the API on its own: that is the default for
    projects created since 30 May 2026 and applies to every project from 30 October 2026. On such
    a project, also run `supabase/migrations/20261109120000_grant_data_api_access.sql` after the
@@ -212,11 +221,74 @@ not read one back.
   the CMS also revalidates the affected paths immediately.
 - Draft and archived rows never reach the public site. A `published_at` in the future keeps a
   published row hidden until that time; the admin picker treats input as IST (`+05:30`).
-- Slugs are frozen after creation so published URLs do not break. The insights route allows
-  new slugs without a deploy; services, sectors and legal pages are prebuilt from the database
+- Slugs are frozen after creation so published URLs do not break. Insights, sub-services, blog
+  posts, case studies and white papers allow new slugs without a deploy (a new page is built the
+  first time it is visited); services, sectors and legal pages are prebuilt from the database
   at build time.
 - Every insert, update and delete on content and leads is written to `audit_log` with the
   actor and changed fields. The log is readable by staff and written only by the database.
+
+### Sub-services, blogs, case studies and white papers
+
+Four content types are edited in the CMS, next to Insights, and shown at their usual addresses:
+
+| CMS screen | Public pages | Notes |
+| :--- | :--- | :--- |
+| Sub-services | `/services/<service>/<slug>` and the lists on each service page and on `/services` | 18 to start: Cybersecurity 4, Cloud & Datacenter 7, AI Automations 4, Application Development 3. The service group is chosen on creation and fixed afterwards. |
+| Blogs | `/blogs`, `/blogs/<slug>` | Short posts: a title, an excerpt, sections, related service links and a picture. |
+| Case studies | `/case-studies`, `/case-studies/<slug>` | Three representative studies to start. |
+| White papers | `/white-papers`, `/white-papers/<slug>` | A PDF uploaded in the CMS, or a link to a file kept elsewhere. |
+
+Insights (`/insights`) stays the place for longer guides; a blog post is the short form.
+
+**Setup.** Run `supabase/apply/05-resource-modules.sql` once (see First setup). Until then each new
+screen explains what to run and the website uses its built-in copy. Existing content is
+database-first: once the tables exist, a page that is not published is not shown, and the built-in
+copy never brings it back. The built-in copy is used only when Supabase is not configured, a table
+is missing, or a read fails.
+
+**Lists.** Every table in the CMS that holds content (these four, and Insights) searches, filters
+and pages in the database: 20 rows a page, with the search, status and page number in the address
+(`?q=…&status=…&page=…`) so a view can be bookmarked or shared. Status is All, Published, Scheduled
+(published, with a date still ahead), Draft or Archived; sub-services also filter by service and case
+studies by kind. Changing a filter starts again at page 1, and a page number past the end shows the
+last page. The audit log pages in the same way (40 rows a page); leads, users, services, industries,
+legal pages and FAQs do not page yet.
+
+**Rules, enforced by the database and not only by the screens.**
+
+- Visitors see only rows that are published and whose publish date has arrived.
+- Super admins and editors create, change and delete. An SEO manager can read everything and change
+  only the SEO title and description. They cannot create or delete.
+- The address (slug) of a page is fixed once it exists; a sub-service's service group is fixed too.
+- A **representative** case study names no client and carries no figures. A **client** case study needs
+  the client's name and recorded approval before it can be published. Nothing on these pages invents
+  a client, a figure or an outcome.
+- A published white paper must have a PDF or a link to one.
+- A post or paper published with no date is dated the moment it is published, so its date on the site
+  is the day it went live. Dates are shown as the Indian calendar day.
+- Every create, change and delete is written to the audit log.
+
+**White-paper PDFs.** Choose the PDF in the editor: it is uploaded from the browser straight to
+Supabase Storage (the `documents` bucket, PDF only, up to 25 MB) and attached when the paper is
+saved. The upload does not pass through the app, because a CMS form is limited to 1 MB. Readers open
+the file from the paper's page with no form in front of it; the bucket is public, so anyone with the
+link can open the file. A replaced PDF, a removed PDF and a deleted paper all delete the stored file.
+
+**Pictures.** Sub-services and blog posts pick one of the site's photographs by number
+(`lib/site-images.ts`, shown in the editor as a preview). Uploading a cover image is not built yet.
+
+**Header menu and contact form.** The sub-services under each service in the header menu, and the
+service choices in the contact form, are the published sub-services, in their saved order, so adding,
+renaming, reordering, unpublishing or deleting one needs no code change and cannot leave a dead
+link behind. Saving or deleting a sub-service refreshes every page. The rest of the menu is still
+`nav` in `lib/content/site.ts`, and so is the 404 page's copy of it, which is rebuilt at each deploy.
+
+**Changing the starter content in code.** The starter content is in `lib/content/` (`subservices.ts`
+with its older source files, `blogs.ts`, `case-studies.ts`). After editing any of it, regenerate the
+scripts: `node scripts/generate-resource-seed.mjs`, then `node scripts/make-apply-blobs.mjs`. The unit
+tests fail if the committed SQL no longer matches. A database that already has rows is not changed by
+re-running script 05; edit those rows in the CMS.
 
 ### Contact form and leads
 
@@ -482,7 +554,9 @@ takes effect once DNS for the apex points at Vercel.
 
 Flip it only on the client's written instruction, after the content swap. With the gate on,
 Lighthouse SEO scores 69 purely because the page is blocked from indexing; with
-`SITE_INDEXABLE=true` the same pages score 100, and the sitemap lists 36 URLs.
+`SITE_INDEXABLE=true` the same pages score 100, and the sitemap lists 63 URLs with the starter content
+(each published sub-service, blog post, case study and white paper adds one; a white paper's page is
+listed once the first one is published).
 
 ## Browser and integration tests
 
@@ -491,7 +565,7 @@ The Playwright MCP server is configured in `.mcp.json` for MCP-compatible client
 - `npm run test:e2e` — full Playwright browser suite: public route rendering, navigation, contact validation, cookie choices, admin authentication and role permissions.
 - `npm run test:e2e:list` — list discovered browser tests without launching a browser.
 - `npm run test:http` — HTTP/API smoke tests against a running app (defaults to `http://127.0.0.1:3000`).
-- `npm run test:unit` — unit tests for the rule that decides who the CMS lets in (`lib/auth/access.ts`), the Overview analytics and lead notes chat, and the core services (the CMS notice, and the check that `supabase/apply/04-core-services.sql` still matches its migrations), and the blog posts and the Technical resources menu (`tests/blogs.test.mjs`). No server or Supabase needed.
+- `npm run test:unit` — unit tests for the rule that decides who the CMS lets in (`lib/auth/access.ts`), the Overview analytics and lead notes chat, and the core services (the CMS notice, and the check that `supabase/apply/04-core-services.sql` still matches its migrations), the blog posts and the Technical resources menu (`tests/blogs.test.mjs`), the list search, filters and page numbers of every admin table (`tests/admin-lists.test.mjs`), and the sub-service, blog, case-study and white-paper modules: the SQL, the content copied in, the PDF helpers, the admin wiring and the header menu (`tests/resource-modules.test.mjs`). No server or Supabase needed.
 
 The browser suite starts an isolated, non-Supabase Next dev server on port 3100 by default. Set `PLAYWRIGHT_PORT` to change it or `PLAYWRIGHT_BASE_URL` to target a test deployment. Optional staff-role checks require an isolated test deployment identified by `PLAYWRIGHT_BASE_URL`, `PLAYWRIGHT_ADMIN_TEST_HOST` (exact hostname match), and `PLAYWRIGHT_ADMIN_ISOLATED_TEST=true`, plus the relevant credentials: `PLAYWRIGHT_SUPER_ADMIN_EMAIL` / `PLAYWRIGHT_SUPER_ADMIN_PASSWORD`, `PLAYWRIGHT_EDITOR_EMAIL` / `PLAYWRIGHT_EDITOR_PASSWORD`, and `PLAYWRIGHT_SEO_MANAGER_EMAIL` / `PLAYWRIGHT_SEO_MANAGER_PASSWORD`. Known Infeara production hostnames are blocked. The create/edit/delete CMS workflow has an additional `PLAYWRIGHT_ADMIN_ALLOW_MUTATIONS=true` opt-in; point the test deployment at an isolated Supabase project only.
 

@@ -3,19 +3,36 @@ import { CtaBand } from "@/components/site/CtaBand";
 import { PageFrame } from "@/components/site/PageFrame";
 import { PageHero } from "@/components/site/PageHero";
 import { SectionHeading } from "@/components/site/SectionHeading";
+import { WhitePaperCard } from "@/components/site/WhitePaperCard";
+import { listWhitePapers } from "@/lib/content";
 import { pageMetadata } from "@/lib/metadata";
 import { figureImage } from "@/lib/site-images";
 
-// There is nothing to list yet, so the page stays out of search results and out of the sitemap
-// (app/sitemap.ts). When the first paper is published: remove `noIndex`, add the route to the
-// sitemap and replace the "not published yet" copy below.
-export const metadata = pageMetadata({
-  title: "White Papers",
-  description:
-    "Infeara has not published any white papers yet. The guides, blog posts and representative case studies cover the same ground in a shorter form.",
-  path: "/white-papers",
-  noIndex: true,
-});
+// White papers are managed in the admin (Admin → Resources → White papers). While none is
+// published the page stays out of search results and says so plainly; the moment one is
+// published it becomes indexable and lists it (and app/sitemap.ts adds the pages).
+export const revalidate = 300;
+
+export async function generateMetadata() {
+  const papers = await listWhitePapers();
+
+  if (papers.length === 0) {
+    return pageMetadata({
+      title: "White Papers",
+      description:
+        "Infeara has not published any white papers yet. The guides, blog posts and representative case studies cover the same ground in a shorter form.",
+      path: "/white-papers",
+      noIndex: true,
+    });
+  }
+
+  return pageMetadata({
+    title: "White Papers",
+    description:
+      "In-depth papers from Infeara on IT operations, security and software, free to open and read with no form to fill in.",
+    path: "/white-papers",
+  });
+}
 
 const meanwhile = [
   {
@@ -38,24 +55,44 @@ const meanwhile = [
   },
 ];
 
-export default function WhitePapersPage() {
+export default async function WhitePapersPage() {
+  const papers = await listWhitePapers();
+  const hasPapers = papers.length > 0;
+
   return (
     <PageFrame>
       <PageHero
         image={figureImage(171)}
         eyebrow="White papers"
-        title="In-depth papers, published when they are ready."
-        intro="We have not published any white papers yet. This page will list them as they are released. Until then, our guides, blog posts and representative case studies cover the same ground in a shorter form."
+        title={hasPapers ? "In-depth papers on IT, security and software." : "In-depth papers, published when they are ready."}
+        intro={
+          hasPapers
+            ? "Longer than our guides and written for the people who have to make the decision. Each one opens straight from this page, with no form to fill in first."
+            : "We have not published any white papers yet. This page will list them as they are released. Until then, our guides, blog posts and representative case studies cover the same ground in a shorter form."
+        }
         crumbs={[{ label: "White papers", href: "/white-papers" }]}
         primary={{ label: "Ask about a topic", href: "/contact" }}
         secondary={{ label: "Read the guides", href: "/insights" }}
       />
 
-      <section className="bg-ivory py-20 md:py-28">
+      {hasPapers ? (
+        <section className="bg-ivory py-20 md:py-28">
+          <div className="shell">
+            <SectionHeading eyebrow="Papers" title="Read and download." />
+            <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+              {papers.map((paper) => (
+                <WhitePaperCard key={paper.slug} paper={paper} />
+              ))}
+            </div>
+          </div>
+        </section>
+      ) : null}
+
+      <section className={`${hasPapers ? "border-t border-navy/10" : ""} bg-ivory py-20 md:py-28`}>
         <div className="shell">
           <SectionHeading
-            eyebrow="In the meantime"
-            title="Where to start reading."
+            eyebrow={hasPapers ? "More to read" : "In the meantime"}
+            title={hasPapers ? "Shorter reads on the same ground." : "Where to start reading."}
             intro="Nothing here is hidden behind a form. Each of these is open to read."
           />
 
