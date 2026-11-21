@@ -122,13 +122,18 @@ fixed, audit `https://www.infeara.com`.
 Vercel project) is done; the apex is the part left.
 
 1. Vercel, project **Settings → Domains**: `infeara.com` should be listed. Its card shows the exact
-   `A` record to use. Copy it from there; Vercel has changed that value before.
+   `A` record to use. Copy it from there; Vercel has changed that value before. On 21 November 2026
+   it recommended `216.198.79.1` and `64.29.17.1`, with `76.76.21.21` as the single-address second choice.
 2. Hostinger, **DNS zone** for `infeara.com`: delete the `A` records and any `AAAA` records for
    `@` (the Hostinger addresses above), add the `A` record from step 1, and keep the `www` `CNAME`.
-   Do not touch `MX` or `TXT` records: they carry the company's email.
+   Do not touch `MX`, `TXT` or other `CNAME` records: they carry the company's email, and the DNS
+   record Search Console used to verify the domain (if it did) sits in the same zone.
 3. Wait a few minutes for the certificate. The Domains card turns to "Valid Configuration".
 4. Check: `curl -I https://infeara.com/contact` gives one 301/308 to `https://www.infeara.com/contact`,
    and `curl -I https://www.infeara.com/contact` gives 200.
+
+Search Console's "Not found (404)" report of the same day (49 addresses, 44 of them on the bare
+domain) is this same problem seen from Google's side: `notes/search-console-404.md`.
 
 ## Still needed from the client
 

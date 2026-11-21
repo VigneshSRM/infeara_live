@@ -12,11 +12,19 @@ import type { Redirect } from "next/dist/lib/load-custom-routes";
  *      app/forgot-password/route.ts). Those two paths are deliberately absent
  *      from this list.
  *
+ * Addresses that Google Search Console later reported as "Not found (404)" and that were
+ * never in that sitemap (the old file address at the end of the list) are added the
+ * same way. tests/legacy-redirects.test.mjs accounts for every address in the 21 November
+ * 2026 report, and notes/search-console-404.md says what each one does.
+ *
  * Rules:
- *   - Slugs are mapped to the closest topical page, never to the homepage.
+ *   - Slugs are mapped to the closest topical page, never to the homepage. The one
+ *     exception is index.html, which is the homepage under another name.
  *   - 301 rather than 308 so the intent is explicit for crawlers and the
  *     client's redirect spreadsheet.
- *   - No chain is longer than one hop.
+ *   - No chain is longer than one hop: no destination is itself a source here
+ *     (the unit test checks it). Requests for the bare domain first take the one
+ *     hop to www that next.config.ts (and the Vercel domain setting) adds.
  */
 type LegacyRedirect = { source: string; destination: string };
 
@@ -40,7 +48,8 @@ const legacy: LegacyRedirect[] = [
 
   // ── Resource centre (collapsed into Insights / Case studies) ───────────
   { source: "/resources", destination: "/insights" },
-  { source: "/resources/blog", destination: "/insights" },
+  // The old blog list. The site has a blog list of its own now, so send readers there.
+  { source: "/resources/blog", destination: "/blogs" },
   { source: "/resources/downloads", destination: "/insights" },
   { source: "/resources/case-studies", destination: "/case-studies" },
   {
@@ -128,6 +137,14 @@ const legacy: LegacyRedirect[] = [
 
   // ── Careers ────────────────────────────────────────────────────────────
   { source: "/careers/senior-system-administrator", destination: "/careers" },
+
+  // ── Old file addresses ─────────────────────────────────────────────────
+  // Search Console lists /index.html (crawled 16 November 2026). It was never in the old sitemap,
+  // so it is mapped by hand. Nothing else is guessed: add an address here when Search Console
+  // reports it, not before. /index.php and /terms.php are in that report too, but they cannot be
+  // mapped: Vercel answers 403 for every address that ends in .php before the request reaches
+  // this site, so a rule here would never run (notes/search-console-404.md).
+  { source: "/index.html", destination: "/" },
 ];
 
 export const legacyRedirects: Redirect[] = legacy.map((entry) => ({
