@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { JsonLd } from "@/components/seo/JsonLd";
+import { ArticleByline } from "@/components/site/ArticleByline";
 import { Breadcrumbs, breadcrumbSchema } from "@/components/site/Breadcrumbs";
 import { CtaBand } from "@/components/site/CtaBand";
 import { Figure } from "@/components/site/Figure";
@@ -9,9 +10,10 @@ import { Schematic } from "@/components/site/Schematic";
 import { SectionHeading } from "@/components/site/SectionHeading";
 import { InsightCard } from "@/components/site/InsightCard";
 import { getInsight, listInsights } from "@/lib/content";
-import type { Insight } from "@/lib/content/types";
 import { pageMetadata } from "@/lib/metadata";
+import { articleSchema } from "@/lib/seo/schema";
 import { SITE_URL } from "@/lib/site";
+import { figureImage } from "@/lib/site-images";
 
 export const revalidate = 300;
 
@@ -34,36 +36,8 @@ export async function generateMetadata({ params }: Props) {
     title: insight.seo.title,
     description: insight.seo.description,
     path: `/insights/${insight.slug}`,
+    article: { publishedDay: insight.publishedAt, section: insight.category },
   });
-}
-
-function articleSchema(insight: Insight) {
-  return {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    headline: insight.title,
-    description: insight.seo.description,
-    datePublished: insight.publishedAt,
-    dateModified: insight.publishedAt,
-    author: {
-      "@type": "Organization",
-      name: "Infeara Technologies",
-      url: SITE_URL,
-    },
-    publisher: {
-      "@type": "Organization",
-      name: "Infeara Technologies",
-      logo: {
-        "@type": "ImageObject",
-        url: `${SITE_URL}/brand/infeara-logo.png`,
-      },
-    },
-    mainEntityOfPage: {
-      "@type": "WebPage",
-      "@id": `${SITE_URL}/insights/${insight.slug}`,
-    },
-    inLanguage: "en-IN",
-  };
 }
 
 export default async function InsightPage({ params }: Props) {
@@ -81,7 +55,17 @@ export default async function InsightPage({ params }: Props) {
 
   return (
     <>
-      <JsonLd data={articleSchema(insight)} />
+      <JsonLd
+        data={articleSchema({
+          siteUrl: SITE_URL,
+          path: `/insights/${insight.slug}`,
+          headline: insight.title,
+          description: insight.seo.description,
+          category: insight.category,
+          publishedAt: insight.publishedAt,
+          imagePath: figureImage(51 + insight.readingMinutes).src,
+        })}
+      />
       <JsonLd data={breadcrumbSchema(crumbs)} />
 
       <PageFrame>
@@ -101,6 +85,8 @@ export default async function InsightPage({ params }: Props) {
             <p className="mt-6 max-w-[44rem] text-[1.02rem] leading-relaxed text-ivory/68">
               {insight.excerpt}
             </p>
+
+            <ArticleByline publishedAt={insight.publishedAt} minutes={insight.readingMinutes} />
           </div>
         </section>
 

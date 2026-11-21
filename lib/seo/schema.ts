@@ -38,30 +38,29 @@ export function indiaDateTime(isoDate: string): string {
   return `${isoDate}T00:00:00+05:30`;
 }
 
-export type BlogPostingInput = {
+export type ArticleInput = {
   siteUrl: string;
-  slug: string;
+  /** The page's own path on this site, such as /insights/what-managed-it-actually-covers. */
+  path: string;
   headline: string;
   description: string;
   category: string;
   /** Calendar date in India, YYYY-MM-DD. */
   publishedAt: string;
-  /** A path on this site, such as /site/noc-monitoring.jpg. */
+  /** A path on this site, such as /site/noc-monitoring.jpg, or an absolute address. */
   imagePath: string;
 };
 
-/**
- * schema.org BlogPosting, which is an Article (Article > SocialMediaPosting > BlogPosting), so
- * anything that understands Article understands it. Written by Infeara, which is also the
- * publisher.
- */
-export function blogPostingSchema(input: BlogPostingInput) {
-  const url = absoluteUrl(input.siteUrl, `/blogs/${input.slug}`);
+export type BlogPostingInput = Omit<ArticleInput, "path"> & { slug: string };
+
+/** Written by Infeara, which is also the publisher. */
+function authoredByInfeara(type: "Article" | "BlogPosting", input: ArticleInput) {
+  const url = absoluteUrl(input.siteUrl, input.path);
   const organization = { "@type": "Organization", name: "Infeara Technologies", url: absoluteUrl(input.siteUrl, "/") };
 
   return {
     "@context": "https://schema.org",
-    "@type": "BlogPosting",
+    "@type": type,
     headline: input.headline,
     description: input.description,
     image: [absoluteUrl(input.siteUrl, input.imagePath)],
@@ -77,6 +76,20 @@ export function blogPostingSchema(input: BlogPostingInput) {
     url,
     inLanguage: "en-IN",
   };
+}
+
+/**
+ * schema.org BlogPosting, which is an Article (Article > SocialMediaPosting > BlogPosting), so
+ * anything that understands Article understands it.
+ */
+export function blogPostingSchema(input: BlogPostingInput) {
+  const { slug, ...rest } = input;
+  return authoredByInfeara("BlogPosting", { ...rest, path: `/blogs/${slug}` });
+}
+
+/** schema.org Article, for the guides under /insights. Same shape and the same dates as a blog post. */
+export function articleSchema(input: ArticleInput) {
+  return authoredByInfeara("Article", input);
 }
 
 /**

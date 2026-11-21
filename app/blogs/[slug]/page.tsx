@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { JsonLd } from "@/components/seo/JsonLd";
+import { ArticleByline } from "@/components/site/ArticleByline";
 import { BlogBody } from "@/components/site/BlogBody";
 import { BlogCard } from "@/components/site/BlogCard";
 import { Breadcrumbs, breadcrumbSchema } from "@/components/site/Breadcrumbs";
@@ -9,7 +10,7 @@ import { Figure } from "@/components/site/Figure";
 import { PageFrame } from "@/components/site/PageFrame";
 import { SectionHeading } from "@/components/site/SectionHeading";
 import { getBlogPost, listBlogPosts } from "@/lib/content";
-import { formatPostDate, readingMinutes } from "@/lib/content/blogs";
+import { readingMinutes } from "@/lib/content/blogs";
 import { pageMetadata } from "@/lib/metadata";
 import { blogPostingSchema } from "@/lib/seo/schema";
 import { SITE_URL } from "@/lib/site";
@@ -37,6 +38,7 @@ export async function generateMetadata({ params }: Props) {
     title: post.seo.title,
     description: post.seo.description,
     path: `/blogs/${post.slug}`,
+    article: { publishedDay: post.publishedAt, section: post.category },
   });
 }
 
@@ -82,11 +84,7 @@ export default async function BlogPostPage({ params }: Props) {
 
             <p className="mt-6 max-w-[44rem] text-[1.02rem] leading-relaxed text-ivory/68">{post.excerpt}</p>
 
-            <p className="mt-6 font-heading text-[0.78rem] text-ivory/70">
-              <time dateTime={post.publishedAt}>{formatPostDate(post.publishedAt)}</time>
-              <span aria-hidden="true"> · </span>
-              {readingMinutes(post)} min read
-            </p>
+            <ArticleByline publishedAt={post.publishedAt} minutes={readingMinutes(post)} />
           </div>
         </section>
 

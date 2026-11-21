@@ -61,6 +61,8 @@ app/
   white-papers/[slug]      PDF white papers (database-managed)
   legal/[slug]             privacy, terms, cookies
   about, approach, why-infeara, partners, sla, faq, careers, contact
+  llms.txt                 plain-text description of the site for AI tools (route handler)
+  og/[...path]             the picture shown when a service, guide, post, case study or industry page is shared
   api/contact              validated form; writes to the leads table
   admin/                   CMS (login, dashboard, content, leads, media, audit, users)
   login, forgot-password   route handlers returning 410 Gone
@@ -72,11 +74,12 @@ lib/admin/                 server actions, form helpers, error mapping
 lib/redirects.ts           legacy URL map (see below)
 supabase/migrations/       schema, roles, RLS, audit triggers, storage policies
 supabase/seed.sql          generated content parity seed
-supabase/apply/            single-statement copies of the SQL you paste by hand (03, 04, 05, 06 are committed)
+supabase/apply/            single-statement copies of the SQL you paste by hand (03, 04, 05, 06, 07 are committed)
 scripts/generate-seed.mjs  regenerates the seed from lib/content
 scripts/generate-resource-seed.mjs  the same for sub-services, blogs and case studies (script 05)
 scripts/generate-blog-migrations.mjs  one additive migration per blog post added later (script 06)
-scripts/sync-fonts.mjs     refreshes app/fonts from @fontsource-variable
+scripts/generate-copy-refresh-migration.mjs  the wording changes of lib/content/copy-refresh.ts as guarded UPDATEs (script 07)
+scripts/sync-fonts.mjs     refreshes app/fonts from @fontsource-variable, and assets/og from @fontsource/manrope
 notes/                     build log, live-site audit, QA evidence
 ```
 
@@ -187,6 +190,16 @@ Automations, Application Development) are the one part of the menu that is not w
    deleted in the CMS, running it again brings it back. The post shows on `/blogs` within five
    minutes of the script running (the pages refresh on a five-minute timer). Details are under
    [Top 10 Managed IT Services Companies in Chennai](#top-10-managed-it-services-companies-in-chennai).
+
+   The SEO audit of 21 November 2026 also changed some wording that lives in the database, so it
+   has its own script: `supabase/apply/07-seo-audit-copy.sql` (readable copy:
+   `20261121120000_seo_audit_copy.sql`). Run it the same way, with **Role: postgres**, after 05.
+   It puts the place name into the search titles of the 28 service and focused-service pages, gives
+   four thin pages (Managed IT, Penetration Testing, Vulnerability Assessment, Cloud Disaster
+   Recovery & Business Continuity) their fuller text, and shortens one blog title that was a
+   character too long. A page is changed only while it still holds the wording it was seeded with,
+   so a title or text edited in the CMS is never overwritten, and running it again changes nothing.
+   Details are under [SEO audit fixes](#seo-audit-fixes-21-november-2026).
 
    Supabase no longer exposes new `public` tables to the API on its own: that is the default for
    projects created since 30 May 2026 and applies to every project from 30 October 2026. On such
@@ -669,7 +682,8 @@ live in one file, `lib/seo/limits.ts`:
 
 - **Title.** Every page title is followed by ` — Infeara` (the home page sets its own full title).
   A result shows about 60 characters, so an editor has room for **50**. The admin's *SEO title*
-  fields say so under the box.
+  fields say so under the box. The same string is the page's `og:title` and `twitter:title`, so the
+  tab, the search result and a shared link all read alike.
 - **Description.** Up to 160 characters. The admin hints suggest 120–155.
 - **Canonical address and social tags.** `pageMetadata()` in `lib/metadata.ts` builds them for each
   page. A page's own `openGraph` *replaces* the layout's instead of adding to it, so `pageMetadata`
@@ -701,14 +715,86 @@ name the sitemap) and that the home page's source says `index, follow`. Then ask
 to read the sitemap: add `https://www.infeara.com/sitemap.xml` in Google Search Console and in Bing
 Webmaster Tools. Both need the owner's own account, so that step cannot be done from the code.
 
+## SEO audit fixes (21 November 2026)
+
+An online audit scored the site 67/100 provisionally. It had read only six pages and could not see
+`robots.txt`, the sitemap, the structured data or the headers, so several of its "could not verify"
+items were already fine (`notes/seo-audit.md` has the full comparison). What was real is fixed:
+
+| Audit finding | What changed |
+| :--- | :--- |
+| Titles without a place | The 28 service and focused-service titles end "… in Chennai, India" (wording in `lib/content/copy-refresh.ts`; the live rows change when script 07 runs). The home page's title is "Managed IT & Cybersecurity Services in Chennai — Infeara". |
+| Home page lead without a place | The line under the heading reads "Managed IT services from Chennai for organisations across India: …". |
+| `<title>` and `og:title` ended differently | One title per page, for the tab, the search result, `og:title` and `twitter:title` (`pageMetadata()`). |
+| `og:type` was `website` on articles | Guides and posts say `article`, with `article:published_time` (midnight India time), `article:author` (the About page) and `article:section`. |
+| No date or byline on guides, no byline on posts | Both show the day, "By Infeara Technologies" (linked to the About page; no invented people) and the reading time (`components/site/ArticleByline.tsx`). |
+| Insight dates a day early | They were read off the UTC text of a midnight-India timestamp. Every public date now goes through `lib/content/dates.ts`, and the sitemap, the page and the Article data agree. |
+| No skip link on the home page | `components/site/SkipLink.tsx`, used by `PageFrame`, the home page and the 404 page. |
+| One picture for every shared link | Services, focused services, guides, posts, case studies and industries each get a card with their own title (below). Other pages keep the shared one. |
+| No `llms.txt` | `/llms.txt` lists the company's facts and every published page with a line about each (below). |
+| The same FAQ on the home and Managed IT pages | The home page picks questions no service page asks (a test keeps it that way). |
+| Thin pages | Managed IT, Penetration Testing, Vulnerability Assessment and Cloud Disaster Recovery & Business Continuity went from about 200–430 words of copy to about 970–1,070, each with 8 deliverables, 6 outcomes and 9 questions (about 1,200–1,400 words on the page). |
+
+**Where the new wording lives, and why it is not in the lists it replaces.** `supabase/seed.sql` and
+`20261110200100_resource_modules_seed.sql` were generated from `services.ts` and the three
+`*-subservices.ts` lists, have already run in production, and a test keeps each pair equal. So those
+lists stay exactly as seeded and the later wording is in `lib/content/copy-refresh.ts`:
+
+- the live site reads the database, which `supabase/apply/07-seo-audit-copy.sql` updates (generated
+  by `scripts/generate-copy-refresh-migration.mjs`). Each `UPDATE` is guarded by the seeded value, so
+  a title or text an editor has changed in the CMS is left alone, and a second run changes nothing.
+  To see what a run did, and what it left, check:
+
+  ```sql
+  select slug, seo_title from public.services order by sort_order;
+  select parent_slug, slug, seo_title from public.sub_services order by parent_slug, sort_order;
+  select slug, jsonb_array_length(faqs) as questions from public.services where slug = 'managed-it';
+  ```
+
+- the code fallback (used only while the database cannot answer) passes the seeded lists through
+  `refreshServices()`, `refreshSubservices()` and `refreshBlogPosts()`, so it shows the same wording.
+
+To change this wording again: edit `copy-refresh.ts`, run `node scripts/generate-copy-refresh-migration.mjs`
+and `node scripts/make-apply-blobs.mjs`, and run the new script, or simply edit the page in the CMS.
+A page the CMS has already changed is skipped by the script, by design. `tests/seo-audit-fixes.test.mjs`
+holds the rules: every title says where the company is and fits 50 characters; the fuller text keeps
+to the honest voice (no clients, figures or "best" claims, standards named only as context, and only
+at the places they are published: PCI DSS v4.0.1 requirements 11.3 and 11.4, ISO/IEC 27001:2022 Annex A
+8.8, 8.29 and 5.30, CERT-In empanelment of auditors); no question is asked on two pages; and every
+guarded value is the one in the committed seed files.
+
+**The picture for a shared link.** `lib/seo/og-paths.ts` says which pages have a card and where it
+is: `/services/managed-it` has `/og/services/managed-it.png`, and so on for focused services,
+`/insights/…`, `/blogs/…`, `/case-studies/…` and `/industries/…`. `pageMetadata()` works the address
+out from the page path, so a new page of those kinds gets its card with no extra step. The route,
+`app/og/[...path]/route.tsx`, draws the page's own title, read from the same content the page shows:
+an address that is not a published page is a 404, and text in the query string is never printed. The
+renderer reads `.woff` fonts, not `.woff2`, so three Manrope weights live in `assets/og`
+(`node scripts/sync-fonts.mjs` copies them from `@fontsource/manrope`, with the licence). The CDN
+may keep each picture for an hour; a title changed in the CMS reaches its picture within that hour.
+To check one: open `https://www.infeara.com/og/services/managed-it.png`.
+
+**`/llms.txt`.** A plain-text description for AI assistants (the format is at llmstxt.org): the
+company's name, where it is, its hours, how to reach it (the contact form), then the services,
+focused services, guides and posts with a line about each. It repeats only what the site says (no
+mailbox, phone number or client names), is rebuilt every five minutes like the sitemap, and returns
+404 when the site is closed with `SITE_INDEXABLE`.
+
+**Still needed from the owner** (none of this can come from code, and none of it is invented): a
+street address, phone number and email to publish; the names, roles and profiles of the people who
+write and lead (the byline is the company until then); the registered legal name and whether
+"Infeara Secure Technologies Pvt Ltd" (Srivilliputhur) is related; LinkedIn, GitHub and Google
+Business Profile addresses for `sameAs`; the Search Console and Bing accounts to submit the sitemap;
+and the DNS change for the bare `infeara.com` (`notes/seo-audit.md`).
+
 ## Browser and integration tests
 
 The Playwright MCP server is configured in `.mcp.json` for MCP-compatible clients. Install the local browser binary once with `npx playwright install chromium` before running browser tests.
 
 - `npm run test:e2e` — full Playwright browser suite: public route rendering, navigation, contact validation, cookie choices, admin authentication and role permissions.
 - `npm run test:e2e:list` — list discovered browser tests without launching a browser.
-- `npm run test:http` — HTTP/API smoke tests against a running app (defaults to `http://127.0.0.1:3000`), including every public page's title, description, canonical address and social tags, and that robots.txt, the sitemap and the pages agree on whether search engines are let in (an open site's sitemap must list only pages that return 200, are not noindex and name that address as canonical).
-- `npm run test:unit` — unit tests for the rule that decides who the CMS lets in (`lib/auth/access.ts`), the Overview analytics and lead notes chat, and the core services (the CMS notice, and the check that `supabase/apply/04-core-services.sql` still matches its migrations), the blog posts and the Technical resources menu (`tests/blogs.test.mjs`), the list search, filters and page numbers of every admin table (`tests/admin-lists.test.mjs`), how each list page is wired, including a check that no admin table can go unpaged (`tests/admin-list-pages.test.mjs`), and the sub-service, blog, case-study and white-paper modules: the SQL, the content copied in, the PDF helpers, the admin wiring and the header menu (`tests/resource-modules.test.mjs`), and the Chennai managed IT list: ten entries in A-to-Z order with official links, the published criteria, no ranking claims, Infeara's disclosed entry and its separate enquiry section, one list per keyword, the Article and breadcrumb data, how links in a post are parsed and refused, and the SQL that adds the post (`tests/blog-directory.test.mjs`), and the search-listing rules: the title and description budgets, the site name and locale every page repeats, and the gate's closed state (`tests/seo-limits.test.mjs`), and the rule that lets search engines in: open unless closed, `true` opens and anything else typed in closes, a Vercel preview stays closed, one value for robots.txt, the sitemap and every page, the sitemap's five-minute clock and the pages that stay out of results (`tests/indexing.test.mjs`). No server or Supabase needed.
+- `npm run test:http` — HTTP/API smoke tests against a running app (defaults to `http://127.0.0.1:3000`), including every public page's title, description, canonical address and social tags, and that robots.txt, the sitemap and the pages agree on whether search engines are let in (an open site's sitemap must list only pages that return 200, are not noindex and name that address as canonical), that one title serves the tab, `og:title` and `twitter:title`, that each service, guide and post has its own picture (a real 1200 × 630 PNG), that articles say so, that every page has a skip link, that no question appears on both the home page and a service page, that the four fuller pages have their words, and that `/llms.txt` links only to pages that exist.
+- `npm run test:unit` — unit tests for the rule that decides who the CMS lets in (`lib/auth/access.ts`), the Overview analytics and lead notes chat, and the core services (the CMS notice, and the check that `supabase/apply/04-core-services.sql` still matches its migrations), the blog posts and the Technical resources menu (`tests/blogs.test.mjs`), the list search, filters and page numbers of every admin table (`tests/admin-lists.test.mjs`), how each list page is wired, including a check that no admin table can go unpaged (`tests/admin-list-pages.test.mjs`), and the sub-service, blog, case-study and white-paper modules: the SQL, the content copied in, the PDF helpers, the admin wiring and the header menu (`tests/resource-modules.test.mjs`), and the Chennai managed IT list: ten entries in A-to-Z order with official links, the published criteria, no ranking claims, Infeara's disclosed entry and its separate enquiry section, one list per keyword, the Article and breadcrumb data, how links in a post are parsed and refused, and the SQL that adds the post (`tests/blog-directory.test.mjs`), and the search-listing rules: the title and description budgets, the site name and locale every page repeats, and the gate's closed state (`tests/seo-limits.test.mjs`), and the rule that lets search engines in: open unless closed, `true` opens and anything else typed in closes, a Vercel preview stays closed, one value for robots.txt, the sitemap and every page, the sitemap's five-minute clock and the pages that stay out of results (`tests/indexing.test.mjs`), and the fixes from the 21 November 2026 audit: a place in every service title, the SQL that updates them (never touching a page an editor changed), the fuller pages' voice, one title per page, article tags and bylines, India-day dates, the skip link, the shared-link pictures and `llms.txt` (`tests/seo-audit-fixes.test.mjs`). No server or Supabase needed.
 
 The browser suite starts an isolated, non-Supabase Next dev server on port 3100 by default. Set `PLAYWRIGHT_PORT` to change it or `PLAYWRIGHT_BASE_URL` to target a test deployment. Optional staff-role checks require an isolated test deployment identified by `PLAYWRIGHT_BASE_URL`, `PLAYWRIGHT_ADMIN_TEST_HOST` (exact hostname match), and `PLAYWRIGHT_ADMIN_ISOLATED_TEST=true`, plus the relevant credentials: `PLAYWRIGHT_SUPER_ADMIN_EMAIL` / `PLAYWRIGHT_SUPER_ADMIN_PASSWORD`, `PLAYWRIGHT_EDITOR_EMAIL` / `PLAYWRIGHT_EDITOR_PASSWORD`, and `PLAYWRIGHT_SEO_MANAGER_EMAIL` / `PLAYWRIGHT_SEO_MANAGER_PASSWORD`. Known Infeara production hostnames are blocked. The create/edit/delete CMS workflow has an additional `PLAYWRIGHT_ADMIN_ALLOW_MUTATIONS=true` opt-in; point the test deployment at an isolated Supabase project only.
 

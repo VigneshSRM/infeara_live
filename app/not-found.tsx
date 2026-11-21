@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
+import { SkipLink } from "@/components/site/SkipLink";
 
 export const metadata = {
   title: "Page not found",
@@ -16,6 +17,7 @@ const links = [
 export default function NotFound() {
   return (
     <>
+      <SkipLink />
       <Header />
       <main id="main">
         <section className="hero-surface">
