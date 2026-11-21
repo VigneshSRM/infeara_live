@@ -1,11 +1,12 @@
 import { cache } from "react";
 import { blogPosts as codeBlogPosts, sortNewestFirst } from "./blogs";
 import { caseStudies as codeCaseStudies, type CaseStudy } from "./case-studies";
+import { refreshBlogPosts, refreshServices } from "./copy-refresh";
 import { industries, industryBySlug } from "./industries";
 import { insightBySlug, insights } from "./insights";
 import { faqGroups } from "./faqs";
 import { legalBySlug, legalDocuments } from "./legal";
-import { services, serviceBySlug } from "./services";
+import { services } from "./services";
 import {
   dbBlogPost,
   dbBlogPosts,
@@ -40,16 +41,20 @@ import { whitePapers as codeWhitePapers, type WhitePaper } from "./white-papers"
  * empty — unpublished content does not come back from the seed.
  */
 
+// The services as seeded, with the wording that changed afterwards applied (copy-refresh.ts), so the
+// fallback below matches the database once its migration has run.
+const codeServices = refreshServices(services);
+
 export async function listServices(): Promise<Service[]> {
   const result = await dbServices();
   if (result.ok) return result.data;
-  return [...services].sort((a, b) => a.order - b.order);
+  return [...codeServices].sort((a, b) => a.order - b.order);
 }
 
 export async function getService(slug: string): Promise<Service | null> {
   const result = await dbService(slug);
   if (result.ok) return result.data;
-  return serviceBySlug(slug) ?? null;
+  return codeServices.find((service) => service.slug === slug) ?? null;
 }
 
 export async function listIndustries(): Promise<Industry[]> {
@@ -137,17 +142,20 @@ export const getSubservice = cache(async (parentSlug: string, slug: string): Pro
   return codeSubservices.find((item) => item.parentSlug === parentSlug && item.slug === slug) ?? null;
 });
 
+// The posts as seeded, with the one search title that changed afterwards (copy-refresh.ts).
+const codeBlogs = refreshBlogPosts(codeBlogPosts);
+
 /** Newest first. */
 export async function listBlogPosts(): Promise<BlogPost[]> {
   const result = await dbBlogPosts();
   if (result.ok) return result.data;
-  return sortNewestFirst(codeBlogPosts);
+  return sortNewestFirst(codeBlogs);
 }
 
 export const getBlogPost = cache(async (slug: string): Promise<BlogPost | null> => {
   const result = await dbBlogPost(slug);
   if (result.ok) return result.data;
-  return codeBlogPosts.find((post) => post.slug === slug) ?? null;
+  return codeBlogs.find((post) => post.slug === slug) ?? null;
 });
 
 export async function listCaseStudies(): Promise<CaseStudy[]> {

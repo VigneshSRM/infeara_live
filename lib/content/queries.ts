@@ -5,6 +5,7 @@ import { SUPABASE_URL } from "@/lib/supabase/config";
 import { getPublicClient } from "@/lib/supabase/public";
 import type { BlogPost } from "./blogs";
 import type { CaseStudy, CaseStudyKind } from "./case-studies";
+import { istDate } from "./dates";
 import { isSubserviceParent, type SubService, type SubserviceInfographic } from "./subservice-model";
 import type { Faq, Industry, Insight, Service } from "./types";
 import { documentUrl, type WhitePaper } from "./white-papers";
@@ -81,8 +82,6 @@ type FaqGroupRow = {
   sort_order: number;
 };
 
-const dateOnly = (value: string | null) => (value ? value.slice(0, 10) : "2026-01-01");
-
 const figure = (value: ServiceRow["figure"] | null) =>
   value && typeof value.seed === "number"
     ? value
@@ -127,7 +126,8 @@ function toInsight(row: InsightRow): Insight {
     excerpt: row.excerpt,
     category: row.category,
     readingMinutes: row.reading_minutes,
-    publishedAt: dateOnly(row.published_at),
+    // The India day, not the UTC one: an insight dated 12 Oct at midnight IST is stored as 11 Oct 18:30 UTC.
+    publishedAt: istDate(row.published_at) ?? "2026-01-01",
     body: row.body ?? [],
     seo: { title: row.seo_title, description: row.seo_description },
   };
@@ -351,16 +351,6 @@ const CASE_STUDY_COLUMNS =
   "slug,title,sector,kind,client_name,situation,work,result,services,seo_title,seo_description";
 const WHITE_PAPER_COLUMNS =
   "slug,title,summary,topic,file_path,file_name,file_size_bytes,external_url,seo_title,seo_description,published_at";
-
-const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
-
-/** The calendar date in India (the operating timezone) of a stored moment, as YYYY-MM-DD. */
-export function istDate(value: string | null | undefined): string | null {
-  if (!value) return null;
-  const at = new Date(value).getTime();
-  if (Number.isNaN(at)) return null;
-  return new Date(at + IST_OFFSET_MS).toISOString().slice(0, 10);
-}
 
 function toInfographic(value: unknown): SubserviceInfographic | null {
   if (!value || typeof value !== "object") return null;

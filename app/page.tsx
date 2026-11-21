@@ -8,6 +8,7 @@ import { Figure } from "@/components/site/Figure";
 import { Footer } from "@/components/site/Footer";
 import { Header } from "@/components/site/Header";
 import { IndustryCard } from "@/components/site/IndustryCard";
+import { SkipLink } from "@/components/site/SkipLink";
 import { coreServiceImages } from "@/lib/site-images";
 import { InsightCard } from "@/components/site/InsightCard";
 import { JourneyStory } from "@/components/site/JourneyStory";
@@ -20,17 +21,15 @@ import { pageMetadata } from "@/lib/metadata";
 
 export const revalidate = 300;
 
-export const metadata: Metadata = {
-  ...pageMetadata({
-    title: "Managed IT, Cybersecurity & Cloud Infrastructure",
-    description:
-      "Infeara operates, secures and modernises business-critical IT from Chennai: managed IT, cybersecurity, infrastructure, cloud and network engineering.",
-    path: "/",
-  }),
-  title: {
-    absolute: "Infeara Technologies — Managed IT, Cybersecurity and Cloud",
-  },
-};
+// The home page names itself in full, with the place and the service first, so it has no " — Infeara"
+// suffix added; the same string is its social title.
+export const metadata: Metadata = pageMetadata({
+  title: "Managed IT & Cybersecurity Services in Chennai",
+  absoluteTitle: "Managed IT & Cybersecurity Services in Chennai — Infeara",
+  description:
+    "Infeara operates, secures and modernises business-critical IT from Chennai: managed IT, cybersecurity, infrastructure, cloud and network engineering.",
+  path: "/",
+});
 
 const capabilities = [
   { label: "Availability", value: "24/7 monitoring options" },
@@ -105,20 +104,25 @@ export default async function HomePage() {
       .filter((service): service is Service => Boolean(service));
   const coreServices = selectServices(coreServiceSlugs);
 
+  // Questions that are on this page and on no other: a service page asks "How is managed IT
+  // different from IT outsourcing?" and "What happens during a security incident?", so the home
+  // page asks others (tests/seo-audit-fixes.test.mjs keeps it that way).
   const pick = (group: number, item: number) => groups[group]?.items[item];
   const selectedFaqs = [
-    pick(0, 0),
-    pick(0, 3),
-    pick(1, 0),
-    pick(1, 1),
-    pick(2, 0),
-    pick(3, 0),
+    pick(0, 0), // What does Infeara Technologies do?
+    pick(0, 1), // Where is Infeara based?
+    pick(0, 3), // How does an engagement start?
+    pick(1, 0), // What is included in managed IT services?
+    pick(1, 4), // Is support available outside business hours?
+    pick(2, 2), // Can you help with DPDP Act compliance?
+    pick(3, 0), // How is pricing structured?
   ].filter((faq): faq is { question: string; answer: string } => Boolean(faq));
 
   return (
     <>
       <JsonLd data={faqSchema(selectedFaqs)} />
 
+      <SkipLink />
       <Header />
 
       <main id="main">
@@ -146,7 +150,7 @@ export default async function HomePage() {
                 <p
                   className="mt-8 max-w-[33rem] text-[1rem] leading-relaxed text-ivory/75 sm:text-[1.0625rem]"
                 >
-                  Managed IT, cybersecurity and infrastructure support for organisations across India, with clear service scope, named ownership and recovery planning.
+                  Managed IT services from Chennai for organisations across India: cybersecurity, infrastructure and cloud support with clear service scope, named ownership and recovery planning.
                 </p>
 
                 <div

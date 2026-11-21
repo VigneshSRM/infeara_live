@@ -7,6 +7,10 @@
  * offline and removes the request from every build; the faces are the same
  * variable fonts, so the rendered typography is unchanged.
  *
+ * It also copies three static Manrope weights (.woff) into assets/og, for the pictures drawn for
+ * shared links (app/og/[...path]/route.tsx). That renderer reads ttf, otf and woff, not woff2, so
+ * it cannot use the variable files above.
+ *
  * Run with: node scripts/sync-fonts.mjs
  */
 
@@ -35,3 +39,18 @@ for (const [pkg, file] of faces) {
 }
 
 console.log(`\napp/fonts now holds:\n  ${readdirSync(target).join("\n  ")}`);
+
+// Manrope is licensed under the SIL Open Font License 1.1, which asks that the notice travels with
+// the font files, so the licence text is copied next to them.
+const cardTarget = join(root, "assets", "og");
+const cardFaces = ["manrope-latin-500-normal.woff", "manrope-latin-700-normal.woff", "manrope-latin-800-normal.woff"];
+const manropeDir = dirname(require.resolve("@fontsource/manrope/package.json"));
+
+mkdirSync(cardTarget, { recursive: true });
+for (const file of cardFaces) {
+  copyFileSync(join(manropeDir, "files", file), join(cardTarget, file));
+  console.log(`copied @fontsource/manrope/files/${file}`);
+}
+copyFileSync(join(manropeDir, "LICENSE"), join(cardTarget, "Manrope-OFL.txt"));
+
+console.log(`\nassets/og now holds:\n  ${readdirSync(cardTarget).join("\n  ")}`);

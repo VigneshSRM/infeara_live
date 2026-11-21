@@ -44,7 +44,7 @@ export const q = (value) => {
 export const json = (value) => `${q(JSON.stringify(value))}::jsonb`;
 
 // An array built from JSON avoids every array-literal escaping rule.
-const textArray = (values) => `array(select jsonb_array_elements_text(${json(values ?? [])}))::text[]`;
+export const textArray = (values) => `array(select jsonb_array_elements_text(${json(values ?? [])}))::text[]`;
 
 // A calendar date is midnight in India (the operating timezone), not midnight UTC.
 export const stamp = (date) => (date ? q(`${date}T00:00:00+05:30`) : "null");
@@ -140,7 +140,7 @@ export async function buildResourceSeed() {
  * subservices.ts imports the three code lists by relative path, which a data: URL cannot
  * resolve, so the lists are loaded one by one and joined with the same function the app uses.
  */
-async function loadSubservices() {
+export async function loadSubservices() {
   const [model, cyber, cloud, product] = await Promise.all([
     load("lib/content/subservice-model.ts"),
     load("lib/content/cybersecurity-subservices.ts"),

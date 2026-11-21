@@ -28,3 +28,4 @@ supabase/apply/*
 !supabase/apply/04-core-services.sql
 !supabase/apply/05-resource-modules.sql
 !supabase/apply/06-blog-top-10-managed-it-chennai.sql
+!supabase/apply/07-seo-audit-copy.sql

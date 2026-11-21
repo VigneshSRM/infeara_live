@@ -126,6 +126,10 @@ test("every public page names itself the way a search result and a shared link n
       `${path}: the description is ${description.length} characters (limit ${limits.DESCRIPTION_MAX})`,
     );
 
+    // One name per page, wherever it is shown: the tab and search result, a shared link and a post on X.
+    assert.equal(metaContent(html, "property", "og:title"), title, `${path}: og:title differs from <title>`);
+    assert.equal(metaContent(html, "name", "twitter:title"), title, `${path}: twitter:title differs from <title>`);
+
     // One canonical address, absolute, on this page's own path.
     const canonicals = [...html.matchAll(/<link rel="canonical" href="([^"]+)"/g)].map((match) => match[1]);
     assert.equal(canonicals.length, 1, `${path} should have one canonical link`);
@@ -255,6 +259,206 @@ test("public contact surfaces do not expose a company mailbox or mailto link", a
     const body = (await response.text()).toLowerCase();
     assert.equal(response.status, 200, `${path} returned ${response.status}`);
     assert.doesNotMatch(body, /contact@infeara\.com|careers@infeara\.com|mailto:/, `${path} exposes an email contact`);
+  }
+});
+
+/** The paths a page links to under `prefix` (for example "/blogs"), from the list page that links to each one. */
+async function linkedUnder(listPath, prefix) {
+  const html = await (await fetch(`${baseURL}${listPath}`)).text();
+  const pattern = new RegExp(`href="(${prefix}/[a-z0-9-]+)"`, "g");
+  return [...new Set([...html.matchAll(pattern)].map((match) => match[1]))];
+}
+
+const isOpen = async () => !/^disallow:\s*\/\s*$/im.test(await (await fetch(`${baseURL}/robots.txt`)).text());
+
+// The audit of 21 November 2026 found titles with no place in them. The wording is in the database for
+// the live site (supabase/apply/07-seo-audit-copy.sql) and in code for a build without one.
+test("every service and focused service says where the company is in its title", async () => {
+  const servicePages = publicRoutes.filter((path) => /^\/services\/[a-z0-9-]+(\/[a-z0-9-]+)?$/.test(path));
+  assert.ok(servicePages.length >= 28, `expected 28 service pages, found ${servicePages.length}`);
+  for (const path of servicePages) {
+    const html = await (await fetch(`${baseURL}${path}`)).text();
+    const title = decodeEntities(html.match(/<title>([^<]*)<\/title>/)?.[1] ?? "");
+    assert.match(title, /Chennai|India/, `${path}: "${title}" does not say where the company is. If this is the live database, run supabase/apply/07-seo-audit-copy.sql`);
+  }
+});
+
+test("a shared link to a service, guide, post, case study or industry page shows a picture of its own", async () => {
+  const cardPages = [
+    ...publicRoutes.filter((path) => /^\/(services\/[a-z0-9-]+(\/[a-z0-9-]+)?|insights\/[a-z0-9-]+|industries\/[a-z0-9-]+)$/.test(path)),
+    ...(await linkedUnder("/blogs", "/blogs")),
+    ...(await linkedUnder("/case-studies", "/case-studies")),
+  ];
+  assert.ok(cardPages.length > 40, `only ${cardPages.length} pages with a card`);
+
+  const seen = new Set();
+  for (const path of cardPages) {
+    const html = await (await fetch(`${baseURL}${path}`)).text();
+    const image = metaContent(html, "property", "og:image") ?? "";
+    assert.equal(new URL(image).pathname, `/og${path}.png`, `${path}: og:image is ${image}`);
+    assert.equal(metaContent(html, "name", "twitter:image"), image, `${path}: twitter:image differs from og:image`);
+    assert.equal(metaContent(html, "property", "og:image:width"), "1200");
+    assert.equal(metaContent(html, "property", "og:image:height"), "630");
+    assert.ok(!seen.has(image), `${path}: shares its picture with another page`);
+    seen.add(image);
+  }
+
+  // The picture itself is a real PNG, 1200 by 630, that a CDN may keep.
+  for (const path of [cardPages[0], cardPages.find((p) => p.startsWith("/insights/")), cardPages.find((p) => p.startsWith("/blogs/"))]) {
+    const response = await fetch(`${baseURL}/og${path}.png`);
+    assert.equal(response.status, 200, `/og${path}.png`);
+    assert.equal(response.headers.get("content-type"), "image/png");
+    assert.match(response.headers.get("cache-control") ?? "", /s-maxage=\d+/, "a picture is cacheable at the CDN");
+    const bytes = Buffer.from(await response.arrayBuffer());
+    assert.deepEqual([...bytes.subarray(0, 8)], [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a], "not a PNG");
+    assert.equal(bytes.readUInt32BE(16), 1200);
+    assert.equal(bytes.readUInt32BE(20), 630);
+    assert.ok(bytes.length > 5_000, `${path}: the picture is only ${bytes.length} bytes`);
+  }
+
+  // Every other page keeps the shared picture.
+  for (const path of ["/", "/about", "/contact", "/services", "/insights", "/blogs"]) {
+    const html = await (await fetch(`${baseURL}${path}`)).text();
+    assert.equal(new URL(metaContent(html, "property", "og:image") ?? "").pathname, "/brand/og-image.png", path);
+  }
+});
+
+test("a picture is drawn only for a page that exists, and never from text in the address", async () => {
+  for (const path of [
+    "/og/services/not-a-service.png",
+    "/og/services/managed-it",
+    "/og/services/managed-it.jpg",
+    "/og/about.png",
+    "/og/services/a-parent/that-is-not-one.png",
+    "/og/blogs/this-post-does-not-exist.png",
+    "/og/services/Managed%20IT%20is%20the%20best.png",
+    "/og/services/managed-it.png?title=Free%20money",
+  ]) {
+    const response = await fetch(`${baseURL}${path}`);
+    const known = path.startsWith("/og/services/managed-it.png?");
+    // A query string is ignored, not printed: the picture for a real page is the same with or without it.
+    assert.equal(response.status, known ? 200 : 404, `${path} returned ${response.status}`);
+    if (known) {
+      const plain = Buffer.from(await (await fetch(`${baseURL}/og/services/managed-it.png`)).arrayBuffer());
+      assert.ok(plain.equals(Buffer.from(await response.arrayBuffer())), "text in the query string changed the picture");
+    }
+  }
+});
+
+test("guides and posts say they are articles, with the day they were published and their author", async () => {
+  const articles = [...(await linkedUnder("/insights", "/insights")), ...(await linkedUnder("/blogs", "/blogs"))];
+  assert.ok(articles.length >= 7, `only ${articles.length} articles`);
+
+  for (const path of articles) {
+    const html = await (await fetch(`${baseURL}${path}`)).text();
+    assert.equal(metaContent(html, "property", "og:type"), "article", `${path}: og:type`);
+    assert.match(metaContent(html, "property", "article:published_time") ?? "", /^\d{4}-\d{2}-\d{2}T00:00:00\+05:30$/, `${path}: article:published_time`);
+    assert.match(metaContent(html, "property", "article:author") ?? "", /^https?:\/\/[^/]+\/about$/, `${path}: article:author`);
+    assert.ok(metaContent(html, "property", "article:section"), `${path}: article:section`);
+
+    // The date and the byline are on the page, not only in the tags, and the date is the same day.
+    const day = html.match(/<time dateTime="(\d{4}-\d{2}-\d{2})"/)?.[1] ?? html.match(/<time datetime="(\d{4}-\d{2}-\d{2})"/)?.[1];
+    assert.ok(day, `${path}: no <time> with a date`);
+    assert.equal(metaContent(html, "property", "article:published_time")?.slice(0, 10), day, `${path}: the tag and the page give different days`);
+    assert.match(html, /By(?:<!-- -->)? ?(?:<!-- -->)?<a[^>]*rel="author"[^>]*>Infeara Technologies<\/a>/, `${path}: no byline`);
+
+    const types = [...html.matchAll(/<script type="application\/ld\+json">(.*?)<\/script>/gs)].map((match) => JSON.parse(match[1])["@type"]);
+    assert.ok(types.includes("Article") || types.includes("BlogPosting"), `${path}: no Article data`);
+  }
+
+  // No other page calls itself an article.
+  for (const path of ["/", "/about", "/services/managed-it", "/blogs", "/insights", "/industries/healthcare"]) {
+    const html = await (await fetch(`${baseURL}${path}`)).text();
+    assert.equal(metaContent(html, "property", "og:type"), "website", path);
+    assert.equal(metaContent(html, "property", "article:published_time"), undefined, path);
+  }
+});
+
+test("a guide's day in the sitemap, on the page and in its Article data is the same India day", async (t) => {
+  if (!(await isOpen())) return t.skip("the site is closed, so the sitemap is empty by design");
+  const sitemap = await (await fetch(`${baseURL}/sitemap.xml`)).text();
+  for (const path of await linkedUnder("/insights", "/insights")) {
+    const entry = sitemap.match(new RegExp(`<loc>[^<]*${path}</loc>\\s*<lastmod>([^<]+)</lastmod>`));
+    assert.ok(entry, `${path}: no lastmod in the sitemap`);
+    const html = await (await fetch(`${baseURL}${path}`)).text();
+    const published = [...html.matchAll(/<script type="application\/ld\+json">(.*?)<\/script>/gs)].map((m) => JSON.parse(m[1])).find((d) => d["@type"] === "Article")?.datePublished;
+    assert.match(published ?? "", /T00:00:00\+05:30$/, `${path}: datePublished`);
+    // The sitemap writes the day as midnight UTC; the page and the Article data write the India day. Same calendar day.
+    assert.equal(entry[1].slice(0, 10), published.slice(0, 10), `${path}: sitemap ${entry[1]} and Article ${published} give different days`);
+  }
+});
+
+test("every public page starts with a skip link that leads to its main content", async () => {
+  for (const path of [...publicRoutes, "/this-page-does-not-exist"]) {
+    const html = await (await fetch(`${baseURL}${path}`)).text();
+    const link = html.indexOf('href="#main"');
+    assert.ok(link > -1, `${path}: no skip link`);
+    assert.match(html.slice(link, link + 400), /Skip to main content/, `${path}: the skip link has no text`);
+    assert.ok(link < html.indexOf("<header"), `${path}: the skip link comes after the menu`);
+    assert.equal((html.match(/<main\b[^>]*id="main"/g) ?? []).length, 1, `${path}: expected one main landmark with id="main"`);
+  }
+});
+
+test("no question is asked on the home page and on a service page", async () => {
+  const questionsOf = (html) =>
+    [...html.matchAll(/<script type="application\/ld\+json">(.*?)<\/script>/gs)]
+      .map((match) => JSON.parse(match[1]))
+      .filter((data) => data["@type"] === "FAQPage")
+      .flatMap((data) => data.mainEntity.map((entry) => entry.name.trim().toLowerCase()));
+
+  const home = questionsOf(await (await fetch(`${baseURL}/`)).text());
+  assert.ok(home.length >= 6, `the home page lists ${home.length} questions`);
+  for (const path of publicRoutes.filter((p) => p.startsWith("/services/"))) {
+    const own = questionsOf(await (await fetch(`${baseURL}${path}`)).text());
+    for (const question of own) assert.ok(!home.includes(question), `"${question}" is on the home page and on ${path}`);
+    assert.equal(new Set(own).size, own.length, `${path} repeats a question`);
+  }
+});
+
+test("the thin pages are full pages", async () => {
+  // Words in the page's own text, with the menu, footer and scripts left out.
+  const wordsOnPage = (html) => {
+    const main = html.slice(html.indexOf("<main"), html.indexOf("</main>"));
+    const plain = main.replace(/<script[\s\S]*?<\/script>/g, " ").replace(/<style[\s\S]*?<\/style>/g, " ").replace(/<[^>]+>/g, " ");
+    return decodeEntities(plain).split(/\s+/).filter(Boolean).length;
+  };
+  for (const [path, minimum, questions] of [
+    ["/services/managed-it", 1100, 8],
+    ["/services/cybersecurity/penetration-testing", 1000, 8],
+    ["/services/cybersecurity/vulnerability-assessment", 1000, 8],
+    ["/services/cloud-datacenter/cloud-disaster-recovery-business-continuity", 1000, 8],
+  ]) {
+    const html = await (await fetch(`${baseURL}${path}`)).text();
+    const count = wordsOnPage(html);
+    assert.ok(count >= minimum, `${path} has ${count} words, expected at least ${minimum}. If this is the live database, run supabase/apply/07-seo-audit-copy.sql`);
+    const faq = [...html.matchAll(/<script type="application\/ld\+json">(.*?)<\/script>/gs)].map((m) => JSON.parse(m[1])).find((d) => d["@type"] === "FAQPage");
+    assert.ok((faq?.mainEntity.length ?? 0) >= questions, `${path} lists ${faq?.mainEntity.length} questions`);
+  }
+});
+
+test("llms.txt describes the site for AI tools, and every page it links to exists", async (t) => {
+  const response = await fetch(`${baseURL}/llms.txt`);
+  if (!(await isOpen())) {
+    assert.equal(response.status, 404, "a closed site advertises nothing");
+    return t.skip("the site is closed to search engines, so llms.txt is withdrawn");
+  }
+
+  assert.equal(response.status, 200);
+  assert.match(response.headers.get("content-type") ?? "", /^text\/plain/);
+  const body = await response.text();
+  assert.match(body, /^# Infeara Technologies\n\n> .+/, "a name and a one-paragraph summary open the file");
+  assert.match(body, /Chennai, Tamil Nadu, India/);
+  assert.doesNotMatch(body, /mailto:|tel:|@[a-z0-9-]+\.(com|in)\b/i, "the site publishes no mailbox or phone number, so llms.txt does not");
+
+  const links = [...body.matchAll(/^- \[[^\]]+\]\((https?:\/\/[^)\s]+)\)/gm)].map((match) => new URL(match[1]));
+  assert.ok(links.length >= 50, `only ${links.length} links`);
+  assert.equal(new Set(links.map((url) => url.origin)).size, 1, "the links mix hosts");
+  for (const required of ["/services/managed-it", "/services/cybersecurity/penetration-testing", "/contact", "/faq", "/sla"]) {
+    assert.ok(links.some((url) => url.pathname === required), `llms.txt does not link to ${required}`);
+  }
+  for (const url of links) {
+    const page = await fetch(`${baseURL}${url.pathname}`);
+    assert.equal(page.status, 200, `llms.txt links to ${url.pathname}, which returned ${page.status}`);
   }
 });
 

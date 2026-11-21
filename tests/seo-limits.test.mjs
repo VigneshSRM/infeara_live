@@ -103,9 +103,14 @@ test("every SEO title and description field in the admin shows the shared hint",
 test("pageMetadata repeats the site name and locale, because a page's openGraph replaces the layout's", () => {
   const metadata = read("lib/metadata.ts");
   assert.ok(metadata.includes('import { SITE_URL, site } from "@/lib/site";'));
-  const openGraph = metadata.slice(metadata.indexOf("openGraph: {"), metadata.indexOf("twitter: {"));
-  assert.ok(openGraph.includes("siteName: site.name,"), "og:site_name is missing from pageMetadata");
-  assert.ok(openGraph.includes("locale: site.locale,"), "og:locale is missing from pageMetadata");
+
+  // The website and the article variants are both built from one base object that carries them.
+  const base = metadata.slice(metadata.indexOf("const openGraphBase = {"), metadata.indexOf("return {"));
+  assert.ok(base.includes("siteName: site.name,"), "og:site_name is missing from pageMetadata");
+  assert.ok(base.includes("locale: site.locale,"), "og:locale is missing from pageMetadata");
+
+  const openGraph = metadata.slice(metadata.indexOf("openGraph: article"), metadata.indexOf("twitter: {"));
+  assert.equal((openGraph.match(/\.\.\.openGraphBase/g) ?? []).length, 2, "the article and the website variants must both start from the base");
 });
 
 test("robots.txt names no Host directive", () => {

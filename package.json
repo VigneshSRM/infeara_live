@@ -9,7 +9,7 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "fonts": "node scripts/sync-fonts.mjs",
-    "test:unit": "node --test tests/staff-access.test.mjs tests/dashboard.test.mjs tests/core-services.test.mjs tests/blogs.test.mjs tests/admin-lists.test.mjs tests/resource-modules.test.mjs tests/admin-list-pages.test.mjs tests/blog-directory.test.mjs tests/seo-limits.test.mjs tests/indexing.test.mjs",
+    "test:unit": "node --test tests/staff-access.test.mjs tests/dashboard.test.mjs tests/core-services.test.mjs tests/blogs.test.mjs tests/admin-lists.test.mjs tests/resource-modules.test.mjs tests/admin-list-pages.test.mjs tests/blog-directory.test.mjs tests/seo-limits.test.mjs tests/indexing.test.mjs tests/seo-audit-fixes.test.mjs",
     "test:http": "node --test tests/http-smoke.test.mjs",
     "test:e2e": "playwright test",
     "test:e2e:list": "playwright test --list"
@@ -25,6 +25,7 @@
     "@fontsource-variable/inter": "^5.3.0",
     "@fontsource-variable/manrope": "^5.3.0",
     "@fontsource-variable/space-grotesk": "^5.3.0",
+    "@fontsource/manrope": "^5.3.0",
     "@playwright/test": "^1.65.0",
     "@tailwindcss/postcss": "^4.1.0",
     "@types/node": "^24.0.0",

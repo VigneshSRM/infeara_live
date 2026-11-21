@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { formatPostDate, listBlogPosts } from "../../lib/content/blogs";
+import { insights } from "../../lib/content/insights";
 
 const publicRoutes = [
   "/",
@@ -72,6 +73,41 @@ for (const route of publicRoutes) {
     await expect(page.locator("h1")).toHaveCount(1);
   });
 }
+
+// The audit found no skip link on the home page. Keyboard users reach it first, on every page.
+for (const route of ["/", "/services/managed-it", "/blogs", "/this-page-does-not-exist"]) {
+  test(`the skip link is the first stop for the keyboard, and it jumps to the content: ${route}`, async ({ page }) => {
+    await page.goto(route);
+    await page.keyboard.press("Tab");
+
+    const skip = page.getByRole("link", { name: "Skip to main content" });
+    await expect(skip).toBeFocused();
+    await expect(skip).toBeVisible();
+
+    await page.keyboard.press("Enter");
+    await expect(page).toHaveURL(/#main$/);
+    await expect(page.locator("main#main")).toHaveCount(1);
+  });
+}
+
+test("a guide shows the day it was published and who wrote it", async ({ page }) => {
+  const guide = insights[0];
+  await page.goto(`/insights/${guide.slug}`);
+
+  await expect(page.locator("time").first()).toHaveAttribute("datetime", guide.publishedAt);
+  await expect(page.locator("time").first()).toHaveText(formatPostDate(guide.publishedAt));
+
+  const byline = page.locator("main p", { has: page.locator("time") }).first();
+  await expect(byline).toContainText("By Infeara Technologies");
+  await expect(byline).toContainText("min read");
+  await expect(byline.getByRole("link", { name: "Infeara Technologies" })).toHaveAttribute("href", "/about");
+});
+
+test("the home page says where the company is and who it serves, under its heading", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.locator("h1")).toHaveCount(1);
+  await expect(page.getByText("Managed IT services from Chennai for organisations across India")).toBeVisible();
+});
 
 test("service header exposes the new AI and application subservice links", async ({ page }) => {
   await page.goto("/");

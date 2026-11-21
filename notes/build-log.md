@@ -256,3 +256,62 @@ default is now open.
 - Apex DNS: `infeara.com` is still on Hostinger and refuses most paths (`notes/seo-audit.md`).
 - The sitemap still has to be submitted in Google Search Console and Bing Webmaster Tools (the
   owner's accounts). Lighthouse has not been re-measured on the live site.
+
+
+## 2026-11-21 — SEO audit fixes (the second audit)
+
+The owner attached an online audit (67/100, provisional: it had read six pages and could not see
+`robots.txt`, the sitemap, the structured data or the headers) and asked for the issues to be fixed.
+Each finding was checked against the live site first; the ones that were real are fixed, the ones
+that were the tool's blind spots are listed as already fine in `notes/seo-audit.md`.
+
+### Delivered
+
+- **Titles with a place.** The 28 service and focused-service titles end "… in Chennai, India" (50
+  characters at most, so 60 with the site name). The wording is in `lib/content/copy-refresh.ts`,
+  not in the lists that were seeded: those, `supabase/seed.sql` and
+  `20261110200100_resource_modules_seed.sql` have already run, and a test keeps each pair equal. A
+  new migration, `20261121120000_seo_audit_copy.sql`, with its paste-ready copy
+  `supabase/apply/07-seo-audit-copy.sql`, updates the rows; each `UPDATE` is guarded by the seeded
+  value, so a page an editor changed is left alone. The code fallback applies the same wording.
+- **Four thin pages made full.** Managed IT, Penetration Testing, Vulnerability Assessment and Cloud
+  Disaster Recovery & Business Continuity: ~970–1,070 words of copy each (was ~190–410), 8
+  deliverables, 6 outcomes, 9 questions. No clients, figures or certifications; PCI DSS 11.3/11.4,
+  ISO/IEC 27001:2022 Annex A 8.8, 8.29, 5.30 and CERT-In empanelment appear as context only.
+- **Consistency.** One title for the tab, `og:title` and `twitter:title` (`pageMetadata()`); guides
+  and posts are `og:type=article` with a published time, an author and a section.
+- **Dates and bylines.** Guides had no date and posts no byline. Both now show the day and "By
+  Infeara Technologies". Insight dates were a day early (the UTC text of a midnight-India
+  timestamp was sliced); `lib/content/dates.ts` is the one place that turns a stored moment into
+  a day, and the sitemap, the page and the Article data agree.
+- **Skip link** on the home page and the 404 page (`components/site/SkipLink.tsx`).
+- **A picture per page** for services, focused services, guides, posts, case studies and industries:
+  `/og/<page path>.png`, drawn by `app/og/[...path]/route.tsx` from the page's own content, in
+  Manrope. A file-based `opengraph-image` was tried first on paper and dropped: Next ignores it when
+  the same segment's metadata sets `openGraph.images`, as `pageMetadata()` does, and the pages
+  are DB-driven, so one route that looks the page up is simpler and cannot be made to print arbitrary text.
+  The renderer reads `.woff`, not `.woff2`, so `assets/og` holds three Manrope weights (OFL licence
+  alongside) synced from `@fontsource/manrope` by `scripts/sync-fonts.mjs`.
+- **`/llms.txt`**, rebuilt every five minutes, 404 while the site is closed.
+- **The home page** says where the company is, and no longer repeats questions a service page asks.
+- **One blog title** a character over the limit is shortened (in the same migration).
+
+### Verified
+
+- `npm run test:unit`, `npm run typecheck`, `npm run test:http` (23 tests on a local production
+  build, 12 of them new), and the Playwright suite.
+- A crawl of that build: 66 pages, no title over 60, no description over 160, no duplicate title or
+  description, one `h1`, a canonical and a skip link everywhere, 46 pages with their own card.
+- The migration, run in a throwaway Postgres (PGlite) with the project's own schema and seed: all
+  titles and the four pages change; a second run changes nothing; an edited title or text is left
+  alone and named in a notice; the audit trigger is switched back on only if it was on; a missing
+  table stops the run and names the script to run first. The first draft failed there
+  (`text[] || 'literal'` parses the literal as an array); the generator now uses `array_append`.
+
+### Open
+
+- Script 07 has to be run in the Supabase SQL editor (Role: postgres) for the live database to take
+  the new titles and text; until then the live pages read the old wording. The connector shows no
+  project, so it could not be run from here.
+- Owner-only facts (address, phone, email, people, profiles, legal name) are listed in
+  `notes/seo-audit.md`. The bare domain's DNS is still the owner's change. PageSpeed was not run.
