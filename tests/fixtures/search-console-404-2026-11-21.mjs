@@ -1,6 +1,7 @@
 // The "Not found (404)" report from Google Search Console, as the owner pasted it on 21 November
 // 2026 (validation started the same day): 49 addresses, each with the day Google last crawled it.
-// 44 are on the bare domain, which is still served by Hostinger, and 5 are on www.
+// 44 are on the bare domain, which Hostinger still served when the report was pasted (its DNS was
+// moved to Vercel later the same day), and 5 are on www.
 //
 // Used by tests/legacy-redirects.test.mjs (every address has an answer) and by the HTTP check in
 // tests/http-smoke.test.mjs (each answers with a page, or one redirect to a page, on a real build).

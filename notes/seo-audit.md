@@ -7,9 +7,10 @@ and which one it met depended on the address it was given:
    `robots.txt` said `Disallow: /`, every page carried `noindex, nofollow` and `sitemap.xml` was empty
    (README, "Launch gate"). A crawler that obeys `robots.txt` stops at the first line. **Opened the
    same day, at the owner's request:** see "After the gate was opened" below.
-2. **`https://infeara.com` (no `www`): still on Hostinger.** Only the bare address redirects; every
-   other path tried was refused or missing. See "The bare domain is not on Vercel" below. Added 21 November
-   2026, after the first version of this note had named only the gate.
+2. **`https://infeara.com` (no `www`): on Hostinger, until the owner moved it the same day.** Only the
+   bare address redirected; every other path tried was refused or missing. See "The bare domain was not
+   on Vercel" below, which also records the check after the change. Added 21 November 2026, after the
+   first version of this note had named only the gate.
 
 So the site was audited the way that tool would have done it, on a copy with the gate open: a local
 production build with `SITE_INDEXABLE=true`, Supabase and GA4 variables blank (the code copy of the
@@ -99,9 +100,14 @@ what ships in the repo; the live site reads the same pages from the database):
 The same checks now run as `npm run test:http` (robots.txt, the sitemap and the pages must agree;
 every sitemap address must be a real, indexable page) and as `tests/indexing.test.mjs`.
 
-## The bare domain is not on Vercel
+## The bare domain was not on Vercel (fixed 21 November 2026)
 
-Checked from outside on 21 November 2026:
+**Status: fixed.** The owner changed the records at Hostinger on 21 November 2026; the check after it,
+with the evidence for each address, is in `notes/search-console-404.md` ("Status"). In short: `A` of
+`infeara.com` is `216.198.79.1`, Vercel says `misconfigured: false`, and an old address takes one 308
+to `www` and then one 301 or a 200. Nothing is left to do here.
+
+Checked from outside on 21 November 2026, **before** the change:
 
 | Check | Result |
 | :--- | :--- |
@@ -118,8 +124,9 @@ sitemap entries, so links and index entries that still use it dead-end. An audit
 `infeara.com` would stop at the 403, which matches the hint in its report to "check a WAF or bot rule". Until this is
 fixed, audit `https://www.infeara.com`.
 
-**Fix: Option A of the DNS cutover runbook** (`concepts_brief.md`, step 5). Step 4 (`www` to the new
-Vercel project) is done; the apex is the part left.
+**The fix, done by the owner: Option A of the DNS cutover runbook** (`concepts_brief.md`, step 5), kept
+here in case the records are ever changed again. Step 4 (`www` to the new Vercel project) was already
+done; the apex was the part left.
 
 1. Vercel, project **Settings → Domains**: `infeara.com` should be listed. Its card shows the exact
    `A` record to use. Copy it from there; Vercel has changed that value before. On 21 November 2026
@@ -129,7 +136,7 @@ Vercel project) is done; the apex is the part left.
    Do not touch `MX`, `TXT` or other `CNAME` records: they carry the company's email, and the DNS
    record Search Console used to verify the domain (if it did) sits in the same zone.
 3. Wait a few minutes for the certificate. The Domains card turns to "Valid Configuration".
-4. Check: `curl -I https://infeara.com/contact` gives one 301/308 to `https://www.infeara.com/contact`,
+4. Check: `curl -I https://infeara.com/contact` gives one 308 to `https://www.infeara.com/contact`,
    and `curl -I https://www.infeara.com/contact` gives 200.
 
 Search Console's "Not found (404)" report of the same day (49 addresses, 44 of them on the bare
@@ -137,7 +144,8 @@ domain) is this same problem seen from Google's side: `notes/search-console-404.
 
 ## Still needed from the client
 
-- **The apex DNS change above.** Until then, point audit tools at `https://www.infeara.com`.
+- **Search Console: press "Validate fix"** on the "Not found (404)" report if it shows *Failed*, and
+  remove a stale `https://infeara.com/sitemap.xml` entry if one is listed (`notes/search-console-404.md`).
 - **Submit the sitemap**, `https://www.infeara.com/sitemap.xml`, in Google Search Console and in Bing
   Webmaster Tools. Both need the owner's own account.
 - **Check the live site after the deployment.** `https://www.infeara.com/robots.txt` should say
@@ -159,7 +167,7 @@ Each finding was checked against the live site and the code.
 | Structured data: could not verify | Organization, WebSite, Service, Article, BlogPosting, FAQPage, BreadcrumbList, ItemList and JobPosting, all parsing, all addresses absolute. |
 | Canonical and robots meta | On every page. |
 | HTTPS and security headers | HTTPS, HSTS (two years, preload), `nosniff`, referrer policy and frame options. |
-| Apex redirect | Configured in Vercel (308 to `www`). The bare domain's DNS is still on Hostinger; see "The bare domain is not on Vercel". |
+| Apex redirect | 308 to `www`, set in Vercel and working since the owner moved the bare domain's DNS to Vercel on 21 November 2026; see "The bare domain was not on Vercel". |
 
 ### Fixed in code
 
@@ -202,7 +210,7 @@ was not verified. No certification, client or figure is claimed anywhere.
 - Directory listings (Justdial, IndiaMART, Clutch, GoodFirms) and the Search Console and Bing accounts.
 - Case studies a client has agreed in writing may be published; city pages only where the company
   really serves the city.
-- The bare domain's DNS (above), and a PageSpeed Insights run on the live site.
+- A PageSpeed Insights run on the live site.
 
 ### Left alone
 
