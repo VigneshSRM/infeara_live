@@ -173,7 +173,7 @@ Each finding was checked against the live site and the code.
 
 | Finding | Before | After |
 | :--- | :--- | :--- |
-| Titles with no place (28 service and focused-service pages) | "Penetration Testing Services — Infeara" | "Penetration Testing Services in Chennai, India — Infeara" (live since script 07 was run on 21 November 2026; one row was skipped, see below) |
+| Titles with no place (28 service and focused-service pages) | "Penetration Testing Services — Infeara" | "Penetration Testing Services in Chennai, India — Infeara" (live since 21 November 2026: script 07 changed 27 of the 28 and the owner set the last one in the admin, see below) |
 | Home page lead without a place | "…for organisations across India, with…" | "Managed IT services from Chennai for organisations across India: …"; the home title is "Managed IT & Cybersecurity Services in Chennai — Infeara" |
 | `<title>` ended "— Infeara", `og:title` "— Infeara Technologies" | two strings per page | one string per page (tab, result, `og:title`, `twitter:title`), checked on all 66 pages |
 | `og:type` `website` on guides and posts | 7 articles said `website` | `article`, with `article:published_time`, `article:author` and `article:section` |
@@ -190,7 +190,7 @@ How the live database gets the new wording: README, "SEO audit fixes". Short ver
 lists and seed files are untouched, the later wording is in `lib/content/copy-refresh.ts`, and
 `supabase/apply/07-seo-audit-copy.sql` updates only rows that still hold the seeded wording.
 
-### Script 07 on the live site (checked 21 November 2026, 14:08 to 14:30 UTC)
+### Script 07 on the live site (checked 21 November 2026, 14:08 to 14:50 UTC)
 
 The owner ran `supabase/apply/07-seo-audit-copy.sql` in the Supabase SQL editor. It was checked on the
 live site afterwards, page by page. The Supabase account connected to the assistant cannot see the
@@ -201,8 +201,8 @@ project (`list_projects` is empty, `get_project` answers 403), so the database i
 - **The four expanded pages are live:** Managed IT, Penetration Testing, Vulnerability Assessment and
   Cloud Disaster Recovery show the fuller introduction, eight deliverables, the outcomes and the extra
   questions.
-- **One title did not change:** `/services/outsourcing-remote-support` still reads "IT Outsourcing &
-  Remote Support — Infeara". Its row holds older wording than the seed: in the database the page is
+- **One title did not change, and the owner then set it by hand:** `/services/outsourcing-remote-support`
+  still read "IT Outsourcing & Remote Support — Infeara" after the script. Its row holds older wording than the seed: in the database the page is
   named "IT Outsourcing & Remote Support", while the repository (the seed, the code lists and the menu
   label) calls it "Remote IT Services". The migration that renames it,
   `20261106120000_service_hierarchy.sql`, was never run in production. It also touches
@@ -211,11 +211,19 @@ project (`list_projects` is empty, `get_project` answers 403), so the database i
 - **Why this shows the database was updated:** the code fallback carries the new wording for all 29
   pages, so an old title on the live site can only come from the database. The site is reading the
   database, and the 28 new titles are in it.
-- **To change the last one:** Admin → Services → the Remote IT row → "Search engine listing" → "SEO
-  title" → `IT Outsourcing & Remote Support in Chennai, India` (49 characters, 59 with the site name) →
-  Save changes. If the page should carry the repository's name, "Remote IT Services", change Name,
-  Tagline, Summary and Intro as well (their wording is in `20261106120000_service_hierarchy.sql`) and use
-  `Remote IT Services & Dedicated Support, India` as the title.
+- **The last title, set in the admin (Services → the Remote IT row → "Search engine listing" → "SEO
+  title"):** `IT Outsourcing & Remote Support in Chennai, India` (49 characters, 59 with the site name).
+  Checked live at about 14:45 UTC: the page's title is now "IT Outsourcing & Remote Support in Chennai,
+  India — Infeara". Saving a service refreshes its public page (`saveService` in
+  `lib/admin/content-actions.ts` revalidates `/`, `/services` and `/services/<slug>`). One read through a metadata service still gave the old title for a
+  minute, from its own cache; a read with that cache bypassed and a plain page fetch both gave the new
+  one, so **all 28 service and focused-service titles and the blog title are now live.**
+- **Still on the older wording:** this page's heading ("IT Outsourcing & Remote Support"), introduction,
+  card text on the IT Infrastructure page and meta description, while the menu says "Remote IT
+  Services". That is the same unrun migration. To make the page carry the repository's name, change
+  Name, Tagline, Summary, Intro and the meta description in the admin (their wording is in
+  `20261106120000_service_hierarchy.sql`) and retitle it `Remote IT Services & Dedicated Support, India`.
+  Optional; the page works as it is.
 
 Standards named in the fuller pages are context, at the places they are published, and a report
 satisfying an auditor is always left to the client: PCI DSS v4.0.1 requirement 11.4 (penetration
