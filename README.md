@@ -746,7 +746,7 @@ items were already fine (`notes/seo-audit.md` has the full comparison). What was
 
 | Audit finding | What changed |
 | :--- | :--- |
-| Titles without a place | The 28 service and focused-service titles end "… in Chennai, India" (wording in `lib/content/copy-refresh.ts`; the live rows change when script 07 runs). The home page's title is "Managed IT & Cybersecurity Services in Chennai — Infeara". |
+| Titles without a place | The 28 service and focused-service titles end "… in Chennai, India" (wording in `lib/content/copy-refresh.ts`; script 07 was run on 21 November 2026 and 27 of the 28 titles changed on the live site. The Remote IT row kept its title because the database holds older wording than the seed; see `notes/seo-audit.md`, "Script 07 on the live site"). The home page's title is "Managed IT & Cybersecurity Services in Chennai — Infeara". |
 | Home page lead without a place | The line under the heading reads "Managed IT services from Chennai for organisations across India: …". |
 | `<title>` and `og:title` ended differently | One title per page, for the tab, the search result, `og:title` and `twitter:title` (`pageMetadata()`). |
 | `og:type` was `website` on articles | Guides and posts say `article`, with `article:published_time` (midnight India time), `article:author` (the About page) and `article:section`. |
