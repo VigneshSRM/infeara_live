@@ -1,11 +1,12 @@
 # SEO audit — 21 November 2026
 
-An online audit tool reported that it could not read the site. Two separate things block a crawler,
-and which one it met depends on the address it was given:
+An online audit tool reported that it could not read the site. Two separate things blocked a crawler,
+and which one it met depended on the address it was given:
 
-1. **`https://www.infeara.com`: the launch gate, on purpose.** With `SITE_INDEXABLE` unset,
-   `robots.txt` says `Disallow: /`, every page carries `noindex, nofollow` and `sitemap.xml` is empty
-   (README, "Launch gate"). A crawler that obeys `robots.txt` stops at the first line.
+1. **`https://www.infeara.com`: the launch gate, closed on purpose.** With `SITE_INDEXABLE` unset,
+   `robots.txt` said `Disallow: /`, every page carried `noindex, nofollow` and `sitemap.xml` was empty
+   (README, "Launch gate"). A crawler that obeys `robots.txt` stops at the first line. **Opened the
+   same day, at the owner's request:** see "After the gate was opened" below.
 2. **`https://infeara.com` (no `www`): still on Hostinger.** Only the bare address redirects; every
    other path tried was refused or missing. See "The bare domain is not on Vercel" below. Added 21 November
    2026, after the first version of this note had named only the gate.
@@ -64,8 +65,39 @@ It was not re-run for this audit; none of the fixes touches what Lighthouse meas
   if the client wants it.
 - **No email, phone number or social profile in the Organization data.** The site publishes none, on
   purpose (no public company mailbox). Add `contactPoint` and `sameAs` when the client supplies them.
-- **Sitemap `lastmod`:** 57 of 64 entries carry the day of the build, because most content has no
-  modified date. Google ignores a `lastmod` it cannot trust; nothing is harmed.
+
+## After the gate was opened (21 November 2026)
+
+The owner then asked for the crawling problem to be fixed, so the site is open by default
+(`lib/seo/indexing.ts`; README, "Launch gate"). What changed:
+
+- **Open unless closed.** `SITE_INDEXABLE` not set means open; `true` opens; any other value closes;
+  a Vercel preview deployment stays closed. Before, only the exact value `true` opened the site, so
+  production, which had no such setting, was closed.
+- **The sitemap keeps pace.** It was a snapshot taken at build time: an insight published in the
+  admin, or a post scheduled for later, was missing until the next deployment. It is now rebuilt
+  every five minutes, like the pages.
+- **No made-up dates.** 57 of 64 sitemap entries said "modified" on the day of the build. An entry
+  now carries a date only where the site knows one (the day a post, insight or white paper was
+  published); the others carry none.
+
+Crawl of a local production build with no setting at all (the code copy of the content, which is
+what ships in the repo; the live site reads the same pages from the database):
+
+| Check | Result |
+| :--- | :--- |
+| `robots.txt` | `Allow: /`, `Disallow: /admin/`, `Disallow: /api/`, `Sitemap: https://www.infeara.com/sitemap.xml` |
+| Robots tag on the home page | `index, follow` |
+| Sitemap | 64 URLs, all on `www`, none twice |
+| Crawl by links, from `/` and from the sitemap | 65 pages: 64 indexable, and `/white-papers` noindex while empty |
+| Sitemap against the pages that can be indexed | the same 64: nothing indexable is missing, nothing listed is blocked |
+| Every sitemap address | 200, not noindex, canonical equal to the address |
+| Kept out whatever the setting | `/admin/login`, `/thank-you`, the 404 page, `/login` and `/forgot-password` (410): all noindex |
+| `SITE_INDEXABLE=false` | `Disallow: /`, 65 of 65 pages noindex, empty sitemap |
+| `VERCEL_ENV=preview`, no setting | closed likewise |
+
+The same checks now run as `npm run test:http` (robots.txt, the sitemap and the pages must agree;
+every sitemap address must be a real, indexable page) and as `tests/indexing.test.mjs`.
 
 ## The bare domain is not on Vercel
 
@@ -101,7 +133,8 @@ Vercel project) is done; the apex is the part left.
 ## Still needed from the client
 
 - **The apex DNS change above.** Until then, point audit tools at `https://www.infeara.com`.
-- **The written go-ahead to open the gate.** The site stays closed to crawlers until the client
-  confirms the content swap in writing, so an online audit of `www` will keep failing until then.
-  Opening it is two steps in Vercel (README, "Search listings"): set `SITE_INDEXABLE=true` for
-  Production, then redeploy.
+- **Submit the sitemap**, `https://www.infeara.com/sitemap.xml`, in Google Search Console and in Bing
+  Webmaster Tools. Both need the owner's own account.
+- **Check the live site after the deployment.** `https://www.infeara.com/robots.txt` should say
+  `Allow: /`. If it still says `Disallow: /`, `SITE_INDEXABLE` is set in Vercel to something other
+  than `true`: delete it (or set it to `true`) and redeploy.

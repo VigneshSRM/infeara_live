@@ -17,10 +17,11 @@
 // `node scripts/generate-blog-migrations.mjs` (later posts), then `node scripts/make-apply-blobs.mjs`,
 // so the SQL follows.
 //
-// The starter posts make no claims about clients, results or figures. Replace or remove them
-// as part of the content swap, before SITE_INDEXABLE is switched on (see "Launch gate" in the
-// README). A later post that describes other companies says only what each one says about
-// itself on its own website, and says when that was checked.
+// The starter posts make no claims about clients, results or figures. The site is open to search
+// engines (see "Launch gate" in the README), so they can be found there: edit, unpublish or
+// delete any of them in the admin if you would rather they were not. A later post that describes
+// other companies says only what each one says about itself on its own website, and says when
+// that was checked.
 //
 // This file deliberately has no imports, so tests/blogs.test.mjs can load it as it is.
 
