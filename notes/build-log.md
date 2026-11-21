@@ -375,3 +375,22 @@ half an hour after the PR #17 deploy (13:53 to 13:56 UTC):
   The README had said the bare host 301s; it is a 308.
 - Open: press *Validate fix* in Search Console and wait; remove a stale `https://infeara.com/sitemap.xml`
   entry if listed; a second `A` record (`64.29.17.1`) is optional.
+
+### 2026-11-21, later — script 07 applied; one title skipped
+
+The owner ran `supabase/apply/07-seo-audit-copy.sql` and connected Supabase to the assistant. The
+connector shows only the organisation "Alpha" with no projects, and `get_project` for the site's
+project answers 403, so the database was neither read nor written from here. Checked on the live site
+instead (14:08 to 14:30 UTC): every title, 18 of them through a page-metadata service and the rest by
+fetching the page.
+
+- 27 of 28 service and focused-service titles and the blog title are new; the four expanded pages
+  (Managed IT, Penetration Testing, Vulnerability Assessment, Cloud DR) are live.
+- `/services/outsourcing-remote-support` still reads "IT Outsourcing & Remote Support — Infeara". The
+  row holds older wording than the seed (`20261106120000_service_hierarchy.sql` was never run in
+  production), so script 07's guard skipped it, as designed. An old title on live also shows the site
+  reads the database: the code fallback carries the new wording.
+- README and `notes/seo-audit.md` no longer say script 07 is pending.
+- Open: change that one title in the admin (steps in `notes/seo-audit.md`); decide whether the page
+  should be renamed "Remote IT Services", as the repository and the menu already call it; connect the
+  Supabase account or organisation that owns the project if SQL should be run from here.

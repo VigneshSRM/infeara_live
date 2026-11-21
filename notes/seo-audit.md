@@ -173,7 +173,7 @@ Each finding was checked against the live site and the code.
 
 | Finding | Before | After |
 | :--- | :--- | :--- |
-| Titles with no place (28 service and focused-service pages) | "Penetration Testing Services — Infeara" | "Penetration Testing Services in Chennai, India — Infeara" (live after script 07 runs) |
+| Titles with no place (28 service and focused-service pages) | "Penetration Testing Services — Infeara" | "Penetration Testing Services in Chennai, India — Infeara" (live since script 07 was run on 21 November 2026; one row was skipped, see below) |
 | Home page lead without a place | "…for organisations across India, with…" | "Managed IT services from Chennai for organisations across India: …"; the home title is "Managed IT & Cybersecurity Services in Chennai — Infeara" |
 | `<title>` ended "— Infeara", `og:title` "— Infeara Technologies" | two strings per page | one string per page (tab, result, `og:title`, `twitter:title`), checked on all 66 pages |
 | `og:type` `website` on guides and posts | 7 articles said `website` | `article`, with `article:published_time`, `article:author` and `article:section` |
@@ -184,11 +184,38 @@ Each finding was checked against the live site and the code.
 | No `llms.txt` | 404 | `/llms.txt`, 51 links, every one a page that exists |
 | Duplicate FAQ on the home and Managed IT pages | "How is managed IT different from IT outsourcing?" on both, and "What happens during a security incident?" on the home and Cybersecurity pages | the home page asks questions no service page asks |
 | Thin service pages | Managed IT ~410 words of copy; Penetration Testing ~190; Vulnerability Assessment ~215; Cloud DR ~225 | ~970–1,070 each; 8 deliverables, 6 outcomes, 9 questions |
-| One 61-character title (a blog post) | 61 | 60 or fewer on every page (live after script 07 runs) |
+| One 61-character title (a blog post) | 61 | 59 (live since script 07 was run) |
 
 How the live database gets the new wording: README, "SEO audit fixes". Short version: the seeded
 lists and seed files are untouched, the later wording is in `lib/content/copy-refresh.ts`, and
 `supabase/apply/07-seo-audit-copy.sql` updates only rows that still hold the seeded wording.
+
+### Script 07 on the live site (checked 21 November 2026, 14:08 to 14:30 UTC)
+
+The owner ran `supabase/apply/07-seo-audit-copy.sql` in the Supabase SQL editor. It was checked on the
+live site afterwards, page by page. The Supabase account connected to the assistant cannot see the
+project (`list_projects` is empty, `get_project` answers 403), so the database itself was not read.
+
+- **27 of the 28 service and focused-service titles are new, and so is the blog title.** That is 9 of
+  the 10 services, all 18 focused services and the one post.
+- **The four expanded pages are live:** Managed IT, Penetration Testing, Vulnerability Assessment and
+  Cloud Disaster Recovery show the fuller introduction, eight deliverables, the outcomes and the extra
+  questions.
+- **One title did not change:** `/services/outsourcing-remote-support` still reads "IT Outsourcing &
+  Remote Support — Infeara". Its row holds older wording than the seed: in the database the page is
+  named "IT Outsourcing & Remote Support", while the repository (the seed, the code lists and the menu
+  label) calls it "Remote IT Services". The migration that renames it,
+  `20261106120000_service_hierarchy.sql`, was never run in production. It also touches
+  `it-infrastructure`, whose title did change. Script 07 changes a title only while it still equals the
+  seeded "Remote IT Services & Dedicated Support", so it left this one alone, as designed.
+- **Why this shows the database was updated:** the code fallback carries the new wording for all 29
+  pages, so an old title on the live site can only come from the database. The site is reading the
+  database, and the 28 new titles are in it.
+- **To change the last one:** Admin → Services → the Remote IT row → "Search engine listing" → "SEO
+  title" → `IT Outsourcing & Remote Support in Chennai, India` (49 characters, 59 with the site name) →
+  Save changes. If the page should carry the repository's name, "Remote IT Services", change Name,
+  Tagline, Summary and Intro as well (their wording is in `20261106120000_service_hierarchy.sql`) and use
+  `Remote IT Services & Dedicated Support, India` as the title.
 
 Standards named in the fuller pages are context, at the places they are published, and a report
 satisfying an auditor is always left to the client: PCI DSS v4.0.1 requirement 11.4 (penetration
