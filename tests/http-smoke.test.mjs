@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import http from "node:http";
 import test from "node:test";
 import ts from "typescript";
+import { answeredByThePlatform, reportedNotFound } from "./fixtures/search-console-404-2026-11-21.mjs";
 
 // The title and description budgets are held in one module that the title template and the admin
 // hints read too, so the test measures against the same numbers instead of copies of them.
@@ -459,6 +461,82 @@ test("llms.txt describes the site for AI tools, and every page it links to exist
   for (const url of links) {
     const page = await fetch(`${baseURL}${url.pathname}`);
     assert.equal(page.status, 200, `llms.txt links to ${url.pathname}, which returned ${page.status}`);
+  }
+});
+
+// Search Console's "Not found (404)" report of 21 November 2026 (tests/fixtures/). Each address Google
+// listed must answer with a page, or with one 301 to a page. The two addresses ending in .php are left
+// out: Vercel answers 403 for those before the site is reached, so a local server cannot show what
+// the platform does. Apex and www share their paths, so each path is asked once.
+test("every address Search Console reported as Not found answers with a page, or one 301 to a page", async () => {
+  const robots = await (await fetch(`${baseURL}/robots.txt`)).text();
+  const open = !/^disallow:\s*\/\s*$/im.test(robots);
+
+  const paths = [...new Set(reportedNotFound.map(([address]) => new URL(address).pathname))].filter(
+    (path) => !answeredByThePlatform.includes(path),
+  );
+  assert.equal(paths.length, 44, "46 reported paths, less the two .php addresses");
+
+  const outcomes = { page: 0, redirect: 0 };
+  for (const path of paths) {
+    const first = await fetch(`${baseURL}${path}`, { redirect: "manual" });
+    await first.arrayBuffer();
+
+    let endsAt = path;
+    if (first.status === 200) {
+      outcomes.page += 1;
+    } else {
+      assert.equal(first.status, 301, `${path} answered ${first.status}; expected a page, or a 301 to one`);
+      const location = first.headers.get("location");
+      assert.ok(location, `${path}: a 301 without a Location`);
+      const target = new URL(location, baseURL);
+      assert.equal(target.origin, new URL(baseURL).origin, `${path} sends visitors off the site: ${location}`);
+      endsAt = target.pathname;
+      outcomes.redirect += 1;
+    }
+
+    // The end of the road must be a real page, reached without a second redirect.
+    const last = await fetch(`${baseURL}${endsAt}`, { redirect: "manual" });
+    const html = await last.text();
+    assert.equal(last.status, 200, `${path} ends at ${endsAt}, which answered ${last.status}`);
+    assert.equal((html.match(/<h1\b/g) ?? []).length, 1, `${endsAt} should have one h1`);
+    if (open) {
+      assert.doesNotMatch(metaContent(html, "name", "robots") ?? "", /noindex/, `${path} ends at ${endsAt}, which says noindex`);
+    }
+  }
+  assert.deepEqual(outcomes, { page: 9, redirect: 35 });
+});
+
+test("a request for the bare domain goes to www with the same path and query", async (t) => {
+  const server = new URL(baseURL);
+  if (!["127.0.0.1", "localhost"].includes(server.hostname)) {
+    t.skip("the Host header is what is under test, so this only makes sense against a local server");
+    return;
+  }
+  // fetch() may not set Host, so ask with node:http.
+  const ask = (path) =>
+    new Promise((resolve, reject) => {
+      const request = http.request(
+        { host: server.hostname, port: server.port || 80, path, headers: { host: "infeara.com" } },
+        (response) => {
+          response.resume();
+          response.on("end", () => resolve(response));
+        },
+      );
+      request.on("error", reject);
+      request.end();
+    });
+
+  for (const [path, expected] of [
+    ["/", "https://www.infeara.com/"],
+    ["/about", "https://www.infeara.com/about"],
+    ["/services/audit-compliance/iso-27001", "https://www.infeara.com/services/audit-compliance/iso-27001"],
+    ["/resources/blog?utm_source=search", "https://www.infeara.com/resources/blog?utm_source=search"],
+  ]) {
+    const response = await ask(path);
+    assert.ok([301, 308].includes(response.statusCode), `${path} on the bare domain answered ${response.statusCode}`);
+    // Compared as addresses: "https://www.infeara.com" and "https://www.infeara.com/" are the same one.
+    assert.equal(new URL(response.headers.location ?? "about:blank").href, new URL(expected).href, `${path} on the bare domain`);
   }
 });
 

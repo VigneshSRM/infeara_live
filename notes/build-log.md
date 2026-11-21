@@ -315,3 +315,45 @@ that were the tool's blind spots are listed as already fine in `notes/seo-audit.
   project, so it could not be run from here.
 - Owner-only facts (address, phone, email, people, profiles, legal name) are listed in
   `notes/seo-audit.md`. The bare domain's DNS is still the owner's change. PageSpeed was not run.
+
+
+## 2026-11-21 — Search Console "Not found (404)": 49 addresses
+
+The owner pasted Search Console's *Not found (404)* report (validation started the same day): 49
+addresses, 44 on the bare domain `infeara.com`, 5 on `www`.
+
+### Finding
+
+- **Forty-four are unreachable from code.** The bare domain is still served by Hostinger (checked with
+  DNS queries to 8.8.8.8 and with Vercel's domain configuration: `misconfigured: true`). Those requests
+  never reach Vercel, so neither the bare-domain rule nor the redirect map can act. Google most likely
+  has the addresses on the bare domain because the site before this one named `https://infeara.com`
+  as canonical on all 77 sitemap entries. The fix is the owner's DNS change (`notes/search-console-404.md`, steps for Hostinger).
+- **Of the five on `www`**, four already answered correctly on the live site (three redirects and the education
+  page, each fetched from `www.infeara.com`). One, `/terms.php`, cannot be fixed: Vercel's edge answers 403
+  for *every* `.php` address before the site is reached (checked on `www.infeara.com`, on
+  `infeara-live.vercel.app` and with a made-up name; a local build answers them with the site's own
+  404, so it is not the code; whether it is Vercel's default or a Firewall rule on the project is not
+  visible from here). So the planned `/index.php` and `/terms.php`
+  rules were dropped, and a test refuses to accept one.
+- **Three addresses were never in the old sitemap**: `/index.html`, `/index.php`, `/terms.php`.
+
+### Delivered
+
+- `lib/redirects.ts`: `/index.html` → `/`; `/resources/blog` → `/blogs` (it went to Insights before the
+  site had a blog list).
+- `tests/legacy-redirects.test.mjs` (10 tests): the map is exact paths, 301, one hop, never to the home
+  page unless the address is the home page; every one of the 49 addresses has an answer (9 pages, 35
+  redirects, 2 `.php`); the bare-domain rule is wired first and keeps the path; the note covers all 46
+  paths. Four deliberate breakages were each caught.
+- `tests/http-smoke.test.mjs`: each reported path answers with a page or one 301 to a page (200, one
+  `h1`, no `noindex`); the bare domain's rule sends `/`, `/about`, an old address and a query to `www`.
+  `tests/fixtures/search-console-404-2026-11-21.mjs` holds the 49 addresses as pasted.
+- `notes/search-console-404.md`: evidence, the Hostinger steps, what to do in Search Console, all 46
+  paths and what each does, how to add the next address.
+
+### Open
+
+- The apex DNS change, which only the owner can make, decides whether Search Console's validation passes.
+- Search Console lists `/index.php` and `/terms.php` as 404 now; they may move to "Blocked due to
+  access forbidden (403)" or drop out. Nothing to do.

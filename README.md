@@ -629,18 +629,35 @@ does not change the database.
 
 ## Redirects
 
-`lib/redirects.ts` maps all 77 URLs from the previous sitemap:
+`lib/redirects.ts` was written for the 77 URLs of the previous sitemap, and has grown since:
 
-- 63 legacy URLs → 301 to the closest new page. Nothing redirects to the homepage.
+- 66 old addresses → 301 to the closest new page (63 when the site was rebuilt; most recently
+  `/index.html` was added, which Search Console reported). Nothing a visitor might want goes to the
+  homepage; the one address that does is `/index.html`, which is the home page.
+  `tests/legacy-redirects.test.mjs` checks that the map is exact paths, never more than one hop, and
+  never shrinks.
 - `/login` and `/forgot-password` → 410 via route handlers. There is no public account area.
 - The remaining 12 URLs already exist under the same path (`/about`, `/services`,
   `/industries/healthcare`, …).
+- An address that ends in `.php` cannot be redirected: Vercel answers 403 for those before the
+  request reaches the site, so a rule here would never run.
 
 The apex host (`infeara.com`) 301s to `https://www.infeara.com` at the edge. That rule only
 takes effect once DNS for the apex points at Vercel. **As of 21 November 2026 it does not:** the
 apex still points at Hostinger, which redirects only the bare address and refuses or 404s every
 other path. The fix (Option A of the DNS cutover runbook in `concepts_brief.md`) and the evidence are
-in `notes/seo-audit.md`.
+in `notes/seo-audit.md`; the steps for Hostinger are repeated in `notes/search-console-404.md`.
+
+### Search Console: "Not found (404)"
+
+On 21 November 2026 Search Console listed 49 addresses as *Not found (404)*: 44 on the bare domain
+`infeara.com` and 5 on `www`. The 44 reach Hostinger, not this site, so no code can
+answer them. The owner's DNS change above is the fix; after it, each takes a 308 to `www` and then the
+301 in `lib/redirects.ts`. Of the five on `www`, four already answered correctly, and `/terms.php`
+cannot be changed (Vercel's own 403 for `.php`). `/index.html` and `/resources/blog` were corrected.
+`notes/search-console-404.md` has the evidence, all 46 paths with what each does, the Hostinger
+steps, what to do in Search Console, and how to add the next address.
+`tests/legacy-redirects.test.mjs` and the HTTP check keep every one of the 49 answered.
 
 ## Launch gate
 
@@ -793,8 +810,8 @@ The Playwright MCP server is configured in `.mcp.json` for MCP-compatible client
 
 - `npm run test:e2e` — full Playwright browser suite: public route rendering, navigation, contact validation, cookie choices, admin authentication and role permissions.
 - `npm run test:e2e:list` — list discovered browser tests without launching a browser.
-- `npm run test:http` — HTTP/API smoke tests against a running app (defaults to `http://127.0.0.1:3000`), including every public page's title, description, canonical address and social tags, and that robots.txt, the sitemap and the pages agree on whether search engines are let in (an open site's sitemap must list only pages that return 200, are not noindex and name that address as canonical), that one title serves the tab, `og:title` and `twitter:title`, that each service, guide and post has its own picture (a real 1200 × 630 PNG), that articles say so, that every page has a skip link, that no question appears on both the home page and a service page, that the four fuller pages have their words, and that `/llms.txt` links only to pages that exist.
-- `npm run test:unit` — unit tests for the rule that decides who the CMS lets in (`lib/auth/access.ts`), the Overview analytics and lead notes chat, and the core services (the CMS notice, and the check that `supabase/apply/04-core-services.sql` still matches its migrations), the blog posts and the Technical resources menu (`tests/blogs.test.mjs`), the list search, filters and page numbers of every admin table (`tests/admin-lists.test.mjs`), how each list page is wired, including a check that no admin table can go unpaged (`tests/admin-list-pages.test.mjs`), and the sub-service, blog, case-study and white-paper modules: the SQL, the content copied in, the PDF helpers, the admin wiring and the header menu (`tests/resource-modules.test.mjs`), and the Chennai managed IT list: ten entries in A-to-Z order with official links, the published criteria, no ranking claims, Infeara's disclosed entry and its separate enquiry section, one list per keyword, the Article and breadcrumb data, how links in a post are parsed and refused, and the SQL that adds the post (`tests/blog-directory.test.mjs`), and the search-listing rules: the title and description budgets, the site name and locale every page repeats, and the gate's closed state (`tests/seo-limits.test.mjs`), and the rule that lets search engines in: open unless closed, `true` opens and anything else typed in closes, a Vercel preview stays closed, one value for robots.txt, the sitemap and every page, the sitemap's five-minute clock and the pages that stay out of results (`tests/indexing.test.mjs`), and the fixes from the 21 November 2026 audit: a place in every service title, the SQL that updates them (never touching a page an editor changed), the fuller pages' voice, one title per page, article tags and bylines, India-day dates, the skip link, the shared-link pictures and `llms.txt` (`tests/seo-audit-fixes.test.mjs`). No server or Supabase needed.
+- `npm run test:http` — HTTP/API smoke tests against a running app (defaults to `http://127.0.0.1:3000`), including every public page's title, description, canonical address and social tags, and that robots.txt, the sitemap and the pages agree on whether search engines are let in (an open site's sitemap must list only pages that return 200, are not noindex and name that address as canonical), that one title serves the tab, `og:title` and `twitter:title`, that each service, guide and post has its own picture (a real 1200 × 630 PNG), that articles say so, that every page has a skip link, that no question appears on both the home page and a service page, that the four fuller pages have their words, and that `/llms.txt` links only to pages that exist, that each address Search Console reported as Not found answers with a page or one 301 to a page, and that a request for the bare domain is sent to `www` with its path and query.
+- `npm run test:unit` — unit tests for the rule that decides who the CMS lets in (`lib/auth/access.ts`), the Overview analytics and lead notes chat, and the core services (the CMS notice, and the check that `supabase/apply/04-core-services.sql` still matches its migrations), the blog posts and the Technical resources menu (`tests/blogs.test.mjs`), the list search, filters and page numbers of every admin table (`tests/admin-lists.test.mjs`), how each list page is wired, including a check that no admin table can go unpaged (`tests/admin-list-pages.test.mjs`), and the sub-service, blog, case-study and white-paper modules: the SQL, the content copied in, the PDF helpers, the admin wiring and the header menu (`tests/resource-modules.test.mjs`), and the Chennai managed IT list: ten entries in A-to-Z order with official links, the published criteria, no ranking claims, Infeara's disclosed entry and its separate enquiry section, one list per keyword, the Article and breadcrumb data, how links in a post are parsed and refused, and the SQL that adds the post (`tests/blog-directory.test.mjs`), and the search-listing rules: the title and description budgets, the site name and locale every page repeats, and the gate's closed state (`tests/seo-limits.test.mjs`), and the rule that lets search engines in: open unless closed, `true` opens and anything else typed in closes, a Vercel preview stays closed, one value for robots.txt, the sitemap and every page, the sitemap's five-minute clock and the pages that stay out of results (`tests/indexing.test.mjs`), and the fixes from the 21 November 2026 audit: a place in every service title, the SQL that updates them (never touching a page an editor changed), the fuller pages' voice, one title per page, article tags and bylines, India-day dates, the skip link, the shared-link pictures and `llms.txt` (`tests/seo-audit-fixes.test.mjs`), and the old-address map: exact paths, 301, one hop, and an answer for each of the 49 addresses Search Console reported as Not found on 21 November 2026 (`tests/legacy-redirects.test.mjs`). No server or Supabase needed.
 
 The browser suite starts an isolated, non-Supabase Next dev server on port 3100 by default. Set `PLAYWRIGHT_PORT` to change it or `PLAYWRIGHT_BASE_URL` to target a test deployment. Optional staff-role checks require an isolated test deployment identified by `PLAYWRIGHT_BASE_URL`, `PLAYWRIGHT_ADMIN_TEST_HOST` (exact hostname match), and `PLAYWRIGHT_ADMIN_ISOLATED_TEST=true`, plus the relevant credentials: `PLAYWRIGHT_SUPER_ADMIN_EMAIL` / `PLAYWRIGHT_SUPER_ADMIN_PASSWORD`, `PLAYWRIGHT_EDITOR_EMAIL` / `PLAYWRIGHT_EDITOR_PASSWORD`, and `PLAYWRIGHT_SEO_MANAGER_EMAIL` / `PLAYWRIGHT_SEO_MANAGER_PASSWORD`. Known Infeara production hostnames are blocked. The create/edit/delete CMS workflow has an additional `PLAYWRIGHT_ADMIN_ALLOW_MUTATIONS=true` opt-in; point the test deployment at an isolated Supabase project only.
 
