@@ -357,3 +357,21 @@ addresses, 44 on the bare domain `infeara.com`, 5 on `www`.
 - The apex DNS change, which only the owner can make, decides whether Search Console's validation passes.
 - Search Console lists `/index.php` and `/terms.php` as 404 now; they may move to "Blocked due to
   access forbidden (403)" or drop out. Nothing to do.
+
+### 2026-11-21, afternoon — the bare domain now points at Vercel
+
+The owner changed the records at Hostinger as written in `notes/search-console-404.md`. Checked about
+half an hour after the PR #17 deploy (13:53 to 13:56 UTC):
+
+- DNS from 8.8.8.8: `infeara.com A 216.198.79.1` (TTL 14400), no `AAAA`; `MX`, the SPF `TXT`, `NS`
+  and the `www` `CNAME` unchanged. Vercel: `misconfigured: false`, verified, redirect to `www` (308).
+- Headers, with a public service that prints every hop: six old addresses, one page that exists,
+  plain `http://` and `robots.txt` each take one 308 to `www`, then one 301 or a 200. Never more than
+  two hops. Four more addresses were fetched and landed on the right page (`/about`, `/resources/blog`,
+  `/legal/terms-of-service`, `/index.html`).
+- The `.php` addresses give 403 with `X-Vercel-Mitigated: deny` on both hosts: a Firewall refusal at
+  Vercel, not the code. Which rule is not visible from here.
+- README, `notes/seo-audit.md` and `notes/search-console-404.md` now say the bare domain is fixed.
+  The README had said the bare host 301s; it is a 308.
+- Open: press *Validate fix* in Search Console and wait; remove a stale `https://infeara.com/sitemap.xml`
+  entry if listed; a second `A` record (`64.29.17.1`) is optional.

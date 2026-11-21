@@ -642,19 +642,24 @@ does not change the database.
 - An address that ends in `.php` cannot be redirected: Vercel answers 403 for those before the
   request reaches the site, so a rule here would never run.
 
-The apex host (`infeara.com`) 301s to `https://www.infeara.com` at the edge. That rule only
-takes effect once DNS for the apex points at Vercel. **As of 21 November 2026 it does not:** the
-apex still points at Hostinger, which redirects only the bare address and refuses or 404s every
-other path. The fix (Option A of the DNS cutover runbook in `concepts_brief.md`) and the evidence are
-in `notes/seo-audit.md`; the steps for Hostinger are repeated in `notes/search-console-404.md`.
+The bare host (`infeara.com`) is redirected to `https://www.infeara.com`, path and query kept, with
+a 308 (permanent). Vercel's domain setting does it; the host rule in `next.config.ts` repeats it as a
+safety net. **Until 21 November 2026 none of that could run:** the bare domain's DNS pointed at
+Hostinger, which refused or 404ed every path. The owner moved it to Vercel that day
+(`A @ 216.198.79.1`; email records untouched), and it was checked from outside afterwards: an old
+address now takes one 308 to `www` and then one 301 or a 200. The evidence is in
+`notes/search-console-404.md` ("Status") and `notes/seo-audit.md`; the Hostinger steps are kept there
+in case the records are ever changed again (Option A of the DNS cutover runbook in
+`concepts_brief.md`).
 
 ### Search Console: "Not found (404)"
 
 On 21 November 2026 Search Console listed 49 addresses as *Not found (404)*: 44 on the bare domain
-`infeara.com` and 5 on `www`. The 44 reach Hostinger, not this site, so no code can
-answer them. The owner's DNS change above is the fix; after it, each takes a 308 to `www` and then the
-301 in `lib/redirects.ts`. Of the five on `www`, four already answered correctly, and `/terms.php`
-cannot be changed (Vercel's own 403 for `.php`). `/index.html` and `/resources/blog` were corrected.
+`infeara.com` and 5 on `www`. The 44 reached Hostinger, not this site, so no code could
+answer them. The owner's DNS change above was the fix; since it, each takes a 308 to `www` and then
+the 301 in `lib/redirects.ts`. Of the five on `www`, four already answered correctly, and `/terms.php`
+cannot be changed (Vercel's Firewall answers 403 for `.php`). `/index.html` and `/resources/blog` were
+corrected. What is left is Google's re-check: press *Validate fix* in Search Console.
 `notes/search-console-404.md` has the evidence, all 46 paths with what each does, the Hostinger
 steps, what to do in Search Console, and how to add the next address.
 `tests/legacy-redirects.test.mjs` and the HTTP check keep every one of the 49 answered.
@@ -712,9 +717,10 @@ that the title template, the admin hints and the budgets still agree. The Organi
 `components/seo/JsonLd.tsx` gives Chennai, Tamil Nadu, India and nothing else: the site publishes no
 company mailbox, phone number or social profile, so the data does not either.
 
-**Auditing.** Online SEO tools obey `robots.txt`. Give them `https://www.infeara.com`, the address
-the site answers on: the bare `infeara.com` is still on Hostinger until its DNS moves, and refuses
-most paths (`notes/seo-audit.md`). If a tool still says it cannot read the site, open
+**Auditing.** Online SEO tools obey `robots.txt`. Give them `https://www.infeara.com`, the canonical
+address. The bare `infeara.com` also works now: it redirects to `www` with a 308 (before 21 November
+2026 its DNS pointed at Hostinger and it refused most paths; `notes/seo-audit.md`). If a tool still
+says it cannot read the site, open
 `https://www.infeara.com/robots.txt`. `Disallow: /` means the site is closed, which happens only when
 `SITE_INDEXABLE` is set to something other than `true` in Vercel. To audit a copy yourself, build and
 start it (`npm run build`, then `npm start`) and crawl that. `notes/seo-audit.md` records the last

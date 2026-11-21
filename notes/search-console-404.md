@@ -4,13 +4,37 @@ Search Console's page indexing report listed **49 addresses** as *Not found (404
 started validation the same day.
 **44 of the 49 are on the bare domain, `https://infeara.com/…`, and 5 are on `https://www.infeara.com/…`.**
 This note says why they 404, what the code now does with each, and the one step that only the owner
-can take.
+could take.
+
+## Status
+
+**The owner made the DNS change on 21 November 2026, and it works.** Checked from outside between
+13:53 and 13:56 UTC, with DNS queries, Vercel's domain settings, a public service that prints every
+hop of a request, and by fetching the pages:
+
+| Check | Result |
+| :--- | :--- |
+| `A` of `infeara.com` | `216.198.79.1` (Vercel). No `AAAA` any more. |
+| `MX`, `TXT`, `NS`, `www` | unchanged: `mx1` and `mx2.hostinger.com`, the email's SPF record, `ns1` and `ns2.dns-parking.com`, the `www` `CNAME` |
+| Vercel, `infeara.com` | `misconfigured: false`, set up by `A`, verified, redirect to `www.infeara.com` (308) |
+| `https://infeara.com/services/audit-compliance/iso-27001` | 308 to `https://www.infeara.com/services/audit-compliance/iso-27001`, then 301 to `/services/cybersecurity`, then 200 |
+| `https://infeara.com/industries/retail` and `/services/turnkey/offshore-development` | 308, then 301 to the new page, then 200 |
+| `https://infeara.com/legal/cookies` (a page that exists) | 308 to `www`, then 200 |
+| `http://infeara.com/contact` | 308 to `https://infeara.com/contact`, 308 to `https://www.infeara.com/contact`, then 200 |
+| `https://infeara.com/robots.txt` | 308 to `https://www.infeara.com/robots.txt`, then 200 |
+| `https://infeara.com/about`, `/resources/blog`, `/legal/terms-of-service`, `/index.html` | land on `www` at the page, `/blogs`, `/legal/terms` and the home page |
+| `https://infeara.com/index.php` and `https://www.infeara.com/terms.php` | 403 with `X-Vercel-Mitigated: deny` (see "Three addresses were never in the old sitemap") |
+
+No address needs more than two hops. Only one `A` record was added, `216.198.79.1`; Vercel accepts
+it. Adding `64.29.17.1` as a second `A` record is optional.
+
+**What is left is on Google's side:** validation and waiting (see "What to do in Search Console").
 
 ## Why they 404
 
-### 1. Forty-four addresses are on a host that is not on Vercel
+### 1. Forty-four addresses were on a host that was not on Vercel
 
-| Check (21 November 2026, from outside) | Result |
+| Before the change (21 November 2026, from outside) | Result |
 | :--- | :--- |
 | Nameservers of `infeara.com` | `ns1.dns-parking.com`, `ns2.dns-parking.com` (Hostinger) |
 | `A` records of `infeara.com` | for example `148.135.128.116`, `77.37.76.142`, `92.112.198.100`: Hostinger addresses; the set changes between lookups |
@@ -21,15 +45,16 @@ can take.
 | `https://infeara.com/about` (a page that exists on the new site) | Hostinger's "Checking your browser" 403 page when a tool fetches it; over plain `http`, Hostinger's own 404 page |
 | `https://www.infeara.com/services/audit-compliance/iso-27001` | 301 to `/services/cybersecurity`, which answers 200 |
 
-A request for `https://infeara.com/anything` goes to Hostinger and never reaches Vercel, so nothing in
-this repository can act on it: not the bare-domain rule in `next.config.ts`, not the map of old
+A request for `https://infeara.com/anything` went to Hostinger and never reached Vercel, so nothing in
+this repository could act on it: not the bare-domain rule in `next.config.ts`, not the map of old
 addresses. The most likely reason Google has them on the bare domain: the site before this one named
 `https://infeara.com` as the canonical address on every page, listed all 77 of its sitemap entries on
 it, and named `https://infeara.com/sitemap.xml` in its robots file (`notes/live-site-audit.md`,
 section 2). The bare domain has never served the site, so those addresses have been a 404 (or a 403)
 since.
 
-**The fix is DNS, and it is the owner's.**
+**The fix was DNS, and only the owner could make it.** The steps, kept in case the records are ever
+changed again:
 
 1. Hostinger, hPanel → **Domains** → `infeara.com` → **DNS / Nameservers** → **DNS records**.
 2. Delete the `A` records for `@` and the `AAAA` records for `@` (the Hostinger addresses above). If
@@ -48,7 +73,7 @@ since.
    minutes and the certificate is issued. The current `A` and `AAAA` records report a 60-second
    lifetime (seen from 8.8.8.8), so resolvers drop the old addresses within about a minute of the change.
 
-After that, every one of the 44 takes the same road. For `https://infeara.com/services/audit-compliance/iso-27001`:
+Since the change, every one of the 44 takes the same road. For `https://infeara.com/services/audit-compliance/iso-27001`:
 
 1. Vercel redirects `infeara.com` to `https://www.infeara.com/services/audit-compliance/iso-27001` (308, path kept).
 2. `lib/redirects.ts` sends that to `https://www.infeara.com/services/cybersecurity` (301).
@@ -68,14 +93,16 @@ curl -sI https://www.infeara.com/services/cybersecurity              # 200
 map was built from, so nothing answered for them.
 
 - `/index.html` is the home page under another name: it now takes a 301 to `/`.
-- `/index.php` and `/terms.php` **cannot be fixed from the code.** Vercel's edge answers `403 Forbidden`
-  (a bare page with an `iad1::…` request id) for every address that ends in `.php`: checked on
-  21 November 2026 on `www.infeara.com` and on `infeara-live.vercel.app`, with a made-up `.php` name as
-  well as these two. A local build of this site answers the same addresses with its own 404 page, so the
-  403 does not come from the code. It is given before the request reaches the site, so a redirect rule
-  would never run, and `tests/legacy-redirects.test.mjs` refuses to accept one. The project's
-  Firewall settings could not be read from the tooling used here, so it is not known whether this is
-  Vercel's default protection or a rule on the project (Vercel dashboard → project → Firewall); for
+- `/index.php` and `/terms.php` **cannot be fixed from the code.** Vercel answers `403 Forbidden` (a
+  bare page with an `iad1::…` request id) for every address that ends in `.php`: checked on
+  21 November 2026 on `www.infeara.com`, on the bare domain and on `infeara-live.vercel.app`, with a
+  made-up `.php` name as well as these two. The answer carries the header `X-Vercel-Mitigated: deny`,
+  which is how Vercel marks a request its Firewall has refused. A local build of this site answers the
+  same addresses with its own 404 page, so the 403 does not come from the code. It is given before the
+  request reaches the site, so a redirect rule would never run, and `tests/legacy-redirects.test.mjs`
+  refuses to accept one. The project's Firewall settings could not be read from the tooling used here,
+  so it is not known which rule does it: Vercel's own protection, a rule on the project, or a managed
+  rule set. To see it: Vercel dashboard → project → Firewall → the denied events for `/terms.php`. For
   the address of an older PHP site it makes no difference. Search Console may keep them as 404, list
   them as "Blocked due to access forbidden (403)" or drop them; none of that affects the pages that
   exist.
@@ -99,13 +126,15 @@ before this change and are unchanged; the HTTP test asks a build for each of the
 
 ## What to do in Search Console
 
-1. **Do the DNS change first.** Google fetches the 44 addresses during validation; while they still
-   reach Hostinger the check fails, and the cause would be the DNS, not the site.
+1. **The DNS change is done** (see "Status"). A validation that started before it, earlier on
+   21 November, fetched some of the 44 addresses while they still reached Hostinger, so it may end as
+   *Failed*. If the report shows *Failed* or *Not started*, press **Validate fix**. If it shows
+   *Started*, let it run: Google re-checks the addresses by itself.
 2. **Sitemaps:** the only sitemap that should be listed is `https://www.infeara.com/sitemap.xml`. If an
    entry for `https://infeara.com/sitemap.xml` exists (the old robots file named it), remove it. The
    current site's own `robots.txt` names the `www` sitemap.
-3. When the Vercel card says "Valid Configuration", open **Page indexing → Not found (404) → Validate fix**
-   again if the earlier validation has already failed. Validation can take up to about two weeks.
+3. Validation can take up to about two weeks. Look at **Page indexing → Not found (404)** again in a few
+   days, and press **Validate fix** again if it has failed.
 4. To see one address the way Google does, use **URL inspection → Test live URL** on
    `https://infeara.com/about`: it should no longer report a 404 or 403, and should show that the
    address redirects to `https://www.infeara.com/about`.
