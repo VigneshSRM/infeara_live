@@ -624,7 +624,10 @@ does not change the database.
   `/industries/healthcare`, …).
 
 The apex host (`infeara.com`) 301s to `https://www.infeara.com` at the edge. That rule only
-takes effect once DNS for the apex points at Vercel.
+takes effect once DNS for the apex points at Vercel. **As of 21 November 2026 it does not:** the
+apex still points at Hostinger, which redirects only the bare address and refuses or 404s every
+other path. The fix (Option A of the DNS cutover runbook in `concepts_brief.md`) and the evidence are
+in `notes/seo-audit.md`.
 
 ## Launch gate
 

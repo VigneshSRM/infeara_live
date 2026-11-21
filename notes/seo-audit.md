@@ -1,9 +1,14 @@
 # SEO audit — 21 November 2026
 
-An online audit tool reported that it could not read www.infeara.com. That is the launch gate, not a
-fault: with `SITE_INDEXABLE` unset, `robots.txt` says `Disallow: /`, every page carries
-`noindex, nofollow` and `sitemap.xml` is empty (README, "Launch gate"). A crawler that obeys
-`robots.txt` stops at the first line.
+An online audit tool reported that it could not read the site. Two separate things block a crawler,
+and which one it met depends on the address it was given:
+
+1. **`https://www.infeara.com`: the launch gate, on purpose.** With `SITE_INDEXABLE` unset,
+   `robots.txt` says `Disallow: /`, every page carries `noindex, nofollow` and `sitemap.xml` is empty
+   (README, "Launch gate"). A crawler that obeys `robots.txt` stops at the first line.
+2. **`https://infeara.com` (no `www`): still on Hostinger.** Only the bare address redirects; every
+   other path tried was refused or missing. See "The bare domain is not on Vercel" below. Added 21 November
+   2026, after the first version of this note had named only the gate.
 
 So the site was audited the way that tool would have done it, on a copy with the gate open: a local
 production build with `SITE_INDEXABLE=true`, Supabase and GA4 variables blank (the code copy of the
@@ -62,8 +67,41 @@ It was not re-run for this audit; none of the fixes touches what Lighthouse meas
 - **Sitemap `lastmod`:** 57 of 64 entries carry the day of the build, because most content has no
   modified date. Google ignores a `lastmod` it cannot trust; nothing is harmed.
 
+## The bare domain is not on Vercel
+
+Checked from outside on 21 November 2026:
+
+| Check | Result |
+| :--- | :--- |
+| Nameservers of `infeara.com` | `ns1.dns-parking.com`, `ns2.dns-parking.com` (Hostinger) |
+| `A` / `AAAA` of `infeara.com` | Hostinger addresses (`147.79.120.214`, `92.112.198.191` and IPv6 `2a02:4780:…`; they rotate; `notes/live-site-audit.md` recorded `147.79.69.59`, `93.127.173.42`) |
+| `www.infeara.com` | `CNAME` to `1992c456e197966a.vercel-dns-017.com`: Vercel, serving the current build |
+| `https://infeara.com/` | redirects to `https://www.infeara.com/` |
+| `https://infeara.com/contact`, `/sla`, `/about` | **403 Forbidden**, a "Checking your browser before accessing" page, for tools and crawlers |
+| `http://infeara.com/about` | **404 Not Found** from Hostinger's default site (`/htdocs_error/page_not_found.svg`) |
+
+Those requests never reach Vercel, so neither the apex-to-`www` rule in `next.config.ts` nor the
+legacy redirect map can act on them. The old site named the bare domain as canonical in all 77
+sitemap entries, so links and index entries that still use it dead-end. An audit tool given
+`infeara.com` would stop at the 403, which matches the hint in its report to "check a WAF or bot rule". Until this is
+fixed, audit `https://www.infeara.com`.
+
+**Fix: Option A of the DNS cutover runbook** (`concepts_brief.md`, step 5). Step 4 (`www` to the new
+Vercel project) is done; the apex is the part left.
+
+1. Vercel, project **Settings → Domains**: `infeara.com` should be listed. Its card shows the exact
+   `A` record to use. Copy it from there; Vercel has changed that value before.
+2. Hostinger, **DNS zone** for `infeara.com`: delete the `A` records and any `AAAA` records for
+   `@` (the Hostinger addresses above), add the `A` record from step 1, and keep the `www` `CNAME`.
+   Do not touch `MX` or `TXT` records: they carry the company's email.
+3. Wait a few minutes for the certificate. The Domains card turns to "Valid Configuration".
+4. Check: `curl -I https://infeara.com/contact` gives one 301/308 to `https://www.infeara.com/contact`,
+   and `curl -I https://www.infeara.com/contact` gives 200.
+
 ## Still needed from the client
 
-The site stays closed to crawlers until the client confirms the content swap in writing, so an
-online audit will keep failing until then. Opening it is two steps in Vercel (README, "Search
-listings"): set `SITE_INDEXABLE=true` for Production, then redeploy.
+- **The apex DNS change above.** Until then, point audit tools at `https://www.infeara.com`.
+- **The written go-ahead to open the gate.** The site stays closed to crawlers until the client
+  confirms the content swap in writing, so an online audit of `www` will keep failing until then.
+  Opening it is two steps in Vercel (README, "Search listings"): set `SITE_INDEXABLE=true` for
+  Production, then redeploy.
