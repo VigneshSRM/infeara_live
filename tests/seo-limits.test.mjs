@@ -118,7 +118,8 @@ test("the launch gate still closes robots.txt, the sitemap and every page", () =
   assert.ok(read("app/robots.ts").includes('rules: [{ userAgent: "*", disallow: "/" }]'));
   assert.ok(read("app/sitemap.ts").includes("if (!SITE_INDEXABLE) return [];"));
   assert.ok(read("app/layout.tsx").includes(": { index: false, follow: false }"));
-  assert.ok(read("lib/site.ts").includes('process.env.SITE_INDEXABLE === "true"'), "the gate opens only on the exact value true");
+  // The rule itself (open unless closed, true opens, anything else typed in closes) is tested in tests/indexing.test.mjs.
+  assert.ok(read("lib/site.ts").includes("export const SITE_INDEXABLE = isIndexable({"));
 });
 
 test("the Organization data says where the company is and publishes no mailbox or phone", () => {

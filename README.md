@@ -6,8 +6,8 @@ public marketing site and the `/admin` CMS.
 **Current state:** the public site is complete — 36 published routes plus a 404, a 410 for two
 retired account routes, and a 301 for every legacy URL. The CMS is built: Supabase Auth,
 Postgres with row-level security, three staff roles, an audit trail and a media library. The
-build is still intentionally non-indexable (`SITE_INDEXABLE=false`) until the client signs off
-the content swap. The database migration must be applied once (see [Content management](#content-management)).
+site is open to search engines (since 21 November 2026; `SITE_INDEXABLE=false` closes it, see
+[Launch gate](#launch-gate)). The database migration must be applied once (see [Content management](#content-management)).
 
 ## Stack
 
@@ -36,7 +36,7 @@ refresh them from the `@fontsource-variable` packages, run `node scripts/sync-fo
 | Variable | Purpose |
 | :--- | :--- |
 | `SITE_URL` | Canonical origin used by metadata, sitemap, Open Graph and JSON-LD. |
-| `SITE_INDEXABLE` | `"true"` to allow indexing. Anything else emits `noindex, nofollow`, an empty sitemap and `Disallow: /`. |
+| `SITE_INDEXABLE` | Leave it out: search engines are let in. `true` opens the site everywhere, any other value (`false`) closes it: `noindex, nofollow` on every page, an empty sitemap and `Disallow: /`. Not set: open, except on a Vercel preview deployment. See [Launch gate](#launch-gate). |
 | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Public project URL and publishable key. Required for the CMS and for database-backed content. |
 | `SUPABASE_SERVICE_ROLE_KEY` | Server-only. Needed only to invite users from the CMS; never exposed to the browser. |
 | `NEXT_PUBLIC_GA4_ID` | GA4 measurement ID (`G-…`). Loaded in the visitor's browser only after they press **Allow analytics**. It is baked into the build, so changing it needs a new deployment. |
@@ -631,17 +631,36 @@ in `notes/seo-audit.md`.
 
 ## Launch gate
 
-`SITE_INDEXABLE=false` is the default. While it is false:
+The site is **open** to search engines. It was closed by default until 21 November 2026, because the
+content swap had not been signed off. The owner then asked for the crawling problem to be fixed (an
+online audit tool could not read the site), and the default was turned round; `concepts_brief.md`
+("Indexing Gate") records the decision. One setting, `SITE_INDEXABLE`, decides. `robots.txt`, the
+sitemap and every page's robots tag all read the same value (`lib/seo/indexing.ts`), so they cannot
+disagree:
 
-- every page carries `<meta name="robots" content="noindex, nofollow">`;
-- `robots.txt` is `Disallow: /`;
-- `sitemap.xml` is a valid but empty `<urlset>`.
+| `SITE_INDEXABLE` | Result |
+| :--- | :--- |
+| not set (or empty) | **open**, except on a Vercel preview deployment, which stays closed |
+| `true` | open everywhere, previews included |
+| anything else (`false`, `0`, a typo) | closed everywhere |
 
-Flip it only on the client's written instruction, after the content swap. With the gate on,
-Lighthouse SEO scores 69 purely because the page is blocked from indexing; with
-`SITE_INDEXABLE=true` the same pages score 100, and the sitemap lists 64 URLs with the content that ships in code
-(each published sub-service, blog post, case study and white paper adds one; a white paper's page is
-listed once the first one is published).
+**Open** means every page says `index, follow`; `robots.txt` allows `/` except `/admin/` and `/api/`
+and names the sitemap; and `sitemap.xml` lists every published page: 64 URLs with the content that
+ships in code, and each published sub-service, blog post, insight, case study and white paper adds
+one (a white paper's list page is listed once the first paper is published). The sitemap is rebuilt
+every five minutes and whenever an editor saves, so a post scheduled for later or an insight
+published in the admin is listed without a deployment. A date is given only where the site knows
+one (the day a post, insight or white paper was published); the other pages carry none, because a
+made-up "modified today" teaches crawlers to ignore the real dates.
+
+Pages that say `noindex` themselves stay out of search results whatever the setting: the staff
+area, the 404 page, the thank-you page, the two retired login routes (410) and the white-paper list
+while nothing is published.
+
+**Closed** means every page says `noindex, nofollow`, `robots.txt` is `Disallow: /` and the sitemap
+is a valid but empty `<urlset>`. With the gate closed, Lighthouse SEO scored 69 purely because the
+page was blocked from indexing; open, the same pages scored 100 (local builds, November 2026; not
+re-measured on the live site).
 
 ## Search listings
 
@@ -662,22 +681,25 @@ that the title template, the admin hints and the budgets still agree. The Organi
 `components/seo/JsonLd.tsx` gives Chennai, Tamil Nadu, India and nothing else: the site publishes no
 company mailbox, phone number or social profile, so the data does not either.
 
-**Auditing while the gate is closed.** Online SEO tools obey `robots.txt`, so against a closed site
-they report that they cannot read it. That is the gate doing its job, not a fault. To audit the same
-pages anyway, build and start a copy with the gate open (`SITE_INDEXABLE=true npm run build`, then
-`SITE_INDEXABLE=true npm start`) and crawl that. `notes/seo-audit.md` records the last run, what it
-fixed and what it left alone on purpose.
+**Auditing.** Online SEO tools obey `robots.txt`. Give them `https://www.infeara.com`, the address
+the site answers on: the bare `infeara.com` is still on Hostinger until its DNS moves, and refuses
+most paths (`notes/seo-audit.md`). If a tool still says it cannot read the site, open
+`https://www.infeara.com/robots.txt`. `Disallow: /` means the site is closed, which happens only when
+`SITE_INDEXABLE` is set to something other than `true` in Vercel. To audit a copy yourself, build and
+start it (`npm run build`, then `npm start`) and crawl that. `notes/seo-audit.md` records the last
+run, what it fixed and what it left alone on purpose.
 
-**Opening the gate.** Only on the client's written instruction, after the content swap:
+**Closing and opening.** To close the site (for a rebuild, say): in Vercel, **Settings → Environment
+Variables**, set `SITE_INDEXABLE` to `false` for **Production** and redeploy the latest production
+deployment. A changed variable reaches new deployments only. To open it again, delete the variable
+and redeploy. If the live `robots.txt` says `Disallow: /` and nobody meant to close the site, the
+variable is set: delete it (or set it to `true`) and redeploy. Do not copy `SITE_INDEXABLE=false`
+from an old `.env` file into Vercel's variables; `.env.example` keeps it commented out for that reason.
 
-1. In Vercel, open the project's **Settings → Environment Variables** and set `SITE_INDEXABLE` to
-   `true` for **Production**.
-2. Redeploy the latest production deployment. A changed variable reaches new deployments only.
-3. Check `https://www.infeara.com/robots.txt` (it should say `Allow: /` and give the sitemap) and
-   that the home page's source says `index, follow`.
-4. Submit `https://www.infeara.com/sitemap.xml` in Google Search Console.
-
-To close it again, delete the variable or set it to anything but `true`, and redeploy.
+**After the site is open.** Check `https://www.infeara.com/robots.txt` (it should say `Allow: /` and
+name the sitemap) and that the home page's source says `index, follow`. Then ask the search engines
+to read the sitemap: add `https://www.infeara.com/sitemap.xml` in Google Search Console and in Bing
+Webmaster Tools. Both need the owner's own account, so that step cannot be done from the code.
 
 ## Browser and integration tests
 
@@ -685,8 +707,8 @@ The Playwright MCP server is configured in `.mcp.json` for MCP-compatible client
 
 - `npm run test:e2e` — full Playwright browser suite: public route rendering, navigation, contact validation, cookie choices, admin authentication and role permissions.
 - `npm run test:e2e:list` — list discovered browser tests without launching a browser.
-- `npm run test:http` — HTTP/API smoke tests against a running app (defaults to `http://127.0.0.1:3000`), including every public page's title, description, canonical address and social tags.
-- `npm run test:unit` — unit tests for the rule that decides who the CMS lets in (`lib/auth/access.ts`), the Overview analytics and lead notes chat, and the core services (the CMS notice, and the check that `supabase/apply/04-core-services.sql` still matches its migrations), the blog posts and the Technical resources menu (`tests/blogs.test.mjs`), the list search, filters and page numbers of every admin table (`tests/admin-lists.test.mjs`), how each list page is wired, including a check that no admin table can go unpaged (`tests/admin-list-pages.test.mjs`), and the sub-service, blog, case-study and white-paper modules: the SQL, the content copied in, the PDF helpers, the admin wiring and the header menu (`tests/resource-modules.test.mjs`), and the Chennai managed IT list: ten entries in A-to-Z order with official links, the published criteria, no ranking claims, Infeara's disclosed entry and its separate enquiry section, one list per keyword, the Article and breadcrumb data, how links in a post are parsed and refused, and the SQL that adds the post (`tests/blog-directory.test.mjs`), and the search-listing rules: the title and description budgets, the site name and locale every page repeats, and the launch gate (`tests/seo-limits.test.mjs`). No server or Supabase needed.
+- `npm run test:http` — HTTP/API smoke tests against a running app (defaults to `http://127.0.0.1:3000`), including every public page's title, description, canonical address and social tags, and that robots.txt, the sitemap and the pages agree on whether search engines are let in (an open site's sitemap must list only pages that return 200, are not noindex and name that address as canonical).
+- `npm run test:unit` — unit tests for the rule that decides who the CMS lets in (`lib/auth/access.ts`), the Overview analytics and lead notes chat, and the core services (the CMS notice, and the check that `supabase/apply/04-core-services.sql` still matches its migrations), the blog posts and the Technical resources menu (`tests/blogs.test.mjs`), the list search, filters and page numbers of every admin table (`tests/admin-lists.test.mjs`), how each list page is wired, including a check that no admin table can go unpaged (`tests/admin-list-pages.test.mjs`), and the sub-service, blog, case-study and white-paper modules: the SQL, the content copied in, the PDF helpers, the admin wiring and the header menu (`tests/resource-modules.test.mjs`), and the Chennai managed IT list: ten entries in A-to-Z order with official links, the published criteria, no ranking claims, Infeara's disclosed entry and its separate enquiry section, one list per keyword, the Article and breadcrumb data, how links in a post are parsed and refused, and the SQL that adds the post (`tests/blog-directory.test.mjs`), and the search-listing rules: the title and description budgets, the site name and locale every page repeats, and the gate's closed state (`tests/seo-limits.test.mjs`), and the rule that lets search engines in: open unless closed, `true` opens and anything else typed in closes, a Vercel preview stays closed, one value for robots.txt, the sitemap and every page, the sitemap's five-minute clock and the pages that stay out of results (`tests/indexing.test.mjs`). No server or Supabase needed.
 
 The browser suite starts an isolated, non-Supabase Next dev server on port 3100 by default. Set `PLAYWRIGHT_PORT` to change it or `PLAYWRIGHT_BASE_URL` to target a test deployment. Optional staff-role checks require an isolated test deployment identified by `PLAYWRIGHT_BASE_URL`, `PLAYWRIGHT_ADMIN_TEST_HOST` (exact hostname match), and `PLAYWRIGHT_ADMIN_ISOLATED_TEST=true`, plus the relevant credentials: `PLAYWRIGHT_SUPER_ADMIN_EMAIL` / `PLAYWRIGHT_SUPER_ADMIN_PASSWORD`, `PLAYWRIGHT_EDITOR_EMAIL` / `PLAYWRIGHT_EDITOR_PASSWORD`, and `PLAYWRIGHT_SEO_MANAGER_EMAIL` / `PLAYWRIGHT_SEO_MANAGER_PASSWORD`. Known Infeara production hostnames are blocked. The create/edit/delete CMS workflow has an additional `PLAYWRIGHT_ADMIN_ALLOW_MUTATIONS=true` opt-in; point the test deployment at an isolated Supabase project only.
 

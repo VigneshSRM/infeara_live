@@ -49,6 +49,10 @@ In that build `robots.txt` allows crawling except `/admin/` and `/api/`, the sit
 36 canonical URLs, and the home page emits `index, follow`. The default build was restored
 immediately afterwards and re-checked: `noindex, nofollow`, `Disallow: /`, empty sitemap.
 
+**Update, 21 November 2026.** The site is now open by default (README, "Launch gate"), so the live
+pages are no longer blocked and the SEO score should be 100, as on the open builds above. It has not
+been re-measured on the live site.
+
 ## axe-core (pages Lighthouse cannot load)
 
 Lighthouse errors on non-200 documents, so the 404 and 410 pages were audited with axe-core

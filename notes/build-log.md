@@ -36,7 +36,7 @@
 ### Needed from the client
 
 - Supabase project URL, anon key, service-role key and the chosen region.
-- Confirmation that `SITE_INDEXABLE` stays false until the content swap.
+- Confirmation that `SITE_INDEXABLE` stays false until the content swap. *(Superseded 21 November 2026: the site is open; see the last entry.)*
 - The name of the person who signs off published claims.
 
 ## 2026-11-05 — Slice 2: complete public site
@@ -105,7 +105,7 @@ Supabase and `/admin` are untouched.
 - Licensed photography to replace the `Figure` / `Schematic` stand-ins. Alt text is already
   written per page.
 - Apex DNS still points at Hostinger; the apex 301 only works after cutover.
-- `SITE_INDEXABLE=false` stays until the client confirms the content swap in writing.
+- `SITE_INDEXABLE=false` stays until the client confirms the content swap in writing. *(Superseded 21 November 2026: the owner asked for the crawling problem to be fixed and the site is open; see the last entry.)*
 
 ### Next slice
 
@@ -219,3 +219,40 @@ pass. Supabase project reachable (email auth on, signups open, autoconfirm off).
   **Users** fail until the one-line `alter table` runs.
 - Real vacancies are needed before the listing shows anything; add them to `openRoles`.
 
+
+## 2026-11-21 — Search engines let in
+
+An online audit tool reported that it could not read the site. `robots.txt` said `Disallow: /`,
+every page said `noindex, nofollow` and the sitemap was empty: the launch gate, closed by default
+(`concepts_brief.md`, "Indexing Gate"). The owner asked for the crawling problem to be fixed, so the
+default is now open.
+
+### Delivered
+
+- `lib/seo/indexing.ts`: the site is open unless `SITE_INDEXABLE` is set to something other than
+  `true`; a Vercel preview deployment stays closed. `lib/site.ts` is the only place that reads the
+  variables, so `robots.txt`, the sitemap and every page's robots tag cannot disagree.
+- `app/sitemap.ts` is rebuilt every five minutes. It was a snapshot from build time, so an insight
+  published in the admin, or a post scheduled for later, was missing until the next deployment.
+  It also no longer says "modified today" for every page: a date is given only for a published day.
+- `.env.example` keeps `SITE_INDEXABLE` commented out, so copying it into Vercel cannot close the
+  site. README "Launch gate" and "Search listings" rewritten; the starter-blog comment in
+  `lib/content/blogs.ts` no longer says to remove them before the gate opens.
+
+### Verified
+
+- Three local production builds, each crawled by link and by sitemap. No setting: open, 64 sitemap
+  URLs, 65 pages crawled, 64 indexable, `/white-papers` noindex while empty. `SITE_INDEXABLE=false`:
+  `Disallow: /`, 65 of 65 pages noindex, empty sitemap. `VERCEL_ENV=preview`: closed likewise.
+- The staff area, the 404 page, the thank-you page and the two 410 routes are noindex in every state.
+- `npm run test:unit` 258/258 (11 new, in `tests/indexing.test.mjs`); `npm run test:http` 14/14 on
+  the open build and 13 passed, 1 skipped by design on the closed one.
+- Fourteen deliberate breakages of the rule were each caught by a unit test. Two faults planted in
+  a build (a sitemap that lists the thank-you page, a `robots.txt` with no sitemap line) were each
+  caught by the HTTP check.
+
+### Open
+
+- Apex DNS: `infeara.com` is still on Hostinger and refuses most paths (`notes/seo-audit.md`).
+- The sitemap still has to be submitted in Google Search Console and Bing Webmaster Tools (the
+  owner's accounts). Lighthouse has not been re-measured on the live site.

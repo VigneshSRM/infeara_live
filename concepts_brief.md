@@ -196,6 +196,8 @@ Recommendation: launch with a single environment flag, `SITE_INDEXABLE=false`, w
 
 If you reject the gate, then the seed copy must contain zero unverifiable claims and the nine service pages must be genuinely distinct before public launch. Both conditions are harder to meet than the flag.
 
+**Update, 21 November 2026: opened.** An online audit tool could not read the site, which was the gate doing its job, and the author asked in writing for the crawling problem to be fixed. That is the written instruction the status table allows for, so the site is now open by default: with `SITE_INDEXABLE` not set, `robots.txt` allows crawling, pages say `index, follow` and the sitemap lists every published page. `SITE_INDEXABLE=false` closes it again, and a Vercel preview deployment stays closed. The three starter blog posts make no claims about clients or results and are published like everything else; edit or unpublish them in Admin → Blogs if they should not be in search results. The README ("Launch gate") has the details.
+
 ## Status Before Day One
 
 | Item | Status |
@@ -203,7 +205,7 @@ If you reject the gate, then the seed copy must contain zero unverifiable claims
 | Apex DNS | Resolved. Hostinger access confirmed by the author; the apex is corrected during cutover using the runbook above. |
 | Brand | Resolved. The brief palette governs; the logo is recoloured to `#226192` and vectorised; a square icon set is generated from the mark. |
 | Deferral reconciliation | Accepted as revised. Scheduled publishing and audit-log browsing ship; the fourth role becomes a documented three-role mapping; UAT becomes the scripted smoke test plus post-launch stakeholder testing. |
-| Indexing gate | Closed by default. The site launches with `SITE_INDEXABLE=false` and flips to `true` after the content swap, unless the author instructs otherwise in writing before cutover. |
+| Indexing gate | Open since 21 November 2026, on the author's written instruction. It launched closed (`SITE_INDEXABLE=false`); with the variable not set the site is now open, and `SITE_INDEXABLE=false` closes it again. |
 | Claims sign-off | Open. One person must confirm each number that survives the copy rewrite. Until that person is named, no statistic is published. |
 
 The only open item is the name of the person who signs off published claims. Everything else is decided.

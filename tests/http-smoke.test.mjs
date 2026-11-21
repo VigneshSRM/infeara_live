@@ -141,6 +141,83 @@ test("every public page names itself the way a search result and a shared link n
   }
 });
 
+/** Every <loc> address in a sitemap body. */
+function sitemapAddresses(xml) {
+  return [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => decodeEntities(match[1]));
+}
+
+// The three things a crawler reads (robots.txt, the sitemap, the robots tag on a page) come from one
+// value, so they must say the same thing. This holds for an open site and for a closed one.
+test("robots.txt, the sitemap and the pages agree on whether search engines are let in", async () => {
+  const robots = await (await fetch(`${baseURL}/robots.txt`)).text();
+  const sitemapResponse = await fetch(`${baseURL}/sitemap.xml`);
+  const addresses = sitemapAddresses(await sitemapResponse.text());
+  const robotsTag = metaContent(await (await fetch(`${baseURL}/`)).text(), "name", "robots") ?? "";
+  assert.equal(sitemapResponse.status, 200, "sitemap.xml should always answer");
+
+  const closed = /^disallow:\s*\/\s*$/im.test(robots);
+  if (closed) {
+    assert.match(robotsTag, /noindex/, "robots.txt closes the site, but the home page can be indexed");
+    assert.equal(addresses.length, 0, "robots.txt closes the site, but the sitemap lists pages");
+    return;
+  }
+
+  assert.match(robots, /^allow:\s*\/\s*$/im, "an open robots.txt allows /");
+  assert.match(robots, /^disallow:\s*\/admin\/\s*$/im, "the staff area stays disallowed");
+  assert.match(robots, /^disallow:\s*\/api\/\s*$/im, "the API stays disallowed");
+  assert.match(robots, /^sitemap:\s*https?:\/\/\S+\/sitemap\.xml\s*$/im, "an open robots.txt names the sitemap");
+  assert.doesNotMatch(robots, /^host\s*:/im, "Host is Yandex-only and withdrawn");
+  assert.equal(robotsTag, "index, follow", "an open site's pages say index, follow");
+  assert.ok(addresses.length >= 50, `an open site's sitemap lists its pages, found ${addresses.length}`);
+});
+
+test("every address in an open site's sitemap is a real page that can be indexed", async (t) => {
+  const robots = await (await fetch(`${baseURL}/robots.txt`)).text();
+  if (/^disallow:\s*\/\s*$/im.test(robots)) {
+    t.skip("the site is closed to search engines, so its sitemap is empty by design");
+    return;
+  }
+
+  const addresses = sitemapAddresses(await (await fetch(`${baseURL}/sitemap.xml`)).text());
+  assert.equal(new Set(addresses).size, addresses.length, "an address is listed twice");
+
+  // The addresses carry the public host; the pages are fetched from this server by path.
+  const hosts = new Set(addresses.map((address) => new URL(address).origin));
+  assert.equal(hosts.size, 1, `the sitemap mixes hosts: ${[...hosts].join(", ")}`);
+
+  for (const address of addresses) {
+    const path = new URL(address).pathname;
+    const response = await fetch(`${baseURL}${path}`, { redirect: "manual" });
+    const html = await response.text();
+    assert.equal(response.status, 200, `${path} is in the sitemap but returned ${response.status}`);
+    assert.doesNotMatch(metaContent(html, "name", "robots") ?? "", /noindex/, `${path} is in the sitemap but says noindex`);
+    const canonical = html.match(/<link rel="canonical" href="([^"]+)"/)?.[1];
+    // Compared as addresses, so "https://host" and "https://host/" (the home page) are the same one.
+    assert.equal(new URL(canonical ?? "about:blank").href, new URL(address).href, `${path}: the sitemap and the canonical address differ`);
+  }
+
+  // Every public page is listed, except the two that are meant to stay out: the thank-you page,
+  // and the white-paper list while nothing is published.
+  const listed = new Set(addresses.map((address) => new URL(address).pathname));
+  for (const path of publicRoutes) {
+    if (path === "/thank-you" || path === "/white-papers") continue;
+    assert.ok(listed.has(path), `${path} is a public page but is missing from the sitemap`);
+  }
+  assert.ok(!listed.has("/thank-you"), "the thank-you page should not be in the sitemap");
+  assert.ok(![...listed].some((path) => path.startsWith("/admin") || path.startsWith("/api")), "the staff area or the API is in the sitemap");
+});
+
+test("pages that must stay out of search results say so, even when the site is open", async () => {
+  for (const path of ["/admin/login", "/thank-you", "/this-page-does-not-exist"]) {
+    const response = await fetch(`${baseURL}${path}`, { redirect: "manual" });
+    const html = await response.text();
+    assert.match(metaContent(html, "name", "robots") ?? "", /noindex/, `${path} can be indexed`);
+  }
+  const gone = await fetch(`${baseURL}/login`);
+  assert.equal(gone.status, 410);
+  assert.match(gone.headers.get("x-robots-tag") ?? "", /noindex/, "the retired login route can be indexed");
+});
+
 test("every blog post the blog page links to returns 200, and other addresses under /blogs do not", async () => {
   const index = await (await fetch(`${baseURL}/blogs`)).text();
   const posts = [...new Set([...index.matchAll(/href="(\/blogs\/[a-z0-9-]+)"/g)].map((match) => match[1]))];
