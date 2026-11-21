@@ -394,3 +394,22 @@ fetching the page.
 - Open: change that one title in the admin (steps in `notes/seo-audit.md`); decide whether the page
   should be renamed "Remote IT Services", as the repository and the menu already call it; connect the
   Supabase account or organisation that owns the project if SQL should be run from here.
+
+### 2026-11-21, later still — the last title is live
+
+The owner set the SEO title of `/services/outsourcing-remote-support` in the admin to
+`IT Outsourcing & Remote Support in Chennai, India`. Checked at about 14:45 UTC with a plain page
+fetch, a metadata read with its cache bypassed, and a header read (same page object): the title is
+"IT Outsourcing & Remote Support in Chennai, India — Infeara" (59 characters). One earlier read through
+a metadata service still gave the old title from its own cache. All 28 service and focused-service
+titles and the blog title are now live.
+
+- Supabase connector: credentials valid, still only the organisation "Alpha" with no projects. No SQL
+  can be run from here; the scripts stay copy-and-paste.
+- DNS and Vercel unchanged since the earlier check (`A 216.198.79.1`, no `AAAA`, `misconfigured: false`);
+  the optional second `A` record (`64.29.17.1`) has not been added. `robots.txt` is open; the sitemap
+  lists the Remote IT page.
+- Still on the older wording on that page: heading, introduction, the card on the IT Infrastructure
+  page and the meta description (the unrun migration `20261106120000_service_hierarchy.sql`). Optional.
+- Open: Search Console (*Validate fix*, sitemap list); the owner-only facts listed in
+  `notes/seo-audit.md`.
