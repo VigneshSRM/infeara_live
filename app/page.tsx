@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   ...pageMetadata({
     title: "Managed IT, Cybersecurity & Cloud Infrastructure",
     description:
-      "Infeara Technologies operates, secures and modernises business-critical IT from Chennai: managed IT, cybersecurity, infrastructure, cloud and network engineering.",
+      "Infeara operates, secures and modernises business-critical IT from Chennai: managed IT, cybersecurity, infrastructure, cloud and network engineering.",
     path: "/",
   }),
   title: {

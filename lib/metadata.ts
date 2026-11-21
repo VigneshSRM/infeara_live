@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { SITE_URL } from "@/lib/site";
+import { SITE_URL, site } from "@/lib/site";
 
 export function pageMetadata({
   title,
@@ -21,7 +21,11 @@ export function pageMetadata({
     description,
     alternates: { canonical: path },
     openGraph: {
+      // A page's openGraph replaces the root layout's rather than adding to it, so the site name
+      // and locale have to be repeated here or every page loses them.
       type: "website",
+      siteName: site.name,
+      locale: site.locale,
       url,
       title: `${title} — Infeara Technologies`,
       description,

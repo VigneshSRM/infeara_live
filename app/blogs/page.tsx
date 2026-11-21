@@ -57,6 +57,7 @@ export default async function BlogsPage() {
                 </p>
                 <Link href={`/blogs/${featured.slug}`} className="btn-solid mt-8 text-sm">
                   Read post
+                  <span className="sr-only"> about {featured.title}</span>
                   <span aria-hidden="true">→</span>
                 </Link>
               </div>

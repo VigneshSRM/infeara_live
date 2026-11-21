@@ -19,6 +19,12 @@ export const organizationSchema = {
   logo: "https://www.infeara.com/brand/infeara-logo.png",
   description:
     "Managed IT services, cybersecurity, cloud infrastructure and enterprise technology operations, delivered from Chennai, India.",
+  address: {
+    "@type": "PostalAddress",
+    addressLocality: "Chennai",
+    addressRegion: "Tamil Nadu",
+    addressCountry: "IN",
+  },
   areaServed: { "@type": "Country", name: "India" },
 };
 

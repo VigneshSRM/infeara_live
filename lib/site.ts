@@ -6,7 +6,7 @@ export const site = {
   name: "Infeara Technologies",
   tagline: "The Way to Lead",
   description:
-    "Managed IT services, cybersecurity and infrastructure support for organisations across India. Based in Chennai, Infeara helps teams operate business-critical systems, reduce exposure and plan recovery.",
+    "Managed IT, cybersecurity and infrastructure support for organisations across India, from Chennai. Infeara helps teams run critical systems and plan recovery.",
   locale: "en_IN",
   city: "Chennai",
   country: "India",

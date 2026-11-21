@@ -158,12 +158,15 @@ test("the blog lists its posts, and a post shows its date, services and a way ba
   const [latest, ...others] = listBlogPosts();
 
   await page.goto("/blogs");
-  await expect(page.getByRole("link", { name: "Read post" })).toHaveAttribute("href", `/blogs/${latest.slug}`);
+  const readLatest = page.getByRole("link", { name: "Read post" });
+  await expect(readLatest).toHaveAttribute("href", `/blogs/${latest.slug}`);
+  // The visible words stay short; the accessible name (and the link's anchor text for a search engine) names the post.
+  await expect(readLatest).toHaveAccessibleName(`Read post about ${latest.title}`);
   for (const post of others) {
     await expect(page.locator(`main a[href="/blogs/${post.slug}"]`)).toBeVisible();
   }
 
-  await page.getByRole("link", { name: "Read post" }).click();
+  await readLatest.click();
   await expect(page).toHaveURL(new RegExp(`/blogs/${latest.slug}$`));
   await expect(page.locator("h1")).toHaveText(latest.title);
   await expect(page.locator("time").first()).toHaveAttribute("datetime", latest.publishedAt);

@@ -1,5 +1,17 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
+import ts from "typescript";
+
+// The title and description budgets are held in one module that the title template and the admin
+// hints read too, so the test measures against the same numbers instead of copies of them.
+const limits = await (async () => {
+  const source = readFileSync(new URL("../lib/seo/limits.ts", import.meta.url), "utf8");
+  const { outputText } = ts.transpileModule(source, {
+    compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 },
+  });
+  return import(`data:text/javascript;base64,${Buffer.from(outputText).toString("base64")}`);
+})();
 
 const baseURL = (process.env.PLAYWRIGHT_BASE_URL ?? process.env.SMOKE_BASE_URL ?? "http://127.0.0.1:3000").replace(/\/$/, "");
 
@@ -71,6 +83,61 @@ test("all public pages return 200 and contain one primary heading", async () => 
     const body = await response.text();
     assert.equal(response.status, 200, `${path} returned ${response.status}`);
     assert.equal((body.match(/<h1\b/g) ?? []).length, 1, `${path} should have one h1`);
+  }
+});
+
+/** Turns the entities Next writes into attribute and title text back into characters, so lengths are real. */
+function decodeEntities(value) {
+  return value
+    .replace(/&#x([0-9a-f]+);/gi, (_, hex) => String.fromCodePoint(parseInt(hex, 16)))
+    .replace(/&#(\d+);/g, (_, dec) => String.fromCodePoint(Number(dec)))
+    .replace(/&quot;/g, '"')
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&amp;/g, "&");
+}
+
+/** The content of the first <meta> whose `attr` is `key`, e.g. metaContent(html, "property", "og:locale"). */
+function metaContent(html, attr, key) {
+  for (const tag of html.match(/<meta\b[^>]*>/g) ?? []) {
+    if (tag.includes(`${attr}="${key}"`)) {
+      const content = tag.match(/\bcontent="([^"]*)"/);
+      return content ? decodeEntities(content[1]) : undefined;
+    }
+  }
+  return undefined;
+}
+
+test("every public page names itself the way a search result and a shared link need", async () => {
+  for (const path of publicRoutes) {
+    const html = await (await fetch(`${baseURL}${path}`)).text();
+
+    const title = decodeEntities(html.match(/<title>([^<]*)<\/title>/)?.[1] ?? "");
+    assert.ok(title, `${path} has no <title>`);
+    assert.ok(
+      title.length <= limits.TITLE_MAX,
+      `${path}: the title is ${title.length} characters (limit ${limits.TITLE_MAX}): ${title}`,
+    );
+
+    const description = metaContent(html, "name", "description");
+    assert.ok(description, `${path} has no meta description`);
+    assert.ok(
+      description.length <= limits.DESCRIPTION_MAX,
+      `${path}: the description is ${description.length} characters (limit ${limits.DESCRIPTION_MAX})`,
+    );
+
+    // One canonical address, absolute, on this page's own path.
+    const canonicals = [...html.matchAll(/<link rel="canonical" href="([^"]+)"/g)].map((match) => match[1]);
+    assert.equal(canonicals.length, 1, `${path} should have one canonical link`);
+    const canonical = new URL(canonicals[0]);
+    assert.equal(canonical.pathname, path, `${path}: canonical points at ${canonicals[0]}`);
+
+    // A page's own Open Graph block replaces the layout's, so the site name and locale must be
+    // repeated on every page or they vanish from all of them.
+    assert.equal(metaContent(html, "property", "og:site_name"), "Infeara Technologies", `${path}: og:site_name`);
+    assert.equal(metaContent(html, "property", "og:locale"), "en_IN", `${path}: og:locale`);
+    assert.equal(metaContent(html, "property", "og:url"), canonicals[0], `${path}: og:url should equal the canonical`);
+    assert.match(metaContent(html, "property", "og:image") ?? "", /^https?:\/\//, `${path}: og:image should be an absolute URL`);
   }
 });
 

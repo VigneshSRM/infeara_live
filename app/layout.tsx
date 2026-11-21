@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import { Analytics } from "@/components/analytics/Analytics";
 import { JsonLd, organizationSchema, websiteSchema } from "@/components/seo/JsonLd";
 import { ConsentBanner } from "@/components/site/ConsentBanner";
+import { SITE_TITLE_SUFFIX } from "@/lib/seo/limits";
 import { SITE_INDEXABLE, SITE_URL, site } from "@/lib/site";
 import "./globals.css";
 
@@ -38,7 +39,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
     default: "Infeara Technologies — Managed IT, Cybersecurity and Cloud",
-    template: "%s — Infeara Technologies",
+    template: `%s${SITE_TITLE_SUFFIX}`,
   },
   description: site.description,
   applicationName: site.name,
