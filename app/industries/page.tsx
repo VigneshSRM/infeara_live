@@ -14,7 +14,7 @@ export const revalidate = 300;
 export const metadata = pageMetadata({
   title: "Industries We Support",
   description:
-    "See how Infeara's managed IT, cybersecurity and infrastructure services support banking, healthcare, manufacturing, retail, education, logistics and business offices.",
+    "How Infeara's managed IT, cybersecurity and infrastructure services support banking, healthcare, manufacturing, retail, education, logistics and offices.",
   path: "/industries",
 });
 

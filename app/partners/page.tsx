@@ -11,7 +11,7 @@ import { pageMetadata } from "@/lib/metadata";
 export const metadata = pageMetadata({
   title: "Technology Platforms We Support",
   description:
-    "Explore the server, cloud, network, storage, security and monitoring platforms Infeara engineers work with. This is a capability list, not a partner-status claim.",
+    "The server, cloud, network, storage, security and monitoring platforms Infeara engineers work with. A capability list, not a partner-status claim.",
   path: "/partners",
 });
 

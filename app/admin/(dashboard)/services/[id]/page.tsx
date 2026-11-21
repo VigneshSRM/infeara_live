@@ -10,6 +10,7 @@ import { saveService, deleteService } from "@/lib/admin/content-actions";
 import { isMissingSchema } from "@/lib/admin/errors";
 import { toIstInput } from "@/lib/admin/forms";
 import { canEdit, requireStaff } from "@/lib/auth/dal";
+import { SEO_DESCRIPTION_HINT, SEO_TITLE_HINT } from "@/lib/seo/limits";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -224,13 +225,13 @@ export default async function ServiceEditorPage({
                 : "Your role can edit these two fields only."
             }
           >
-            <TextField name="seo_title" label="SEO title" defaultValue={row.seo_title} />
+            <TextField name="seo_title" label="SEO title" defaultValue={row.seo_title} hint={SEO_TITLE_HINT} />
             <TextareaField
               name="seo_description"
               label="Meta description"
               defaultValue={row.seo_description}
               rows={3}
-              hint="Aim for 120–155 characters."
+              hint={SEO_DESCRIPTION_HINT}
             />
           </Panel>
 

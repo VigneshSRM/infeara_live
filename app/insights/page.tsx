@@ -50,6 +50,7 @@ export default async function InsightsPage() {
                 </p>
                 <Link href={`/insights/${featured.slug}`} className="btn-solid mt-8 text-sm">
                   View guide
+                  <span className="sr-only"> about {featured.title}</span>
                   <span aria-hidden="true">→</span>
                 </Link>
               </div>

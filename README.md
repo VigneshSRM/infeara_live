@@ -640,14 +640,50 @@ Lighthouse SEO scores 69 purely because the page is blocked from indexing; with
 (each published sub-service, blog post, case study and white paper adds one; a white paper's page is
 listed once the first one is published).
 
+## Search listings
+
+What a search result and a shared link show comes from three places, and the numbers behind them
+live in one file, `lib/seo/limits.ts`:
+
+- **Title.** Every page title is followed by ` — Infeara` (the home page sets its own full title).
+  A result shows about 60 characters, so an editor has room for **50**. The admin's *SEO title*
+  fields say so under the box.
+- **Description.** Up to 160 characters. The admin hints suggest 120–155.
+- **Canonical address and social tags.** `pageMetadata()` in `lib/metadata.ts` builds them for each
+  page. A page's own `openGraph` *replaces* the layout's instead of adding to it, so `pageMetadata`
+  repeats the site name (`og:site_name`) and locale (`og:locale`). Build a page's metadata through
+  it, not by hand, or those two tags vanish from the page.
+
+`npm run test:http` checks all of this on every public page, and `tests/seo-limits.test.mjs` checks
+that the title template, the admin hints and the budgets still agree. The Organization data in
+`components/seo/JsonLd.tsx` gives Chennai, Tamil Nadu, India and nothing else: the site publishes no
+company mailbox, phone number or social profile, so the data does not either.
+
+**Auditing while the gate is closed.** Online SEO tools obey `robots.txt`, so against a closed site
+they report that they cannot read it. That is the gate doing its job, not a fault. To audit the same
+pages anyway, build and start a copy with the gate open (`SITE_INDEXABLE=true npm run build`, then
+`SITE_INDEXABLE=true npm start`) and crawl that. `notes/seo-audit.md` records the last run, what it
+fixed and what it left alone on purpose.
+
+**Opening the gate.** Only on the client's written instruction, after the content swap:
+
+1. In Vercel, open the project's **Settings → Environment Variables** and set `SITE_INDEXABLE` to
+   `true` for **Production**.
+2. Redeploy the latest production deployment. A changed variable reaches new deployments only.
+3. Check `https://www.infeara.com/robots.txt` (it should say `Allow: /` and give the sitemap) and
+   that the home page's source says `index, follow`.
+4. Submit `https://www.infeara.com/sitemap.xml` in Google Search Console.
+
+To close it again, delete the variable or set it to anything but `true`, and redeploy.
+
 ## Browser and integration tests
 
 The Playwright MCP server is configured in `.mcp.json` for MCP-compatible clients. Install the local browser binary once with `npx playwright install chromium` before running browser tests.
 
 - `npm run test:e2e` — full Playwright browser suite: public route rendering, navigation, contact validation, cookie choices, admin authentication and role permissions.
 - `npm run test:e2e:list` — list discovered browser tests without launching a browser.
-- `npm run test:http` — HTTP/API smoke tests against a running app (defaults to `http://127.0.0.1:3000`).
-- `npm run test:unit` — unit tests for the rule that decides who the CMS lets in (`lib/auth/access.ts`), the Overview analytics and lead notes chat, and the core services (the CMS notice, and the check that `supabase/apply/04-core-services.sql` still matches its migrations), the blog posts and the Technical resources menu (`tests/blogs.test.mjs`), the list search, filters and page numbers of every admin table (`tests/admin-lists.test.mjs`), how each list page is wired, including a check that no admin table can go unpaged (`tests/admin-list-pages.test.mjs`), and the sub-service, blog, case-study and white-paper modules: the SQL, the content copied in, the PDF helpers, the admin wiring and the header menu (`tests/resource-modules.test.mjs`), and the Chennai managed IT list: ten entries in A-to-Z order with official links, the published criteria, no ranking claims, Infeara's disclosed entry and its separate enquiry section, one list per keyword, the Article and breadcrumb data, how links in a post are parsed and refused, and the SQL that adds the post (`tests/blog-directory.test.mjs`). No server or Supabase needed.
+- `npm run test:http` — HTTP/API smoke tests against a running app (defaults to `http://127.0.0.1:3000`), including every public page's title, description, canonical address and social tags.
+- `npm run test:unit` — unit tests for the rule that decides who the CMS lets in (`lib/auth/access.ts`), the Overview analytics and lead notes chat, and the core services (the CMS notice, and the check that `supabase/apply/04-core-services.sql` still matches its migrations), the blog posts and the Technical resources menu (`tests/blogs.test.mjs`), the list search, filters and page numbers of every admin table (`tests/admin-lists.test.mjs`), how each list page is wired, including a check that no admin table can go unpaged (`tests/admin-list-pages.test.mjs`), and the sub-service, blog, case-study and white-paper modules: the SQL, the content copied in, the PDF helpers, the admin wiring and the header menu (`tests/resource-modules.test.mjs`), and the Chennai managed IT list: ten entries in A-to-Z order with official links, the published criteria, no ranking claims, Infeara's disclosed entry and its separate enquiry section, one list per keyword, the Article and breadcrumb data, how links in a post are parsed and refused, and the SQL that adds the post (`tests/blog-directory.test.mjs`), and the search-listing rules: the title and description budgets, the site name and locale every page repeats, and the launch gate (`tests/seo-limits.test.mjs`). No server or Supabase needed.
 
 The browser suite starts an isolated, non-Supabase Next dev server on port 3100 by default. Set `PLAYWRIGHT_PORT` to change it or `PLAYWRIGHT_BASE_URL` to target a test deployment. Optional staff-role checks require an isolated test deployment identified by `PLAYWRIGHT_BASE_URL`, `PLAYWRIGHT_ADMIN_TEST_HOST` (exact hostname match), and `PLAYWRIGHT_ADMIN_ISOLATED_TEST=true`, plus the relevant credentials: `PLAYWRIGHT_SUPER_ADMIN_EMAIL` / `PLAYWRIGHT_SUPER_ADMIN_PASSWORD`, `PLAYWRIGHT_EDITOR_EMAIL` / `PLAYWRIGHT_EDITOR_PASSWORD`, and `PLAYWRIGHT_SEO_MANAGER_EMAIL` / `PLAYWRIGHT_SEO_MANAGER_PASSWORD`. Known Infeara production hostnames are blocked. The create/edit/delete CMS workflow has an additional `PLAYWRIGHT_ADMIN_ALLOW_MUTATIONS=true` opt-in; point the test deployment at an isolated Supabase project only.
 

@@ -12,7 +12,7 @@ import { company } from "@/lib/content/site";
 export const metadata = pageMetadata({
   title: "IT Support Model & Service Levels",
   description:
-    "Learn how Infeara defines support hours, incident severity, escalation, reporting and client responsibilities. Specific response targets are agreed in each service schedule.",
+    "How Infeara defines support hours, incident severity, escalation, reporting and client duties. Response targets are agreed in each service schedule.",
   path: "/sla",
 });
 
