@@ -413,3 +413,22 @@ titles and the blog title are now live.
   page and the meta description (the unrun migration `20261106120000_service_hierarchy.sql`). Optional.
 - Open: Search Console (*Validate fix*, sitemap list); the owner-only facts listed in
   `notes/seo-audit.md`.
+
+### 2026-11-27 — Search Console: "Indexed, though blocked by robots.txt"
+
+The owner pasted the warning (1 page, *Improve page appearance*, validation not started); the page is
+not named and not visible from outside. `robots.txt` disallowed `/admin/` and `/api/`, which hides the
+`noindex` those pages carry; the site's scripts name `/admin` and `/api/contact`, and `/admin` (no
+slash) redirects into the blocked `/admin/login`.
+
+- An open `robots.txt` now blocks nothing (`app/robots.ts`); `next.config.ts` sends
+  `X-Robots-Tag: noindex, nofollow` for `/admin/:path*` and `/api/:path*`, redirects included. A closed
+  site is unchanged.
+- Production build: header on `/admin`, `/admin/login`, `/admin/leads`, `/admin/reset-password`,
+  `/api/contact`, `/login`, `/forgot-password`; none of the 64 sitemap pages has it. 297 unit tests, 26
+  HTTP tests. Three deliberate breakages were each caught (`Disallow` back, API rule gone, header on
+  every page).
+- README and `notes/seo-audit.md` updated (history, what to do in Search Console). README also says why
+  closing the site does not remove a page Google already holds.
+- Open: press *Validate fix* in Search Console after the deploy. Playwright was not re-run (no page
+  changed; the browser suite forces a closed site).

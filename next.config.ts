@@ -1,6 +1,11 @@
 import type { NextConfig } from "next";
 import { legacyRedirects } from "./lib/redirects";
 
+// The staff area and the API are kept out of search results with `noindex`, not with robots.txt: a
+// crawler can only obey `noindex` on a page it is allowed to fetch (see app/robots.ts). The robots
+// tag in the page covers the HTML; this header also covers a redirect and the JSON the API sends.
+const NOINDEX = [{ key: "X-Robots-Tag", value: "noindex, nofollow" }];
+
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
@@ -36,6 +41,8 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+      { source: "/admin/:path*", headers: NOINDEX },
+      { source: "/api/:path*", headers: NOINDEX },
     ];
   },
 };

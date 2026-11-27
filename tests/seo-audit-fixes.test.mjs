@@ -603,9 +603,10 @@ test("the card route draws only pages that exist, with the fonts it was given", 
   assert.doesNotMatch(route, /searchParams|request\.url|\.get\("title"\)/, "the picture must not print text taken from the request");
   assert.match(route, /Cache-Control|CACHE_CONTROL/);
 
-  // /og is outside /api, which robots.txt disallows: a crawler that follows robots can fetch the picture.
+  // /og is outside /api, which answers with a noindex header, and robots.txt blocks nothing on an open
+  // site: a crawler that follows robots can fetch the picture.
   assert.ok(!existsSync(here("../app/api/og")));
-  assert.ok(text("app/robots.ts").includes('disallow: ["/admin/", "/api/"]'));
+  assert.ok(text("app/robots.ts").includes('rules: [{ userAgent: "*", allow: "/" }]'));
 
   // The renderer reads ttf, otf and woff, not woff2, so the faces are woff files, shipped with their licence.
   for (const weight of [500, 700, 800]) assert.ok(existsSync(here(`../assets/og/manrope-latin-${weight}-normal.woff`)), `weight ${weight}`);
