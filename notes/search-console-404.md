@@ -142,6 +142,66 @@ before this change and are unchanged; the HTTP test asks a build for each of the
    in *Not found (404)* to fall as Google re-crawls. It does not fall at once and it need not reach
    zero: Google treats a 404 as a normal answer for an address that really is gone.
 
+## The next report: "Page with redirect" (23 November 2026)
+
+Two days after the DNS change the page indexing report gained a new reason under *Why pages aren't
+indexed*: **Page with redirect**, **12 pages**, last updated 23 November, crawled between 23 and 25
+November. The owner pasted the first ten rows. All ten are addresses from the 21 November list (or
+their `www` twins), so the report is the earlier fix showing up: those addresses answered 404, or
+reached Hostinger, and now answer with a redirect.
+
+**It is a status, not an error, and there is nothing to fix.** Google describes it as "a non-canonical
+URL that redirects to another page. As such, this URL will not be indexed", and says "Redirect URLs
+are not indexed, only the redirect target"
+([Page indexing report](https://support.google.com/webmasters/answer/7440203)). An old address is
+supposed to be listed here. **Do not press *Validate fix* on it:** there is nothing for Google to see
+change, because the redirect is meant to stay.
+
+Each of the ten, asked of the live site on 27 November 2026 at 22:26 UTC with a public service that
+prints every hop. A request for the bare domain takes a 308 to `www` first (Vercel's domain setting),
+then the 301 below, then the page answers 200.
+
+| Address in the report | Leads to |
+| :--- | :--- |
+| `/services/ai-automation/n8n` (bare domain and `www`) | `/services/ai-automations` |
+| `/services/audit-compliance/iam-audit` (bare domain) | `/services/cybersecurity` |
+| `/services/audit-compliance/wireless-security` (bare domain and `www`) | `/services/cybersecurity` |
+| `/services/audit-compliance/app-security` (bare domain) | `/services/cybersecurity` |
+| `/services/audit-compliance/firewall-audit` (bare domain) | `/services/cybersecurity` |
+| `/resources/case-studies` (bare domain) | `/case-studies` |
+| `/services/infrastructure/consulting` (bare domain) | `/services/it-infrastructure` |
+| `/services/infrastructure/cloud-solutions` (bare domain) | `/services/cloud-datacenter` |
+
+**What would be wrong, and the check for each.** Google's cases that do need action:
+
+| Case | Checked |
+| :--- | :--- |
+| A page that should be indexed redirects by mistake | No. Every page in the sitemap answers 200 (`tests/http-smoke.test.mjs`). The redirecting addresses are old-site paths that are no longer pages. |
+| The sitemap lists an address that redirects | No. 64 addresses, each 200, not `noindex`, and its own canonical (same test). |
+| A link on the site names an old address | No. A crawl of a production build by its own links: 65 pages, 8,994 links, and every internal address answers 200 straight away. This is now a test, "no page links to an address that redirects or does not exist"; when it fails it names the address, where it leads and the page that links to it. A deliberate link to `/services/audit-compliance/iam-audit` in the footer failed it with `answered 301 (to /services/cybersecurity), linked from /`. |
+| The destination is not worth landing on | Every destination answers 200, is indexable and has one `h1` (the test of the 46 paths). Whether Google indexes it is Google's call: the target "might or might not be indexed". |
+
+**What to expect.**
+
+1. **The count rises before it falls.** Google has re-crawled 12 old addresses so far. The 21 November
+   list alone has 49, and the old site had more. *Page with redirect* grows as Google reaches the
+   others while *Not found (404)* shrinks by the same amount. Both are normal. Google stops asking for
+   an address that only redirects after months, not days.
+2. **Keep the redirects for at least a year.** Google: "Keep the redirects for as long as possible,
+   generally at least 1 year"
+   ([Site moves and migrations](https://developers.google.com/search/docs/crawling-indexing/site-move-with-url-changes)).
+   So `lib/redirects.ts` stays as it is until at least **21 November 2027**, and the file says so.
+3. **Two steps for the bare domain is fine.** Google follows up to 10 hops and advises "ideally no more
+   than 3 and fewer than 5". The first step is Vercel's own domain redirect (it carries none of the
+   site's headers), so the code cannot merge it with the second.
+4. **Speed up the destinations, not the old addresses.** In *URL inspection*, inspect a destination
+   such as `https://www.infeara.com/services/cybersecurity` and press *Request indexing* if it is not
+   indexed yet. Requesting indexing for an old address does nothing useful: Google follows the
+   redirect again.
+5. **The other two rows.** Set *Rows per page* to 25 to see them. Each has to be an address that
+   redirects. The usual ones are the bare-domain home page and an `http://` address, which redirect
+   on purpose (to `https` and `www`). If one is a page that should be indexed, send the address.
+
 ## The 46 paths, and what each does
 
 49 addresses, 46 paths: `/services/audit-compliance/iso-27001`, `/services/ai-automation/workflow-automation`

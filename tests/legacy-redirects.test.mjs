@@ -160,4 +160,11 @@ test("the notes say what each reported address does, and what is left for DNS", 
   const readme = read("README.md");
   assert.ok(readme.includes("notes/search-console-404.md"), "the README does not point to the Search Console note");
   assert.ok(readme.includes("tests/legacy-redirects.test.mjs"), "the README does not name the redirect test");
+
+  // "Page with redirect" is the normal status of an old address (report of 23 November 2026). The
+  // notes say so, and say how long the rules stay, so nobody prunes the map or validates a fix.
+  assert.match(note, /Page with redirect/);
+  assert.match(note, /21 November 2027/, "the note does not say how long the redirects stay");
+  assert.ok(readme.includes("Page with redirect"), "the README does not explain the Page with redirect status");
+  assert.ok(read("lib/redirects.ts").includes("21 November 2027"), "lib/redirects.ts does not say how long its rules stay");
 });
