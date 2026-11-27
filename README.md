@@ -679,8 +679,8 @@ disagree:
 | `true` | open everywhere, previews included |
 | anything else (`false`, `0`, a typo) | closed everywhere |
 
-**Open** means every page says `index, follow`; `robots.txt` allows `/` except `/admin/` and `/api/`
-and names the sitemap; and `sitemap.xml` lists every published page: 64 URLs with the content that
+**Open** means every page says `index, follow`; `robots.txt` allows everything and names the
+sitemap; and `sitemap.xml` lists every published page: 64 URLs with the content that
 ships in code, and each published sub-service, blog post, insight, case study and white paper adds
 one (a white paper's list page is listed once the first paper is published). The sitemap is rebuilt
 every five minutes and whenever an editor saves, so a post scheduled for later or an insight
@@ -692,10 +692,25 @@ Pages that say `noindex` themselves stay out of search results whatever the sett
 area, the 404 page, the thank-you page, the two retired login routes (410) and the white-paper list
 while nothing is published.
 
+**The staff area and the API are kept out of search with `noindex`, not with `robots.txt`.** A crawler
+can only obey `noindex` on a page it is allowed to fetch, and a `Disallow` line hides the tag: Google
+may still list the blocked address, with no description, when a link or a string in a script names it
+(the site's scripts contain `/admin` and `/api/contact`). Search Console calls that "Indexed, though
+blocked by robots.txt" and reported it for one page on 27 November 2026. So an open `robots.txt`
+blocks nothing, the staff pages carry the robots tag, and `next.config.ts` adds
+`X-Robots-Tag: noindex, nofollow` to everything under `/admin` and `/api`, redirects included (a visitor
+without a session is redirected to the login page, and that redirect is the first thing a crawler
+sees). No public page carries the header. `tests/indexing.test.mjs` and `npm run test:http` keep it
+that way. If a path ever has to be blocked again, remember that blocking it also hides its `noindex`.
+`notes/seo-audit.md` ("Search Console: Indexed, though blocked by robots.txt") has the history and
+what to do in Search Console.
+
 **Closed** means every page says `noindex, nofollow`, `robots.txt` is `Disallow: /` and the sitemap
 is a valid but empty `<urlset>`. With the gate closed, Lighthouse SEO scored 69 purely because the
 page was blocked from indexing; open, the same pages scored 100 (local builds, November 2026; not
-re-measured on the live site).
+re-measured on the live site). Closing keeps crawlers out of a site that has not been indexed yet; it
+does not remove a page Google already holds, because Google can no longer fetch the page to read its
+`noindex`, so Search Console reports "Indexed, though blocked by robots.txt" until the site is opened.
 
 ## Search listings
 
@@ -816,7 +831,7 @@ The Playwright MCP server is configured in `.mcp.json` for MCP-compatible client
 
 - `npm run test:e2e` — full Playwright browser suite: public route rendering, navigation, contact validation, cookie choices, admin authentication and role permissions.
 - `npm run test:e2e:list` — list discovered browser tests without launching a browser.
-- `npm run test:http` — HTTP/API smoke tests against a running app (defaults to `http://127.0.0.1:3000`), including every public page's title, description, canonical address and social tags, and that robots.txt, the sitemap and the pages agree on whether search engines are let in (an open site's sitemap must list only pages that return 200, are not noindex and name that address as canonical), that one title serves the tab, `og:title` and `twitter:title`, that each service, guide and post has its own picture (a real 1200 × 630 PNG), that articles say so, that every page has a skip link, that no question appears on both the home page and a service page, that the four fuller pages have their words, and that `/llms.txt` links only to pages that exist, that each address Search Console reported as Not found answers with a page or one 301 to a page, and that a request for the bare domain is sent to `www` with its path and query.
+- `npm run test:http` — HTTP/API smoke tests against a running app (defaults to `http://127.0.0.1:3000`), including every public page's title, description, canonical address and social tags, and that robots.txt, the sitemap and the pages agree on whether search engines are let in (an open site's sitemap must list only pages that return 200, are not noindex and name that address as canonical), that one title serves the tab, `og:title` and `twitter:title`, that each service, guide and post has its own picture (a real 1200 × 630 PNG), that articles say so, that every page has a skip link, that no question appears on both the home page and a service page, that the four fuller pages have their words, and that `/llms.txt` links only to pages that exist, that each address Search Console reported as Not found answers with a page or one 301 to a page, and that a request for the bare domain is sent to `www` with its path and query, and that the staff area and the API answer with a `noindex` header while no public page does.
 - `npm run test:unit` — unit tests for the rule that decides who the CMS lets in (`lib/auth/access.ts`), the Overview analytics and lead notes chat, and the core services (the CMS notice, and the check that `supabase/apply/04-core-services.sql` still matches its migrations), the blog posts and the Technical resources menu (`tests/blogs.test.mjs`), the list search, filters and page numbers of every admin table (`tests/admin-lists.test.mjs`), how each list page is wired, including a check that no admin table can go unpaged (`tests/admin-list-pages.test.mjs`), and the sub-service, blog, case-study and white-paper modules: the SQL, the content copied in, the PDF helpers, the admin wiring and the header menu (`tests/resource-modules.test.mjs`), and the Chennai managed IT list: ten entries in A-to-Z order with official links, the published criteria, no ranking claims, Infeara's disclosed entry and its separate enquiry section, one list per keyword, the Article and breadcrumb data, how links in a post are parsed and refused, and the SQL that adds the post (`tests/blog-directory.test.mjs`), and the search-listing rules: the title and description budgets, the site name and locale every page repeats, and the gate's closed state (`tests/seo-limits.test.mjs`), and the rule that lets search engines in: open unless closed, `true` opens and anything else typed in closes, a Vercel preview stays closed, one value for robots.txt, the sitemap and every page, the sitemap's five-minute clock and the pages that stay out of results (`tests/indexing.test.mjs`), and the fixes from the 21 November 2026 audit: a place in every service title, the SQL that updates them (never touching a page an editor changed), the fuller pages' voice, one title per page, article tags and bylines, India-day dates, the skip link, the shared-link pictures and `llms.txt` (`tests/seo-audit-fixes.test.mjs`), and the old-address map: exact paths, 301, one hop, and an answer for each of the 49 addresses Search Console reported as Not found on 21 November 2026 (`tests/legacy-redirects.test.mjs`). No server or Supabase needed.
 
 The browser suite starts an isolated, non-Supabase Next dev server on port 3100 by default. Set `PLAYWRIGHT_PORT` to change it or `PLAYWRIGHT_BASE_URL` to target a test deployment. Optional staff-role checks require an isolated test deployment identified by `PLAYWRIGHT_BASE_URL`, `PLAYWRIGHT_ADMIN_TEST_HOST` (exact hostname match), and `PLAYWRIGHT_ADMIN_ISOLATED_TEST=true`, plus the relevant credentials: `PLAYWRIGHT_SUPER_ADMIN_EMAIL` / `PLAYWRIGHT_SUPER_ADMIN_PASSWORD`, `PLAYWRIGHT_EDITOR_EMAIL` / `PLAYWRIGHT_EDITOR_PASSWORD`, and `PLAYWRIGHT_SEO_MANAGER_EMAIL` / `PLAYWRIGHT_SEO_MANAGER_PASSWORD`. Known Infeara production hostnames are blocked. The create/edit/delete CMS workflow has an additional `PLAYWRIGHT_ADMIN_ALLOW_MUTATIONS=true` opt-in; point the test deployment at an isolated Supabase project only.

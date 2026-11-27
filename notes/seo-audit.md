@@ -87,7 +87,7 @@ what ships in the repo; the live site reads the same pages from the database):
 
 | Check | Result |
 | :--- | :--- |
-| `robots.txt` | `Allow: /`, `Disallow: /admin/`, `Disallow: /api/`, `Sitemap: https://www.infeara.com/sitemap.xml` |
+| `robots.txt` | `Allow: /` and `Sitemap: https://www.infeara.com/sitemap.xml` (until 27 November 2026 it also said `Disallow: /admin/` and `Disallow: /api/`; see "Search Console: Indexed, though blocked by robots.txt") |
 | Robots tag on the home page | `index, follow` |
 | Sitemap | 64 URLs, all on `www`, none twice |
 | Crawl by links, from `/` and from the sitemap | 65 pages: 64 indexable, and `/white-papers` noindex while empty |
@@ -146,6 +146,8 @@ domain) is this same problem seen from Google's side: `notes/search-console-404.
 
 - **Search Console: press "Validate fix"** on the "Not found (404)" report if it shows *Failed*, and
   remove a stale `https://infeara.com/sitemap.xml` entry if one is listed (`notes/search-console-404.md`).
+- **Search Console: press "Validate fix"** on "Indexed, though blocked by robots.txt" once the change
+  of 27 November 2026 is live (below).
 - **Submit the sitemap**, `https://www.infeara.com/sitemap.xml`, in Google Search Console and in Bing
   Webmaster Tools. Both need the owner's own account.
 - **Check the live site after the deployment.** `https://www.infeara.com/robots.txt` should say
@@ -163,7 +165,7 @@ Each finding was checked against the live site and the code.
 
 | The tool said | What the site does |
 | :--- | :--- |
-| `robots.txt`, sitemap: could not verify | `Allow: /`, `Disallow: /admin/` and `/api/`, a `Sitemap:` line; 64 URLs. |
+| `robots.txt`, sitemap: could not verify | `Allow: /` and a `Sitemap:` line (it also disallowed `/admin/` and `/api/` until 27 November 2026); 64 URLs. |
 | Structured data: could not verify | Organization, WebSite, Service, Article, BlogPosting, FAQPage, BreadcrumbList, ItemList and JobPosting, all parsing, all addresses absolute. |
 | Canonical and robots meta | On every page. |
 | HTTPS and security headers | HTTPS, HSTS (two years, preload), `nosniff`, referrer policy and frame options. |
@@ -262,3 +264,66 @@ that does not exist. `npm run test:unit`, `npm run test:http` and the Playwright
 migration was run in a throwaway Postgres: every title and the four pages change; a second run
 changes nothing; a page whose title or text was edited is left as it was and named in a notice; the
 audit trigger is switched back on; a missing table stops the run with the script to run first.
+
+## Search Console: "Indexed, though blocked by robots.txt" (27 November 2026)
+
+The owner pasted an *Improve page appearance* warning: reason **Indexed, though blocked by
+robots.txt**, source *Website*, **1 page**, validation *Not started*. The paste does not name the
+page, and the report exists only in the owner's Search Console account, so the address could not be
+read from outside.
+
+**What it means.** Google lists an address it was not allowed to fetch, because something names it,
+and shows it with no description. It is a warning about how a result looks, not an error, and no page
+content is affected. Google's own advice for a page that should stay out of search is the opposite of
+blocking it: let the crawler in and serve `noindex`, because a blocked page cannot show its `noindex`.
+
+**What could have been the page.** Until this change `robots.txt` said `Allow: /`, `Disallow: /admin/`
+and `Disallow: /api/`. No public page links to either. Four routes lead a crawler to a blocked address
+anyway, and the report does not say which one it was, so the change covers all four:
+
+- The site's scripts contain the strings `/admin` (`components/analytics/Analytics.tsx`,
+  `components/site/ConsentBanner.tsx`) and `/api/contact` (`ContactForm.tsx`, `ApplicationForm.tsx`),
+  and a crawler can pick up an address from a script.
+- `/admin`, without the slash, was not covered by `Disallow: /admin/`. It answers 307 to
+  `/admin/login`, which was blocked, so a crawler was sent from an open address to a blocked one.
+- The previous site named `/admin/` in its own `robots.txt` (`notes/live-site-audit.md`), so an old
+  address may be known from that time.
+- A page that was indexed before 21 November 2026. While the site was closed `robots.txt` blocked
+  every page, and Google keeps listing a page it can no longer fetch. Opening the site that day
+  already ended this case; the report catches up when Google reads `robots.txt` and the page again.
+
+**The change.**
+
+- `app/robots.ts`: an open site is `Allow: /` and the sitemap, with nothing disallowed. A closed site
+  is unchanged (`Disallow: /`).
+- `next.config.ts`: `X-Robots-Tag: noindex, nofollow` on `/admin/:path*` and `/api/:path*`. It covers the
+  redirect to the login page and the API's answers, which the robots tag in a page cannot. The pages
+  already carry the tag (`app/admin/layout.tsx`), and `/login` and `/forgot-password` (410) already sent
+  the header.
+- `tests/indexing.test.mjs`: an open `robots.txt` disallows nothing; the header is on those two paths and
+  not on the catch-all rule. `tests/http-smoke.test.mjs`: the header on `/admin`, `/admin/login`,
+  `/admin/reset-password`, `/admin/leads`, `/api/contact` and `/login`, and on none of the home page, a
+  service page, the blog list and the contact page. `tests/seo-audit-fixes.test.mjs`: the pin on the old
+  `Disallow` lines now pins the open rule.
+
+**Checked on a production build** (no settings, as on the live site): `robots.txt` is `Allow: /` and
+the sitemap line; `/admin` (307), `/admin/login` (200), `/admin/leads` (307), `/admin/reset-password`
+(200), `/api/contact` (405), `/login` and `/forgot-password` (410) all carry
+`X-Robots-Tag: noindex, nofollow`; none of the 64 sitemap pages carries it. Three deliberate breakages
+fail the tests every time: the `Disallow` lines put back, the API rule removed, and the header put on
+every page (which would have taken the whole site out of search; the HTTP test reports
+`/ must not carry an X-Robots-Tag header`).
+
+**What the owner does, after the deploy.**
+
+1. Open `https://www.infeara.com/robots.txt`: it should say `Allow: /` and the sitemap line, and
+   nothing else.
+2. Search Console, **Page indexing**, **Indexed, though blocked by robots.txt**: open the row to see the
+   page, then press **Validate fix**. Google re-checks the page within days; a validation can take up
+   to about two weeks.
+3. Expect that address to move to an ordinary "not indexed" reason: *Excluded by 'noindex' tag* for
+   `/admin/login`, a redirect for `/admin`, a 4xx for `/api/contact`. All three are normal. If the page
+   turns out to be a public page that should be indexed, it needs nothing but a re-crawl: URL
+   inspection, then **Request indexing**.
+4. Optional, to hurry an admin address out of results: Search Console, **Removals**, **New request**.
+   It lasts about six months, which the `noindex` header then outlasts.

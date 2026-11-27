@@ -94,11 +94,36 @@ test("a closed site is closed everywhere: robots.txt, every page and the sitemap
   assert.ok(read("app/sitemap.ts").includes("if (!SITE_INDEXABLE) return [];"));
 });
 
-test("an open site lets crawlers in, keeps them out of the staff area and names the sitemap", () => {
+// Search Console, November 2026: "Indexed, though blocked by robots.txt". A Disallow line stops a
+// crawler fetching a page, so it never reads the page's `noindex`; Google can still list the address
+// because a link or a string in a script names it ("/admin" and "/api/contact" are both in the site's
+// scripts). An open site therefore blocks nothing, and the staff area and the API say `noindex` instead.
+test("an open site lets crawlers in everywhere and names the sitemap", () => {
   const robots = read("app/robots.ts");
-  assert.ok(robots.includes('rules: [{ userAgent: "*", allow: "/", disallow: ["/admin/", "/api/"] }]'));
+  assert.ok(robots.includes('rules: [{ userAgent: "*", allow: "/" }]'));
   assert.ok(robots.includes("sitemap: `${SITE_URL}/sitemap.xml`"));
   assert.ok(read("app/layout.tsx").includes("? { index: true, follow: true }"));
+
+  // The only `disallow` left in the file is the closed site's `disallow: "/"`.
+  const disallows = [...robots.matchAll(/disallow\s*:\s*(\S+?)\s*[,}]/g)].map((match) => match[1]);
+  assert.deepEqual(disallows, ['"/"'], "an open site must not disallow a path: a blocked page cannot show its noindex");
+});
+
+test("the staff area and the API are kept out of search with noindex, on the page and in a header", () => {
+  const config = read("next.config.ts");
+  assert.ok(config.includes('const NOINDEX = [{ key: "X-Robots-Tag", value: "noindex, nofollow" }];'));
+  assert.ok(config.includes('{ source: "/admin/:path*", headers: NOINDEX }'));
+  assert.ok(config.includes('{ source: "/api/:path*", headers: NOINDEX }'));
+
+  // The catch-all rule comes before those two and must not carry the header: it would take every
+  // public page out of search.
+  const catchAll = config.slice(config.indexOf("async headers()"), config.indexOf('{ source: "/admin/:path*"'));
+  assert.ok(catchAll.includes('source: "/:path*"'), "the catch-all header rule moved");
+  assert.doesNotMatch(catchAll, /x-robots-tag/i, "the catch-all header rule must not say noindex");
+
+  // The pages say it too, so a crawler that reads the HTML sees it even without the header.
+  assert.ok(read("app/admin/layout.tsx").includes("robots: { index: false, follow: false, nocache: true }"));
+  assert.ok(read("lib/gone.ts").includes('"x-robots-tag": "noindex, nofollow"'), "the retired login routes keep their header");
 });
 
 test("the sitemap is rebuilt every five minutes and never invents a modified date", () => {

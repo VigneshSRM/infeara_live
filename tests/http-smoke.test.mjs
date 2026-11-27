@@ -169,12 +169,33 @@ test("robots.txt, the sitemap and the pages agree on whether search engines are 
   }
 
   assert.match(robots, /^allow:\s*\/\s*$/im, "an open robots.txt allows /");
-  assert.match(robots, /^disallow:\s*\/admin\/\s*$/im, "the staff area stays disallowed");
-  assert.match(robots, /^disallow:\s*\/api\/\s*$/im, "the API stays disallowed");
+  assert.doesNotMatch(robots, /^disallow:\s*\S/im, "an open site blocks nothing: a blocked page cannot show its noindex tag");
   assert.match(robots, /^sitemap:\s*https?:\/\/\S+\/sitemap\.xml\s*$/im, "an open robots.txt names the sitemap");
   assert.doesNotMatch(robots, /^host\s*:/im, "Host is Yandex-only and withdrawn");
   assert.equal(robotsTag, "index, follow", "an open site's pages say index, follow");
   assert.ok(addresses.length >= 50, `an open site's sitemap lists its pages, found ${addresses.length}`);
+});
+
+// Search Console, November 2026: "Indexed, though blocked by robots.txt". The staff area and the API
+// are kept out of search with noindex, which a crawler can only obey on a page it may fetch, so
+// robots.txt must not block them (the test above) and every answer carries the header, a redirect
+// included: a visitor without a session is redirected, and that redirect is the first thing a crawler sees.
+test("the staff area and the API say noindex in a header, and no public page does", async () => {
+  for (const path of ["/admin", "/admin/login", "/admin/reset-password", "/admin/leads", "/api/contact", "/login"]) {
+    const response = await fetch(`${baseURL}${path}`, { redirect: "manual" });
+    await response.arrayBuffer();
+    assert.match(response.headers.get("x-robots-tag") ?? "", /noindex/, `${path} (${response.status}) has no noindex header`);
+  }
+
+  for (const path of ["/", "/services/managed-it", "/blogs", "/contact"]) {
+    const response = await fetch(`${baseURL}${path}`, { redirect: "manual" });
+    await response.arrayBuffer();
+    assert.equal(response.headers.get("x-robots-tag"), null, `${path} must not carry an X-Robots-Tag header`);
+  }
+
+  // The login page is HTML a crawler can read, so it carries the tag in the page as well.
+  const html = await (await fetch(`${baseURL}/admin/login`)).text();
+  assert.match(metaContent(html, "name", "robots") ?? "", /noindex/);
 });
 
 test("every address in an open site's sitemap is a real page that can be indexed", async (t) => {
