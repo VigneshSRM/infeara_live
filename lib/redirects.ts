@@ -25,6 +25,11 @@ import type { Redirect } from "next/dist/lib/load-custom-routes";
  *   - No chain is longer than one hop: no destination is itself a source here
  *     (the unit test checks it). Requests for the bare domain first take the one
  *     hop to www that next.config.ts (and the Vercel domain setting) adds.
+ *   - Keep every rule for at least a year from 21 November 2026, so until 21 November 2027.
+ *     Google: "Keep the redirects for as long as possible, generally at least 1 year", so that it
+ *     can move the old address's signals to the new page. Search Console lists these addresses as
+ *     "Page with redirect", which is the expected status and needs no fix (notes/search-console-404.md).
+ *     After the year, drop a rule only when its old address no longer gets visits or links.
  */
 type LegacyRedirect = { source: string; destination: string };
 

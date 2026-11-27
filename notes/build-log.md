@@ -432,3 +432,25 @@ slash) redirects into the blocked `/admin/login`.
   closing the site does not remove a page Google already holds.
 - Open: press *Validate fix* in Search Console after the deploy. Playwright was not re-run (no page
   changed; the browser suite forces a closed site).
+
+### 2026-11-27 — Search Console: "Page with redirect"
+
+The owner pasted a new reason in the page indexing report, *Page with redirect*, 12 pages, and asked for
+it to be fixed. It is the expected result of the 21 November redirects, not a fault: the ten rows shown
+are addresses from the 404 report (`/services/audit-compliance/*`, `/services/infrastructure/*`,
+`/services/ai-automation/n8n`, `/resources/case-studies`), which now redirect instead of answering 404.
+
+- Checked each of the ten live (bare domain: 308 to `www`, 301 to the page, 200; `www`: 301, 200).
+  Destinations: `/services/cybersecurity` (four), `/services/ai-automations`, `/case-studies`,
+  `/services/it-infrastructure`, `/services/cloud-datacenter`.
+- Looked for the causes that do need action: a crawl of a production build by its own links read 8,994
+  links on 65 pages and found no internal address that is not a straight 200. The sitemap is already held
+  to the same.
+- New test in `tests/http-smoke.test.mjs`: "no page links to an address that redirects or does not
+  exist". Proven by a deliberate link to an old address in the footer (caught, with the page that links
+  to it), then removed. 27 HTTP tests.
+- `lib/redirects.ts` says to keep the rules until at least 21 November 2027 (Google's one year). The note
+  and README explain the status, say not to press *Validate fix*, and what to expect (the count rises before
+  it falls). A docs test pins those statements.
+- Open: the two rows not pasted (*Rows per page: 25*). A page that should be indexed but shows here would
+  need its address.

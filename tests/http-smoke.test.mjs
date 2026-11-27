@@ -528,6 +528,59 @@ test("every address Search Console reported as Not found answers with a page, or
   assert.deepEqual(outcomes, { page: 9, redirect: 35 });
 });
 
+// Search Console's "Page with redirect" (12 old addresses in the report of 23 November 2026) is the
+// normal state of an old address: Google does not index a URL that redirects, only the page it leads
+// to. Google's help names what does need action: a page that redirects by mistake, and a sitemap or an
+// internal link that still names an old address. The sitemap is held to that above (every address
+// answers 200 and names itself as canonical). This crawls the site by its own links, the way a search
+// engine does, and holds every link to the same: it must answer 200 straight away.
+test("no page links to an address that redirects or does not exist", async () => {
+  const ours = new Set([new URL(baseURL).host, "www.infeara.com", "infeara.com"]);
+  const answers = new Map(); // path -> { status, location }
+  const linkedFrom = new Map(); // path -> the first page that links to it
+  const queue = ["/", ...publicRoutes];
+  let anchors = 0;
+
+  while (queue.length > 0) {
+    const path = queue.shift();
+    if (answers.has(path)) continue;
+    const response = await fetch(`${baseURL}${path}`, { redirect: "manual" });
+    const isPage = (response.headers.get("content-type") ?? "").includes("text/html");
+    const html = isPage ? await response.text() : (await response.arrayBuffer(), "");
+    answers.set(path, { status: response.status, location: response.headers.get("location") });
+    if (response.status !== 200 || !html) continue;
+
+    for (const match of html.matchAll(/<a\s[^>]*?\bhref="([^"]*)"/gi)) {
+      anchors += 1;
+      const href = decodeEntities(match[1]);
+      if (href.startsWith("#")) continue;
+      let url;
+      try {
+        url = new URL(href, `${baseURL}${path}`);
+      } catch {
+        continue;
+      }
+      // mailto:, tel: and other sites are not ours to check.
+      if (!/^https?:$/.test(url.protocol) || !ours.has(url.host)) continue;
+      if (!linkedFrom.has(url.pathname)) linkedFrom.set(url.pathname, path);
+      if (!answers.has(url.pathname)) queue.push(url.pathname);
+    }
+  }
+
+  assert.ok(answers.size >= 50 && anchors >= 1000, `the crawl found ${answers.size} addresses and ${anchors} links; it should find the whole site`);
+  const problems = [...answers]
+    .filter(([, answer]) => answer.status !== 200)
+    .map(
+      ([path, answer]) =>
+        `${path} answered ${answer.status}${answer.location ? ` (to ${answer.location})` : ""}, linked from ${linkedFrom.get(path) ?? "the list of public pages"}`,
+    );
+  assert.deepEqual(
+    problems,
+    [],
+    "a link names an address that redirects or is missing: Google lists such an address as \"Page with redirect\" or \"Not found\". Link to the page it leads to instead (notes/search-console-404.md)",
+  );
+});
+
 test("a request for the bare domain goes to www with the same path and query", async (t) => {
   const server = new URL(baseURL);
   if (!["127.0.0.1", "localhost"].includes(server.hostname)) {
