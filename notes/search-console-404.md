@@ -102,8 +102,13 @@ map was built from, so nothing answered for them.
   request reaches the site, so a redirect rule would never run, and `tests/legacy-redirects.test.mjs`
   refuses to accept one. The project's Firewall settings could not be read from the tooling used here,
   so it is not known which rule does it: Vercel's own protection, a rule on the project, or a managed
-  rule set. To see it: Vercel dashboard → project → Firewall → the denied events for `/terms.php`. For
-  the address of an older PHP site it makes no difference. Search Console may keep them as 404, list
+  rule set. Other Vercel users report the same 403 for PHP paths on sites that have no PHP (a
+  [GitHub project](https://github.com/King0711/agentforge-academy/pull/96) says every client gets it), and a
+  [Vercel Community post](https://community.vercel.com/t/false-positive-managed-php-detection-blocks-post-kiosk-with-403/51744)
+  names the rule that *Firewall → Traffic* showed for a similar block as `managed_php_detection`. That
+  points to Vercel's own managed protection, but it is a lead, not a finding. To see it: Vercel
+  dashboard → project → Firewall → the denied events for `/terms.php`. For the address of an older PHP
+  site it makes no difference. Search Console may keep them as 404, list
   them as "Blocked due to access forbidden (403)" or drop them; none of that affects the pages that
   exist.
 
@@ -201,6 +206,38 @@ then the 301 below, then the page answers 200.
 5. **The other two rows.** Set *Rows per page* to 25 to see them. Each has to be an address that
    redirects. The usual ones are the bare-domain home page and an `http://` address, which redirect
    on purpose (to `https` and `www`). If one is a page that should be indexed, send the address.
+
+## Reading the "Not found (404)" validation page (27 November 2026)
+
+The owner pasted the validation details: **Validation Started**, 11/21/26, *All known pages*, 40
+addresses listed (35 on the bare domain, 5 on `www`). *Started* is the right state and nothing needs
+pressing.
+
+- **49 became 40.** Nine addresses of the 21 November report have left the list: the eight rows of the
+  *Page with redirect* report above and `/industries/professional-services`, a page that exists (the bare
+  domain takes the 308 to `www`, then the page answers 200). Google re-crawled them after the DNS
+  change and now sees a redirect, so they are no longer *Not found*.
+- **The 40 still listed were all last crawled on or before 20 November, before the fix.** "Last
+  crawled" is the date of the crawl that found the error, so a listed address says nothing about how it
+  answers now, only that Google has not asked again. Google works through them in its own order. Eight
+  show a later date than they did on 21 November (`/about`, `/careers`, `/industries/logistics`,
+  `/resources/blog`, `/index.html`, `/index.php`, `/services/infrastructure/managed-it`,
+  `/services/audit-compliance/endpoint-security`), but every one is still before the fix.
+- **What the 40 do now**, from `lib/redirects.ts` (`tests/http-smoke.test.mjs` asks every path on every
+  build): 8 are pages at the same address (`/about`, `/careers`, `/contact`, `/industries`,
+  `/industries/manufacturing`, `/legal/cookies`, `/legal/privacy-policy` and, on `www`,
+  `/industries/education`), 30 take one 301 to a page, and 2 are the `.php` addresses. The 30 lead to 14
+  pages; the largest groups are `/services/cybersecurity` (9), `/services/ai-automations` (4) and
+  `/insights` (3). Live, on 27 November 2026 at 22:43 UTC: `/industries/logistics`, `/legal/disclaimer`,
+  `/services/infrastructure/managed-it` and `/resources/downloads` each answered 301 and then 200, and
+  `/industries/professional-services` answered 200.
+- **The two `.php` addresses** still answer Vercel's 403 on both hosts (see "Three addresses were never in
+  the old sitemap"). They no longer answer 404, so on the next crawl they no longer have this error;
+  Search Console may list them as *Blocked due to access forbidden (403)*, which needs no action: they
+  were never pages.
+- **When it ends.** Validation takes up to about two weeks from its start, longer when Google is slow to
+  come back to the addresses. It ends *Passed*, or *Failed* if an address still shows the error. If it
+  fails, press *Validate fix* again and send the addresses that remain.
 
 ## The 46 paths, and what each does
 

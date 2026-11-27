@@ -454,3 +454,20 @@ are addresses from the 404 report (`/services/audit-compliance/*`, `/services/in
   it falls). A docs test pins those statements.
 - Open: the two rows not pasted (*Rows per page: 25*). A page that should be indexed but shows here would
   need its address.
+
+### 2026-11-27 — Search Console: "Not found (404)" validation page
+
+The owner pasted the validation details (*Started* 11/21/26, *All known pages*, 40 addresses). Read
+against the 49 of the 21 November report: nine have left the list (the eight *Page with redirect* rows
+and `/industries/professional-services`, a page that exists). The 40 left were all last crawled on or
+before 20 November, before the DNS change, so the list says only that Google has not asked again.
+Nothing is wrong and nothing needs pressing.
+
+- What the 40 do now: 8 pages at the same address, 30 one 301, 2 `.php`. Live: `/industries/logistics`,
+  `/legal/disclaimer`, `/services/infrastructure/managed-it`, `/resources/downloads` (301, then 200) and
+  `/industries/professional-services` (200).
+- The two `.php` addresses still answer Vercel's 403 (`X-Vercel-Mitigated: deny`) on both hosts. Reports from
+  other Vercel projects name Vercel's managed PHP detection (`managed_php_detection`, shown in Firewall →
+  Traffic); recorded in the note as a lead, since the Firewall tab cannot be read from here. Not
+  changeable from the code.
+- Note and README updated. No code change.

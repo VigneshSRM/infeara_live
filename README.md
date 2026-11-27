@@ -659,7 +659,9 @@ On 21 November 2026 Search Console listed 49 addresses as *Not found (404)*: 44 
 answer them. The owner's DNS change above was the fix; since it, each takes a 308 to `www` and then
 the 301 in `lib/redirects.ts`. Of the five on `www`, four already answered correctly, and `/terms.php`
 cannot be changed (Vercel's Firewall answers 403 for `.php`). `/index.html` and `/resources/blog` were
-corrected. What is left is Google's re-check: press *Validate fix* in Search Console.
+corrected. What is left is Google's re-check. The validation the owner started on 21 November (*Started*) is
+running: an address leaves the *Not found (404)* list when Google re-crawls it, and nothing more needs
+pressing. The two `.php` addresses can stay as they are.
 `notes/search-console-404.md` has the evidence, all 46 paths with what each does, the Hostinger
 steps, what to do in Search Console, and how to add the next address.
 `tests/legacy-redirects.test.mjs` and the HTTP check keep every one of the 49 answered.
